@@ -1,6 +1,6 @@
 # Tracking Library `mm-tracking`
 
-The `tracking` library provides the interface that allows to communicate with the tracking system at VISUS. 
+The `mm-tracking` library provides the interface that allows to communicate with the tracking system at VISUS. 
 This library can be connected with the MegaMol Powerwall demo librarys to allow interaction with the pointing/stick device and its buttons (and the glasses).
 
 ---
