@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <TrackingDir>$(SolutionDir)tracking</TrackingDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="Exists('$(TrackingDir)')">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(TrackingDir)\$(PlatformTarget)\$(Configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>HAVE_TRACKING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+	<Link>
+	  <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">$(TrackingDir)\$(PlatformTarget)\$(Configuration)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+	  <AdditionalDependencies>tracking.lib; %(AdditionalDependencies)</AdditionalDependencies>
+	</Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="TrackingDir">
+      <Value>$(TrackingDir)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

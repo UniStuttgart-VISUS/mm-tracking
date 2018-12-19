@@ -1,0 +1,149 @@
+/**
+ * Tracker.h
+ *
+ * Copyright (C) 2014-2018 by VISUS (Universitaet Stuttgart)
+ * Alle Rechte vorbehalten.
+ */
+
+#ifndef TRACKING_TRACKER_H_INCLUDED
+#define TRACKING_TRACKER_H_INCLUDED
+
+#if (defined(_MSC_VER) && (_MSC_VER > 1000))
+#pragma once
+#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
+
+#ifdef TRACKING_EXPORTS  
+#define TRACKING_API __declspec(dllexport)   
+#else  
+#define TRACKING_API __declspec(dllimport)   
+#endif  
+
+
+#include "stdafx.h"
+
+#include "VrpnButtonDevice.h"
+#include "NatNetDevicePool.h"
+
+
+namespace tracking {
+
+    /***************************************************************************
+    *
+    * Collects 6 DOF tracking data of rigid bodies (via NetNet) and 
+    * the states of VRPN button devices.
+    *
+    ***************************************************************************/
+    class TRACKING_API Tracker {
+
+    public:
+
+        /** Data structure for setting parameters as batch. */
+        typedef struct {
+            std::string                                         activeNode;      /** The name of the active node which should receive the tracking data exclusively. */
+            std::vector<VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
+            NatNetDevicePool::Params                            natnet_params;
+        } Params;
+
+        /** Current tracking raw data. */
+        typedef struct {
+            NatNetDevicePool::RigidBodyData rigidBody;
+            tracking::ButtonMask            buttonState;
+        } TrackingData;
+
+        ///////////////////////////////////////////////////////////////////////
+
+        /**
+        * CTOR
+        */
+        Tracker(void);
+
+        Tracker(Tracker::Params& inParams);
+
+        /**
+        * DTOR
+        */
+        ~Tracker(void);
+
+        /**
+        * Callback for connection tracking.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool Connect(void);
+
+        /**
+        * Callback for disconnection tracking.
+        *   
+        * @return True for success, false otherwise.
+        */
+        bool Disconnect(void);
+
+        /**********************************************************************/
+        // GET
+
+        /**
+        *  Get current tracking data.
+        *
+        * @param buttonDevice The name of the button device getting data for.
+        * @param rigidBody    The name of the rigid body getting data for
+        * @param data         Returns the current tracking raw data.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data);
+
+        /**
+        * Get all available rigid body names.
+        *
+        * @return All available rigid body names.
+        */
+        void GetRigidBodyNames(std::vector<std::string>& inoutNames) const;
+
+        /**********************************************************************/
+        // SET
+
+        inline void SetActiveNode(std::string an) {
+            this->activeNode = an;
+        }
+
+    private:
+
+        /**********************************************************************
+        * types
+        **********************************************************************/
+
+        typedef std::vector<std::unique_ptr<VrpnButtonDevice>> VrpnButtonPoolType;
+
+        /**********************************************************************
+        * variables
+        **********************************************************************/
+
+        /** The VRPN devices that handle button presses. */
+        VrpnButtonPoolType buttonDevices;
+
+        /** The NatNat motion devices that handle position and orientation of rigid bodies. */
+        NatNetDevicePool motionDevices;
+
+        /** Connection status. */
+        bool isConnected;
+
+        /** parameters ********************************************************/
+
+        /** Enables the tracker only on the node with the specified name. */
+        std::string activeNode;
+
+        /**********************************************************************
+        * functions
+        **********************************************************************/
+
+        /** Print used parameter values. */
+        void paramsPrint(void);
+
+        /** Print used parameter values. */
+        bool paramsCheck(void);
+
+    };
+
+} /** end namespace tracking */
+
+#endif /** TRACKING_TRACKER_H_INCLUDED */
