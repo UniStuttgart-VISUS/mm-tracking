@@ -26,7 +26,7 @@ Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously (s
 
 * Configure and generate projects (`tracking` and `check`) with `cmake`.
 * Adjust client IP parameter in `check\\src\\check.cpp` in line 35.
-* Build all projects using `INSTALL` target.
+* Build all projects using `INSTALL` target in Viusal Studio (tested with VS2017 and VS2015).
 * Start 'Motive' software on NatNet server `mini`
 * Start VRPN server (`C:\\vrpn\\start64.bat`) on VRPN server `mini` 
 * Start test program: `bin\\check.exe`
