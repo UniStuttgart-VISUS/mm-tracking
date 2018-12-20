@@ -7,7 +7,7 @@ cmake_minimum_required (VERSION 3.8)
 project(all)
 
 # Set default install path 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR} CACHE PATH "default install path" FORCE)
+#set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR} CACHE PATH "default install path" FORCE)
 
 # Add directory structure for visual studio
 if(WIN32)
@@ -33,4 +33,7 @@ add_subdirectory(${TRACKING_DIR})
 ###############################
 # CHECK
 ###############################
-add_subdirectory(${CHECK_DIR})
+option(ADD_TRACKING_TEST "Creates the tracking test program check.exe" OFF)
+if(ADD_TRACKING_TEST)
+    add_subdirectory(${CHECK_DIR})
+endif()
