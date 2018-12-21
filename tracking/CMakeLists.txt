@@ -1,4 +1,4 @@
-﻿###############################################################################
+###############################################################################
 # TRACKING
 ###############################################################################
 
@@ -7,7 +7,8 @@
 if(WIN32)
   
     project(tracking)
-    
+    message(STATUS "[${PROJECT_NAME}] configuring ...")
+
     string(TOUPPER ${PROJECT_NAME} EXPORT_NAME)
     
     file(GLOB_RECURSE TRACKING_HEADERS RELATIVE ${PROJECT_SOURCE_DIR} "include/*.h")
@@ -19,15 +20,13 @@ if(WIN32)
     set(TRACKING_INSTALL_CONF "conf/tracking.conf" )
 
     
-    message(STATUS "[${PROJECT_NAME}] configuring VRPN ...")
-        
+    ##### VRPN #####
     # Get the external vrpn project from GitHub.
     include(ExternalProject)
     
-    # Set the install location and the version for the vrpn project.
-    set(VRPN_INSTALL_LOCATION "${GLOBAL_INSTALL_DIR}" CACHE INTERNAL '')
     set(VRPN_VER "v07.34")
-    
+    set(VRPN_INSTALL_LOCATION "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL '')
+
     # Set the paths for the needed libraries and include files from the vrpn
     # project.
     set(VRPN_INCLUDE_COPY "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Assert.h"     "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_BaseClass.h" 
@@ -37,10 +36,9 @@ if(WIN32)
   						  "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Thread.h"     "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Tracker.h" 
   						  "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Types.h"      "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_WindowsH.h")
 	
-    set(VRPN_INCLUDE_DIR ${GLOBAL_INCLUDE_DIR})
-    # Directory is required for installation of vrpn header files
-    file(MAKE_DIRECTORY ${VRPN_INCLUDE_DIR})
-    
+    set(VRPN_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
+    file(MAKE_DIRECTORY ${VRPN_INCLUDE_DIR}) 
+
     # Add the vrpn project as an external project and set the cmake commands
     # for configuring and building it. For some reason the x64 flag is
     # necessary because if it is not set vrpn is using x86. The BUILD_COMMAND
@@ -56,32 +54,25 @@ if(WIN32)
   	  BUILD_COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build --config Debug COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build --config Release COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build --config RelWithDebInfo
   	  INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${VRPN_INCLUDE_COPY} ${VRPN_INCLUDE_DIR}
     )
-    #INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${VRPN_INCLUDE_DIR} -E copy ${VRPN_INCLUDE_COPY} ${VRPN_INCLUDE_DIR}
-    
 
     # Set the paths to the libraries.
     set(QUAT_LIBRARY debug "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build/quat/Debug/quatd.lib" optimized "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build/quat/Release/quat.lib")
     set(VRPN_LIBRARY debug "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build/Debug/vrpnd.lib" optimized "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build/Release/vrpn.lib")  
-        
-        
-    message(STATUS "[${PROJECT_NAME}] configuring NATNET ...")
-    
-    # Find the NatNet library, the location of the NatNet dll and the location of the
-    # include files.
+  
+    ##### NATNET #####
+    # Find the NatNet library, the location of the NatNet dll and the location of the include files.
     option(USE_NATNET "use NatNet" ON)
     if(USE_NATNET)
       find_package(NATNET REQUIRED)
-      message(STATUS ${NATNET_LIBRARIES})
-      message(STATUS ${NATNET_DLL_DIR})
-      message(STATUS ${NATNET_INCLUDE_DIR})
+      #message(STATUS "[${PROJECT_NAME}] NetNet Library: ${NATNET_LIBRARIES}")
+      #message(STATUS "[${PROJECT_NAME}] NatNet DLL:     ${NATNET_DLL_DIR}")
+      #message(STATUS "[${PROJECT_NAME}] NatNet Include: ${NATNET_INCLUDE_DIR}")
       if (NOT NATNET_FOUND)
-        message(FATAL_ERROR "Cannot find NatNet")
+        message(FATAL_ERROR "[${PROJECT_NAME}] Cannot find NatNet ...")
       endif()
     endif(USE_NATNET)
 
-    
-    message(STATUS "[${PROJECT_NAME}] configuring ${PROJECT_NAME} ...")
-    
+    ##### TRACKING #####
     include_directories(${VRPN_INCLUDE_DIR} ${NATNET_INCLUDE_DIR} "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/src")
   
     # TARGET DEFINITION
@@ -94,21 +85,19 @@ if(WIN32)
   
     # INSTALLATION
     install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME} ${PROJECT_NAME} 
-        RUNTIME DESTINATION ${GLOBAL_BIN_DIR}
-        LIBRARY DESTINATION ${GLOBAL_LIB_DIR}
-        ARCHIVE DESTINATION ${GLOBAL_LIB_STATIC_DIR}
+        RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
     )
-  	install(FILES ${NATNET_DLL_DIR} DESTINATION ${GLOBAL_BIN_DIR})
-    install(FILES ${TRACKING_INSTALL_CONF} DESTINATION ${GLOBAL_BIN_DIR})
-    #install(FILES ${TRACKING_INSTALL_HEADER} DESTINATION ${GLOBAL_INCLUDE_DIR})
-    #install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION ${GLOBAL_INCLUDE_DIR})
-    install(DIRECTORY "${PROJECT_SOURCE_DIR}/natnet/include/" DESTINATION ${GLOBAL_INCLUDE_DIR})
+  	install(FILES ${NATNET_DLL_DIR} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    install(FILES ${TRACKING_INSTALL_CONF} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/natnet/include/" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
 
     # Grouping in Visual Studio
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER plugins)
     source_group("Header Files" FILES ${TRACKING_HEADERS})
     source_group("Source Files" FILES ${TRACKING_SOURCES})
   
-    message(STATUS "[${PROJECT_NAME}] DONE.")
+    message(STATUS "[${PROJECT_NAME}] configuring DONE.")
 
 endif(WIN32)
