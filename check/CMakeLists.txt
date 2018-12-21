@@ -1,4 +1,4 @@
-﻿###############################################################################
+###############################################################################
 # CHECK
 ###############################################################################
 
@@ -14,7 +14,7 @@ if(WIN32)
     file(GLOB_RECURSE CHECK_HEADERS RELATIVE ${PROJECT_SOURCE_DIR} "include/*.h")
     file(GLOB_RECURSE CHECK_SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.cpp")
     
-    include_directories(${GLOBAL_INCLUDE_DIR} "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/include")
+    include_directories("${CMAKE_INSTALL_PREFIX}/include" "${PROJECT_SOURCE_DIR}/src" "${PROJECT_SOURCE_DIR}/include")
 
     # TARGET DEFINITION
     add_executable(${PROJECT_NAME} 
@@ -23,16 +23,15 @@ if(WIN32)
     )
     add_dependencies(${PROJECT_NAME} ${TRACKING_NAME})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${TRACKING_NAME})
-    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
     # INSTALL TARGET
-    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${GLOBAL_BIN_DIR})
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 
     # Grouping in Visual Studio
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER plugins)
     source_group("Header Files" FILES ${CHECK_HEADERS})
     source_group("Source Files" FILES ${CHECK_SOURCES})
 
-    message(STATUS "[${PROJECT_NAME}] DONE.")
+    message(STATUS "[${PROJECT_NAME}] configuring DONE.")
         
 endif(WIN32)
