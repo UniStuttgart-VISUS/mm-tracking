@@ -11,7 +11,7 @@ Since the required library NatNet is not available for Linux and the library is 
 [NatNet](http://optitrack.com/products/natnet-sdk/) is included in this package and it is required for this library to build. If it is not included download the SDK and copy the lib and include folder into the `../tracking/tracking/natnet/` folder. If NatNet is not automatically found set the appropriate `NATNET_GENERIC_LIBRARY`. 
 [VRPN](https://github.com/vrpn/vrpn.git) is also required and it is automatically installed via `cmake`.
 
-## Modules
+## Interface Classes
 
 The tracking library interface provides the classes `Tracker` and `TrackingUtilizer`. 
 
@@ -24,12 +24,13 @@ Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously (s
 
 ## Test
 
-* Configure and generate projects (`tracking` and `check`) with `cmake`.
+* Configure and generate projects with `cmake`.
 * Adjust client IP parameter in `check/src/check.cpp` in line 35.
-* Build all projects using `INSTALL` target in Viusal Studio (tested with VS2017 and VS2015).
-* Start 'Motive' software on NatNet server `mini`
-* Start VRPN server (`C:/vrpn/start64.bat`) on VRPN server `mini` 
-* Start test program: `bin/check.exe`
+* Build all projects using `INSTALL` target in Viusal Studio. Tested for VS-15(2017) and VS-14(2015).
+* Start 'Motive' software on NatNet server `mini`.
+* Start VRPN server (`C:/vrpn/start64.bat`) on VRPN server `mini`.
+* Place rigid body inside of tracking area.
+* Start test program: `bin/check.exe`.
 
 ### Troubleshooting
 

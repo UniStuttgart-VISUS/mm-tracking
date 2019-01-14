@@ -7,7 +7,10 @@ cmake_minimum_required (VERSION 3.8)
 project(all)
 
 # Set default install path 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}
+    CACHE PATH "default install path" FORCE)
+endif()
 
 # Add directory structure for visual studio
 if(WIN32)

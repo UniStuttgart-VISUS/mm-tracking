@@ -25,7 +25,7 @@ if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${TRACKING_NAME})
 
     # INSTALL TARGET
-    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION "bin")
 
     # Grouping in Visual Studio
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER plugins)

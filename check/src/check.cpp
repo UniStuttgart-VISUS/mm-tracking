@@ -32,7 +32,7 @@ int main() {
     tracking::Tracker::Params tp;
     tp.activeNode                   = ""; // = all
     /// NatNet
-    tp.natnet_params.clientIP       = "129.69.205.205"; // >>> musette (braunms) => CHANGE!
+    tp.natnet_params.clientIP       = "129.69.205.205"; // >>> => CHANGE!
     tp.natnet_params.serverIP       = "129.69.205.86";
     tp.natnet_params.cmdPort        = 1510;
     tp.natnet_params.dataPort       = 1511;

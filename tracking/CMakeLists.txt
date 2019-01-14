@@ -25,7 +25,7 @@ if(WIN32)
     include(ExternalProject)
     
     set(VRPN_VER "v07.34")
-    set(VRPN_INSTALL_LOCATION "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL '')
+    set(VRPN_INSTALL_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL '')
 
     # Set the paths for the needed libraries and include files from the vrpn
     # project.
@@ -85,13 +85,13 @@ if(WIN32)
   
     # INSTALLATION
     install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME} ${PROJECT_NAME} 
-        RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+        RUNTIME DESTINATION "bin"
+        LIBRARY DESTINATION "lib" 
+        ARCHIVE DESTINATION "lib"
     )
-  	install(FILES ${NATNET_DLL_DIR} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-    install(FILES ${TRACKING_INSTALL_CONF} DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
-    install(DIRECTORY "${PROJECT_SOURCE_DIR}/natnet/include/" DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+  	install(FILES ${NATNET_DLL_DIR} DESTINATION "bin")
+    install(FILES ${TRACKING_INSTALL_CONF} DESTINATION "bin")
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/natnet/include/" DESTINATION "include")
 
     # Grouping in Visual Studio
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER plugins)
