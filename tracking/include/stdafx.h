@@ -12,24 +12,19 @@
 #pragma once
 #endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
 
-
-#ifdef _WIN32
- /** Windows includes */
-
+#ifdef _WIN32 
+/** Windows includes */
+ 
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>
 
-#else /** _WIN32 */
- /** Linux includes */
+#define TRACKING_AVAILABLE
 
-#include <memory.h>
-#include <unistd.h> // for gethostname()
-#include <limits.h>
-
-#ifndef NULL
-#   define NULL 0
-#endif
+#else 
+ /** other OS */
+ 
+#error Platform not supported
 
 #endif /** _WIN32 */
 
