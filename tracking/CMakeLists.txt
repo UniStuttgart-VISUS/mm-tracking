@@ -25,7 +25,7 @@ if(WIN32)
     include(ExternalProject)
     
     set(VRPN_VER "v07.34")
-    set(VRPN_INSTALL_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL '')
+    set(VRPN_INSTALL_LOCATION "${PROJECT_SOURCE_DIR}" CACHE INTERNAL '')
 
     # Set the paths for the needed libraries and include files from the vrpn
     # project.
@@ -80,7 +80,7 @@ if(WIN32)
     add_dependencies(${PROJECT_NAME} "vrpn")
     set(TRACKING_LIBS ${NATNET_LIBRARIES} ${VRPN_LIBRARY} ${QUAT_LIBRARY})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${TRACKING_LIBS})
-    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/natnet/include>)
+    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/natnet/include>)
     target_compile_definitions(${PROJECT_NAME} PRIVATE "${EXPORT_NAME}_EXPORTS")
   
     # INSTALLATION
@@ -91,7 +91,10 @@ if(WIN32)
     )
   	install(FILES ${NATNET_DLL_DIR} DESTINATION "bin")
     install(FILES ${TRACKING_INSTALL_CONF} DESTINATION "bin")
+    # Copy all header files 
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION "include")    
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/natnet/include/" DESTINATION "include")
+
 
     # Grouping in Visual Studio
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER plugins)

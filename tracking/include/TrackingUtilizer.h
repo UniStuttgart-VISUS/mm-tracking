@@ -18,7 +18,6 @@
 #define TRACKING_API __declspec(dllimport)   
 #endif  
 
-
 #include "stdafx.h"
 
 #include "Tracker.h"
