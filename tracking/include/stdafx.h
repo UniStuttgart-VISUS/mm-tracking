@@ -16,15 +16,14 @@
 /** Windows includes */
  
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
-// Windows Header Files:
 #include <windows.h>
 
-#define TRACKING_AVAILABLE
+#define TRACKING_AVAILABLE 1
 
 #else 
  /** other OS */
  
-#error Platform not supported
+#error Platform not supported!
 
 #endif /** _WIN32 */
 
