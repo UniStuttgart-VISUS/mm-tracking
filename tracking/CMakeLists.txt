@@ -90,6 +90,7 @@ if(WIN32)
         ARCHIVE DESTINATION "lib"
     )
   	install(FILES ${NATNET_DLL_DIR} DESTINATION "bin")
+    install(FILES ${NATNET_LIBRARIES} DESTINATION "lib")
     install(FILES ${TRACKING_INSTALL_CONF} DESTINATION "bin")
     # Copy all header files 
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION "include")    
@@ -101,6 +102,6 @@ if(WIN32)
     source_group("Header Files" FILES ${TRACKING_HEADERS})
     source_group("Source Files" FILES ${TRACKING_SOURCES})
   
-    message(STATUS "[${PROJECT_NAME}] configuring DONE.")
+    message(STATUS "[${PROJECT_NAME}] DONE.")
 
 endif(WIN32)

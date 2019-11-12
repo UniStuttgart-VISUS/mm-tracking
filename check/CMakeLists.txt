@@ -32,6 +32,6 @@ if(WIN32)
     source_group("Header Files" FILES ${CHECK_HEADERS})
     source_group("Source Files" FILES ${CHECK_SOURCES})
 
-    message(STATUS "[${PROJECT_NAME}] configuring DONE.")
+    message(STATUS "[${PROJECT_NAME}] DONE.")
         
 endif(WIN32)
