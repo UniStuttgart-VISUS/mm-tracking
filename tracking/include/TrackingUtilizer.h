@@ -8,10 +8,6 @@
 #ifndef TRACKING_TRACKINGUTILIZER_H_INCLUDED
 #define TRACKING_TRACKINGUTILIZER_H_INCLUDED
 
-#if (defined(_MSC_VER) && (_MSC_VER > 1000))
-#pragma once
-#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
-
 #ifdef TRACKING_EXPORTS  
 #define TRACKING_API __declspec(dllexport)   
 #else  
@@ -19,11 +15,10 @@
 #endif  
 
 #include "stdafx.h"
-
 #include "Tracker.h"
 
 
-namespace tracking {
+namespace mm_tracking {
 
     /***************************************************************************
     *
@@ -99,11 +94,11 @@ namespace tracking {
         * CTOR
         */
         TrackingUtilizer(void);
-        TrackingUtilizer(std::shared_ptr<tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(std::shared_ptr<mm_tracking::Tracker> inTrackerPtr);
         TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams);
-        TrackingUtilizer(tracking::Tracker::Params& inTrackerParams);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, tracking::Tracker::Params& inTrackerParams);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(mm_tracking::Tracker::Params& inTrackerParams);
+        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, mm_tracking::Tracker::Params& inTrackerParams);
+        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<mm_tracking::Tracker> inTrackerPtr);
 
         /**
         // Copy CTOR 
@@ -130,59 +125,62 @@ namespace tracking {
         /**
         *  Get the raw tracking data.
         *
-        * @param inoutBtnState  The current button state of the given button device.
-        * @param inoutPos       The current position of the given rigid body.
-        * @param inoutOri       The current orientation of the given rigid body.
+        * @param outBtnState  The current button state of the given button device.
+        * @param outPos       The current position of the given rigid body.
+        * @param outOri       The current orientation of the given rigid body.
         *
         * @return True for success, false otherwise.
         */
-        bool GetRawData(tracking::ButtonMask& inoutBtnState, tracking::Vector3D& inoutPos, tracking::Quaternion& inoutOri);
+        bool GetRawData(mm_tracking::ButtonMask& outBtnState, mm_tracking::Vector3D& outPos, mm_tracking::Quaternion& outOri);
 
         /**
         *  Get the current state of the select button.
         *
-        * @param inoutSelect  True if select button is pressed, false otherwise.
+        * @param outSelect  True if select button is pressed, false otherwise.
         *
         * @return True for success, false otherwise.
         */
-        bool GetSelectionState(bool& inoutSelect);
+        bool GetSelectionState(bool& outSelect);
 
         /**
         *  Get the current intersection with the screen.
         *
-        * @param inoutIntersect  The relative screen interaction.
+        * @param outIntersect  The relative 2D screen intersection coordinates (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetIntersection(tracking::Point2D& inoutIntersect);
+        bool GetIntersection(mm_tracking::Point2D& outIntersect);
 
         /**
         *  Get the current field of view.
         *
-        * @param inoutFov  The relative filed of view vertices (2D = screen space).
+        * @param outFov  The relative 2D screen space filed of view vertices (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetFieldOfView(tracking::Rectangle& inoutFov);
+        bool GetFieldOfView(mm_tracking::Rectangle& outFov);
 
         /**
         * Get the updated camera vectors depending on pressed buttons.
+        * 
+        * Requires previous call of SetCurrentCamera(...).
+        * 
         * 3D: Transformations are applied in three-dimensional space.
         * 2D: Transformations are applied in two-dimensional screen space.
         * 
-        * @param dim             The camera position.
-        * @param inoutCamPos     The camera position.
-        * @param inoutCamLookAt  The camera loook at position.
-        * @param inoutCamUp      The up direction of the camera.
+        * @param dim           The camera position.
+        * @param outCamPos     The camera position.
+        * @param outCamLookAt  The camera loook at position.
+        * @param outCamUp      The up direction of the camera.
         *
         * @return True for success, false otherwise.
         */
-        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, tracking::Vector3D& inoutCamPos, tracking::Vector3D& inoutCamLookAt, tracking::Vector3D& inoutCamUp);
+        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, mm_tracking::Vector3D& outCamPos, mm_tracking::Vector3D& outCamLookAt, mm_tracking::Vector3D& outCamUp);
 
         /**
         * Get the button device name.
         *
-        * @return The current button device name.
+        * @return The button device name.
         */
         inline std::string GetButtonDeviceName(void) const {
             return this->buttonDeviceName;
@@ -191,7 +189,7 @@ namespace tracking {
         /**
         * Get the rigid body name.
         *
-        * @return The current rigid body name.
+        * @return The rigid body name.
         */
         inline std::string GetRigidBodyName(void) const {
             return this->rigidBodyName;
@@ -209,11 +207,11 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp);
+        bool SetCurrentCamera(mm_tracking::Vector3D inCamPos, mm_tracking::Vector3D inCamLookAt, mm_tracking::Vector3D inCamUp);
 
         /**
-        * Set the calibration orientation of the Point2Ding device. 
-        * >>> Put rigid body somewhere Point2Ding vertically towards the powerwall screen and
+        * Set the calibration orientation of the Pointing device. 
+        * >>> Put rigid body somewhere Pointing vertically towards the powerwall screen and
         * >>> right- and up-Vector3D of rigid body must be parallel to x- and y-axis of powerwall screen.
         *
         * @return True for success, false otherwise.
@@ -227,32 +225,32 @@ namespace tracking {
         **********************************************************************/
 
         /** The Pointer to the Tracker which provides the tracking data. */
-        std::shared_ptr<tracking::Tracker> tracker;
+        std::shared_ptr<mm_tracking::Tracker> tracker;
 
-        tracking::Vector3D                 curCameraPosition;
-        tracking::Vector3D                 curCameraUp;
-        tracking::Vector3D                 curCameraLookAt;
+        mm_tracking::Vector3D                 curCameraPosition;
+        mm_tracking::Vector3D                 curCameraUp;
+        mm_tracking::Vector3D                 curCameraLookAt;
 
-        tracking::Point2D                  curIntersection;
-        tracking::Rectangle                curFOV;
-        tracking::Quaternion               curOrientation;
-        tracking::Vector3D                 curPosition;
-        tracking::ButtonMask               curButtonStates;
+        mm_tracking::Point2D                  curIntersection;
+        mm_tracking::Rectangle                curFOV;
+        mm_tracking::Quaternion               curOrientation;
+        mm_tracking::Vector3D                 curPosition;
+        mm_tracking::ButtonMask               curButtonStates;
 
         bool                               curSelecting;
 
-        std::vector<tracking::Vector3D>    positionBuffer;
+        std::vector<mm_tracking::Vector3D>    positionBuffer;
         unsigned int                       bufferIdx;
         bool                               constPosition;
 
-        tracking::ButtonMask               lastButtonStates;
+        mm_tracking::ButtonMask               lastButtonStates;
 
-        tracking::Vector3D                 startCamLookAt;
-        tracking::Vector3D                 startCamPosition;
-        tracking::Vector3D                 startCamUp;
-        tracking::Vector3D                 startPosition;
-        tracking::Quaternion               startOrientation;
-        tracking::Quaternion               startRelativeOrientation;
+        mm_tracking::Vector3D                 startCamLookAt;
+        mm_tracking::Vector3D                 startCamPosition;
+        mm_tracking::Vector3D                 startCamUp;
+        mm_tracking::Vector3D                 startPosition;
+        mm_tracking::Quaternion               startOrientation;
+        mm_tracking::Quaternion               startRelativeOrientation;
 
         bool                               isRotating;
         bool                               isTranslating;
@@ -280,10 +278,10 @@ namespace tracking {
         float                              physicalHeight;
         float                              physicalWidth;
         
-        tracking::Quaternion               calibrationOrientation;
-        tracking::Vector3D                 physicalOrigin;
-        tracking::Vector3D                 physicalXDir;
-        tracking::Vector3D                 physicalYDir;
+        mm_tracking::Quaternion               calibrationOrientation;
+        mm_tracking::Vector3D                 physicalOrigin;
+        mm_tracking::Vector3D                 physicalXDir;
+        mm_tracking::Vector3D                 physicalYDir;
 
         TrackingUtilizer::FovMode          fovMode;
         float                              fovHeight;
@@ -350,7 +348,7 @@ namespace tracking {
         *
         * @return Answer the (normalised) rotation for matching 'u' on 'v'.
         */
-        tracking::Quaternion xform(const tracking::Vector3D& u, const tracking::Vector3D& v);
+        mm_tracking::Quaternion xform(const mm_tracking::Vector3D& u, const mm_tracking::Vector3D& v);
 
         /**
         * Returns the class name. --- UNUSED ---
@@ -358,6 +356,6 @@ namespace tracking {
         const std::string cn(void) const;
     };
 
-} /** end namespace tracking */
+} /** end namespace mm_tracking */
 
 #endif /** TRACKING_TRACKINGUTILIZER_H_INCLUDED */

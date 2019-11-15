@@ -8,17 +8,11 @@
 #ifndef TRACKING_VRPNBUTTONDEVICE_H_INCLUDED
 #define TRACKING_VRPNBUTTONDEVICE_H_INCLUDED
 
-#if (defined(_MSC_VER) && (_MSC_VER > 1000))
-#pragma once
-#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
-
-
 #include "stdafx.h"
-
 #include "VrpnDevice.h"
 
 
-namespace tracking {
+namespace mm_tracking {
 
     /***************************************************************************
     *
@@ -60,7 +54,7 @@ namespace tracking {
         *
         * @return The current button states.
         */
-        tracking::ButtonMask GetButtonStates(void) const;
+        mm_tracking::ButtonMask GetButtonStates(void) const;
 
     private:
 
@@ -76,7 +70,7 @@ namespace tracking {
         /** 
         * The current button states. 
         */
-        std::atomic<tracking::ButtonMask> states;
+        std::atomic<mm_tracking::ButtonMask> states;
 
         /***********************************************************************
         * functions
@@ -91,6 +85,6 @@ namespace tracking {
         static void VRPN_CALLBACK onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData);
     };
 
-} /** end namespace tracking */
+} /** end namespace mm_tracking */
 
 #endif /** TRACKING_VRPNBUTTONDEVICE_H_INCLUDED */

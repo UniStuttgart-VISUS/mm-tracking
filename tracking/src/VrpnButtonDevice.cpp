@@ -5,14 +5,10 @@
 * Alle Rechte vorbehalten.
 */
 
-
 #include "VrpnButtonDevice.h"
 
 
-/**
-* tracking::VrpnButtonDevice::VrpnButtonDevice
-*/
-tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remote>(),
+mm_tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remote>(),
     runThreadLoop(false),
     states(0)
 {
@@ -20,7 +16,7 @@ tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remo
 }
 
 
-tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Params& inParams) : VrpnDevice<vrpn_Button_Remote>(inParams),
+mm_tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Params& inParams) : VrpnDevice<vrpn_Button_Remote>(inParams),
     runThreadLoop(false),
     states(0)
 {
@@ -28,19 +24,13 @@ tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Par
 }
 
 
-/**
-* tracking::VrpnButtonDevice::~VrpnButtonDevice
-*/
-tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
+mm_tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
 
     this->Disconnect();
 }
 
 
-/**
-* tracking::VrpnButtonDevice::Connect.
-*/
-bool tracking::VrpnButtonDevice::Connect(void) {
+bool mm_tracking::VrpnButtonDevice::Connect(void) {
 
     // Establish connection.
     if (!VrpnDevice<vrpn_Button_Remote>::Connect()) { 
@@ -68,10 +58,7 @@ bool tracking::VrpnButtonDevice::Connect(void) {
 }
 
 
-/**
-* tracking::VrpnButtonDevice::Disconnect
-*/
-bool tracking::VrpnButtonDevice::Disconnect(void) {
+bool mm_tracking::VrpnButtonDevice::Disconnect(void) {
 
     // End main loop thread
     this->runThreadLoop.store(false);
@@ -80,19 +67,13 @@ bool tracking::VrpnButtonDevice::Disconnect(void) {
 }
 
 
-/**
-* tracking::VrpnButtonDevice::GetButtonStates
-*/
-tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
+mm_tracking::ButtonMask mm_tracking::VrpnButtonDevice::GetButtonStates(void) const {
 
     return this->states.load();
 }
 
 
-/**
-* tracking::VrpnButtonDevice::onButtonChanged
-*/
-void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData) {
+void VRPN_CALLBACK mm_tracking::VrpnButtonDevice::onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData) {
 
     auto that = static_cast<VrpnButtonDevice*>(userData);
     if (that == nullptr) {
@@ -101,8 +82,8 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, c
     }
 
     // Remember the button state.
-    tracking::ButtonMask tmpStates = that->states.load();
-    tracking::ButtonMask tmpMask   = 1 << vrpnData.button;
+    mm_tracking::ButtonMask tmpStates = that->states.load();
+    mm_tracking::ButtonMask tmpMask   = 1 << vrpnData.button;
     if (vrpnData.state != 0) {
         that->states.store(tmpStates |= tmpMask);
     }

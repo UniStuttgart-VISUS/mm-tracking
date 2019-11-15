@@ -8,24 +8,18 @@
 #ifndef TRACKING_TRACKER_H_INCLUDED
 #define TRACKING_TRACKER_H_INCLUDED
 
-#if (defined(_MSC_VER) && (_MSC_VER > 1000))
-#pragma once
-#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
-
 #ifdef TRACKING_EXPORTS  
 #define TRACKING_API __declspec(dllexport)   
 #else  
 #define TRACKING_API __declspec(dllimport)   
 #endif  
 
-
 #include "stdafx.h"
-
 #include "VrpnButtonDevice.h"
 #include "NatNetDevicePool.h"
 
 
-namespace tracking {
+namespace mm_tracking {
 
     /***************************************************************************
     *
@@ -47,7 +41,7 @@ namespace tracking {
         /** Current tracking raw data. */
         typedef struct {
             NatNetDevicePool::RigidBodyData rigidBody;
-            tracking::ButtonMask            buttonState;
+            mm_tracking::ButtonMask            buttonState;
         } TrackingData;
 
         ///////////////////////////////////////////////////////////////////////
@@ -90,7 +84,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data);
+        bool GetData(std::string& rigidBody, std::string& buttonDevice, mm_tracking::Tracker::TrackingData& data);
 
         /**
         * Get all available rigid body names.
@@ -144,6 +138,6 @@ namespace tracking {
 
     };
 
-} /** end namespace tracking */
+} /** end namespace mm_tracking */
 
 #endif /** TRACKING_TRACKER_H_INCLUDED */

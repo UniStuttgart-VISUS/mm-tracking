@@ -5,14 +5,10 @@
  * Alle Rechte vorbehalten.
  */
 
-
 #include "NatNetDevicePool.h"
 
 
-/**
- * tracking::NatNetDevicePool::NatNetDevicePool
- */
-tracking::NatNetDevicePool::NatNetDevicePool(void) :
+mm_tracking::NatNetDevicePool::NatNetDevicePool(void) :
     natnetClient(nullptr),
     rigidBodies(),
     callbackCounter({ 0, 0 } ),
@@ -27,7 +23,7 @@ tracking::NatNetDevicePool::NatNetDevicePool(void) :
 }
 
 
-tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
+mm_tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
     natnetClient(nullptr),
     rigidBodies(),
     callbackCounter({ 0, 0 }),
@@ -42,10 +38,7 @@ tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
 }
 
 
-/**
-* tracking::NatNetDevicePool::paramsPrint
-*/
-void tracking::NatNetDevicePool::paramsPrint(void) {
+void mm_tracking::NatNetDevicePool::paramsPrint(void) {
     std::cout << "[parameter] <NatNetDevicePool> Client IP:               " << this->clientIP.c_str() << std::endl;
     std::cout << "[parameter] <NatNetDevicePool> Server IP:               " << this->serverIP.c_str() << std::endl;
     std::cout << "[parameter] <NatNetDevicePool> Command Port:            " << this->cmdPort << std::endl;
@@ -54,10 +47,8 @@ void tracking::NatNetDevicePool::paramsPrint(void) {
     std::cout << "[parameter] <NatNetDevicePool> Verbose NatNet client:   " << ((this->verboseClient)?("yes"):("no")) << std::endl;
 }
 
-/**
-* tracking::NatNetDevicePool::paramsCheck
-*/
-bool tracking::NatNetDevicePool::paramsCheck(void) {
+
+bool mm_tracking::NatNetDevicePool::paramsCheck(void) {
 
     bool retval = true;
 
@@ -86,19 +77,13 @@ bool tracking::NatNetDevicePool::paramsCheck(void) {
 }
 
 
-/**
- * tracking::NatNetDevicePool::~NatNetDevicePool
- */
-tracking::NatNetDevicePool::~NatNetDevicePool(void) {
+mm_tracking::NatNetDevicePool::~NatNetDevicePool(void) {
 
     this->Disconnect();
 }
 
 
-/**
- * tracking::NatNetDevicePool::Connect
- */
-bool tracking::NatNetDevicePool::Connect(void) {
+bool mm_tracking::NatNetDevicePool::Connect(void) {
 
     ::sServerDescription serverDesc;
 
@@ -226,10 +211,7 @@ bool tracking::NatNetDevicePool::Connect(void) {
 }
 
 
-/**
- * tracking::NatNetDevicePool::Disconnect
- */
-bool tracking::NatNetDevicePool::Disconnect(void) {
+bool mm_tracking::NatNetDevicePool::Disconnect(void) {
 
     if (this->natnetClient) {
         ::ErrorCode errorcode = this->natnetClient->Disconnect();
@@ -252,12 +234,9 @@ bool tracking::NatNetDevicePool::Disconnect(void) {
 }
 
 
-/**
-* tracking::NatNetDevicePool::GetOrientation
-*/
-tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(std::string& rbn) {
+mm_tracking::Quaternion mm_tracking::NatNetDevicePool::GetOrientation(std::string& rbn) {
 
-    tracking::Quaternion retOr((std::numeric_limits<float>::max)(),
+    mm_tracking::Quaternion retOr((std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)());
@@ -280,12 +259,9 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(std::string& rbn
 }
 
 
-/**
-* tracking::NatNetDevicePool::GetPosition
-*/
-tracking::Vector3D tracking::NatNetDevicePool::GetPosition(std::string& rbn) {
+mm_tracking::Vector3D mm_tracking::NatNetDevicePool::GetPosition(std::string& rbn) {
 
-    tracking::Vector3D retPos((std::numeric_limits<float>::max)(), 
+    mm_tracking::Vector3D retPos((std::numeric_limits<float>::max)(), 
         (std::numeric_limits<float>::max)(), 
         (std::numeric_limits<float>::max)());
 
@@ -307,10 +283,7 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(std::string& rbn) {
 }
 
 
-/**
-* tracking::NatNetDevicePool::GetRigidBodyNames
-*/
-std::vector<std::string> tracking::NatNetDevicePool::GetRigidBodyNames(void) const {
+std::vector<std::string> mm_tracking::NatNetDevicePool::GetRigidBodyNames(void) const {
 
     std::vector<std::string> retval;
     retval.clear();
@@ -323,10 +296,7 @@ std::vector<std::string> tracking::NatNetDevicePool::GetRigidBodyNames(void) con
 }
 
 
-/**
- * tracking::NatNetDevicePool::onData
- */
-void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
+void __cdecl mm_tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
 
 	auto that = static_cast<NatNetDevicePool *>(pUserData);
     if ((pFrameOfData == nullptr) || (that == nullptr)) {
@@ -396,10 +366,7 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
 }
 
 
-/**
- * tracking::NatNetDevicePool::onMessage
- */
-void __cdecl tracking::NatNetDevicePool::onMessage(Verbosity level, const char *message) {
+void __cdecl mm_tracking::NatNetDevicePool::onMessage(Verbosity level, const char *message) {
 
     switch (level) {
         case (::Verbosity::Verbosity_None):    break;

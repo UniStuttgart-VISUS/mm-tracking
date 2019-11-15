@@ -5,10 +5,9 @@
 * Alle Rechte vorbehalten.
 */
 
-
 #include "TrackingMath.h" 
 
 
-tracking::Vector3D tracking::operator *(const float lhs, const tracking::Vector3D& rhs) {
+mm_tracking::Vector3D mm_tracking::operator *(const float lhs, const mm_tracking::Vector3D& rhs) {
     return (rhs * lhs);
 }

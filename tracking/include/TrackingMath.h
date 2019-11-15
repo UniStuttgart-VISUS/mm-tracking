@@ -8,17 +8,12 @@
 #ifndef TRACKING_MATH_INCLUDED
 #define TRACKING_MATH_INCLUDED
 
-#if (defined(_MSC_VER) && (_MSC_VER > 1000))
-#pragma once
-#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
-
-
 #include <cmath>
 #include <cstdlib>
 #include <limits>
 
 
-namespace tracking
+namespace mm_tracking
 {
     /** Point2D - 2D ***********************************************************/
     class Point2D {
@@ -210,7 +205,7 @@ namespace tracking
     };
 
     // Scalar multiplication from left.
-    extern tracking::Vector3D operator *(const float lhs, const tracking::Vector3D& rhs);
+    extern mm_tracking::Vector3D operator *(const float lhs, const mm_tracking::Vector3D& rhs);
 
 
     /** QUATERNION ************************************************************/
@@ -238,7 +233,7 @@ namespace tracking
             return *this;
         }
 
-        inline tracking::Vector3D operator *(const tracking::Vector3D& rhs) const {
+        inline mm_tracking::Vector3D operator *(const mm_tracking::Vector3D& rhs) const {
             Vector3D u;
             u.Set(this->x, this->y, this->z);
             return (((2.0f) * ((u.Dot(rhs) * u)

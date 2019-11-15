@@ -26,11 +26,11 @@ set(TRACKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tracking")
 add_subdirectory(${TRACKING_DIR})
 
 ###############################
-# CHECK
+# TEST
 ###############################
-set(CHECK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/check")
+set(TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/test")
 
-option(CREATE_TRACKING_TEST_PROGRAM "Creates the tracking test program check.exe" OFF)
+option(CREATE_TRACKING_TEST_PROGRAM "Creates the tracking TEST program." OFF)
 if(CREATE_TRACKING_TEST_PROGRAM)
-    add_subdirectory(${CHECK_DIR})
+    add_subdirectory(${TEST_DIR})
 endif()

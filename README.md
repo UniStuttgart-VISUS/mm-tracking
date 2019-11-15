@@ -1,7 +1,7 @@
 # Tracking Library `mm-tracking`
 
-The `mm-tracking` library provides the interface that allows to communicate with the tracking system at VISUS. 
-This library can be connected with the MegaMol Powerwall demo librarys to allow interaction with the pointing/stick device and its buttons (and the glasses).
+The `mm-tracking` library provides the interface that allows to communicate with the tracking system in front of the Powerwall at the Visualization Research Center (VISUS) of the University of Stuttgart. 
+This library can be used for interaction with tracking and button devices (stick, glasses).
 
 ---
 
@@ -25,21 +25,23 @@ Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously (s
 ## Test
 
 * Configure and generate projects with `cmake`.
-* Adjust client IP parameter in `check/src/check.cpp` in line 35.
+* Adjust client IP parameter in `test/src/test.cpp` in line 35.
 * Build all projects using `INSTALL` target in Viusal Studio. Tested for VS-15(2017) and VS-14(2015).
 * Start 'Motive' software on NatNet server `mini`.
 * Start VRPN server (`C:/vrpn/start64.bat`) on VRPN server `mini`.
 * Place rigid body inside of tracking area.
-* Start test program: `bin/check.exe`.
+* Start test program: `bin/test.exe`.
 
 ### Troubleshooting
 
 If Windows doesn't ask to add a Firewall exception for the test program, rules to allow incoming traffic for TCP port 3884 and UDP ports 1510 and 1511 have to be added manually.
 
 ## Documentation
+
 Some documentation diagrams are provided in the `documentation` folder.
 
 ## Parameters
-The given default parameters in the example program `check/src/check.cpp` fit the current VISUS tracking setup (Dezember 2018).
+
+The given default parameters in the example test program `test/src/test.cpp` fit the current VISUS tracking setup (Dezember 2019).
 
 ---

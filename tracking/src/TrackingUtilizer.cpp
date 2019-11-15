@@ -5,14 +5,10 @@
 * Alle Rechte vorbehalten.
 */
 
-
 #include "TrackingUtilizer.h"
 
 
-/**
-* tracking::TrackingUtilizer::TrackingUtilizer
-*/
-tracking::TrackingUtilizer::TrackingUtilizer(void) :
+mm_tracking::TrackingUtilizer::TrackingUtilizer(void) :
     tracker(nullptr), 
     curCameraPosition(),
     curCameraUp(),
@@ -34,7 +30,8 @@ tracking::TrackingUtilizer::TrackingUtilizer(void) :
     this->paramsPrint();
 }
 
-tracking::TrackingUtilizer::TrackingUtilizer(std::shared_ptr<tracking::Tracker> inTrackerPtr) :
+
+mm_tracking::TrackingUtilizer::TrackingUtilizer(std::shared_ptr<mm_tracking::Tracker> inTrackerPtr) :
     tracker(inTrackerPtr), 
     curCameraPosition(),
     curCameraUp(),
@@ -52,7 +49,8 @@ tracking::TrackingUtilizer::TrackingUtilizer(std::shared_ptr<tracking::Tracker> 
     this->paramsPrint();
 }
 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams) :
+
+mm_tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams) :
     tracker(nullptr),
     curCameraPosition(),
     curCameraUp(),
@@ -74,7 +72,8 @@ tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilize
     this->paramsPrint();
 }
 
-tracking::TrackingUtilizer::TrackingUtilizer(tracking::Tracker::Params& inTrackerParams) :
+
+mm_tracking::TrackingUtilizer::TrackingUtilizer(mm_tracking::Tracker::Params& inTrackerParams) :
     tracker(nullptr), 
     curCameraPosition(),
     curCameraUp(),
@@ -96,7 +95,8 @@ tracking::TrackingUtilizer::TrackingUtilizer(tracking::Tracker::Params& inTracke
     this->paramsPrint();
 }
 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, tracking::Tracker::Params& inTrackerParams) :
+
+mm_tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, mm_tracking::Tracker::Params& inTrackerParams) :
     tracker(nullptr), 
     curCameraPosition(),
     curCameraUp(),
@@ -118,7 +118,8 @@ tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilize
     this->paramsPrint();
 }
 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) :
+
+mm_tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<mm_tracking::Tracker> inTrackerPtr) :
     tracker(inTrackerPtr), 
     curCameraPosition(),
     curCameraUp(),
@@ -138,7 +139,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilize
 
 /**
 // Copy 
-tracking::TrackingUtilizer::TrackingUtilizer(const TrackingUtilizer& rhs) {
+mm_tracking::TrackingUtilizer::TrackingUtilizer(const TrackingUtilizer& rhs) {
 
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[COPY CONSTRUCTOR] >>> ";
@@ -148,7 +149,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(const TrackingUtilizer& rhs) {
 }
 
 // Move 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer&& rhs) {
+mm_tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer&& rhs) {
 
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[MOVE CONSTRUCTOR] >>> ";
@@ -157,8 +158,8 @@ tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer&& rhs) {
     *this = std::move(rhs);
 }
 
-// Copy - tracking::TrackingUtilizer::operator=
-tracking::TrackingUtilizer& tracking::TrackingUtilizer::operator=(const TrackingUtilizer & rhs) {
+// Copy - mm_tracking::TrackingUtilizer::operator=
+mm_tracking::TrackingUtilizer& mm_tracking::TrackingUtilizer::operator=(const TrackingUtilizer & rhs) {
 
     // check for self-assignment
     if (this != &rhs) {
@@ -219,8 +220,8 @@ tracking::TrackingUtilizer& tracking::TrackingUtilizer::operator=(const Tracking
     return *this;
 }
 
-// Move - tracking::TrackingUtilizer::operator=
-tracking::TrackingUtilizer& tracking::TrackingUtilizer::operator=(TrackingUtilizer && rhs) {
+// Move - mm_tracking::TrackingUtilizer::operator=
+mm_tracking::TrackingUtilizer& mm_tracking::TrackingUtilizer::operator=(TrackingUtilizer && rhs) {
 
     // check for self-assignment
     if (this != &rhs) {
@@ -235,7 +236,7 @@ tracking::TrackingUtilizer& tracking::TrackingUtilizer::operator=(TrackingUtiliz
         this->curPosition               = std::move(rhs.curPosition);
         this->curButtonStates           = std::exchange(rhs.curButtonStates, 0);
         this->curSelecting              = std::exchange(rhs.curSelecting, false);
-        this->positionBuffer            = std::exchange(rhs.positionBuffer, std::vector<tracking::Vector3D>()); // ?
+        this->positionBuffer            = std::exchange(rhs.positionBuffer, std::vector<mm_tracking::Vector3D>()); // ?
         this->bufferIdx                 = std::exchange(rhs.bufferIdx, 0);
         this->constPosition             = std::exchange(rhs.constPosition, false);
         this->lastButtonStates          = std::exchange(rhs.lastButtonStates, 0);
@@ -282,19 +283,14 @@ tracking::TrackingUtilizer& tracking::TrackingUtilizer::operator=(TrackingUtiliz
 }
 */
 
-/**
-* tracking::TrackingUtilizer::~TrackingUtilizer
-*/
-tracking::TrackingUtilizer::~TrackingUtilizer(void) {
+
+mm_tracking::TrackingUtilizer::~TrackingUtilizer(void) {
 
     // nothing to do here ...
 }
 
 
-/**
-* tracking::TrackingUtilizer::paramsInit
-*/
-void tracking::TrackingUtilizer::paramsInit(void) {
+void mm_tracking::TrackingUtilizer::paramsInit(void) {
       
     this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
 
@@ -325,7 +321,8 @@ void tracking::TrackingUtilizer::paramsInit(void) {
     this->fovAspectRatio    = TrackingUtilizer::FovAspectRatio::AR_1_77__1;
 }
 
-void tracking::TrackingUtilizer::paramsInit(TrackingUtilizer::Params& p) {
+
+void mm_tracking::TrackingUtilizer::paramsInit(TrackingUtilizer::Params& p) {
 
     this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
 
@@ -357,10 +354,7 @@ void tracking::TrackingUtilizer::paramsInit(TrackingUtilizer::Params& p) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::paramsPrint
-*/
-void tracking::TrackingUtilizer::paramsPrint(void) {
+void mm_tracking::TrackingUtilizer::paramsPrint(void) {
     std::cout << "[parameter] <TrackingUtilizer> Button Device Name:      " << this->buttonDeviceName.c_str() << std::endl;
     std::cout << "[parameter] <TrackingUtilizer> Rigid Body Name:         " << this->rigidBodyName.c_str() << std::endl;
     std::cout << "[parameter] <TrackingUtilizer> Select Button:           " << this->selectButton << std::endl;
@@ -389,10 +383,7 @@ void tracking::TrackingUtilizer::paramsPrint(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::paramsRead
-*/
-bool tracking::TrackingUtilizer::paramsRead(void) {
+bool mm_tracking::TrackingUtilizer::paramsRead(void) {
 
     std::string line, tag, name;
     float x, y, z, w;
@@ -492,10 +483,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::paramsCheck
-*/
-bool tracking::TrackingUtilizer::paramsCheck(void) {
+bool mm_tracking::TrackingUtilizer::paramsCheck(void) {
 
     bool retval  = true;
     bool changed = true;
@@ -582,36 +570,30 @@ bool tracking::TrackingUtilizer::paramsCheck(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::GetRawData
-*/
-bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& inoutBtnState, tracking::Vector3D& inoutPos, tracking::Quaternion& inoutOri) {
+bool mm_tracking::TrackingUtilizer::GetRawData(mm_tracking::ButtonMask& outBtnState, mm_tracking::Vector3D& outPos, mm_tracking::Quaternion& outOri) {
 
     bool stateRawData = false;
 
     // Request updated tracking data.
     if (this->updateTrackingData()) {
 
-        inoutBtnState = this->curButtonStates;
-        inoutPos      = this->curPosition;
-        inoutOri      = this->curOrientation;
+        outBtnState = this->curButtonStates;
+        outPos      = this->curPosition;
+        outOri      = this->curOrientation;
 
         stateRawData = true;
     }
     else {
-        inoutBtnState = 0;
-        inoutPos.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        inoutOri.Set(0.0f, 0.0f, 0.0f, 1.0f);
+        outBtnState = 0;
+        outPos.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outOri.Set(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     return (stateRawData);
 }
 
 
-/**
-* tracking::TrackingUtilizer::GetSelectionState
-*/
-bool tracking::TrackingUtilizer::GetSelectionState(bool& inoutSelect) {
+bool mm_tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
 
     bool stateBtnChgs = false;
 
@@ -623,20 +605,17 @@ bool tracking::TrackingUtilizer::GetSelectionState(bool& inoutSelect) {
     }
 
     if (stateBtnChgs) {
-        inoutSelect = this->curSelecting;
+        outSelect = this->curSelecting;
     }
     else {
-        inoutSelect = false;
+        outSelect = false;
     }
 
     return (stateBtnChgs);
 }
 
 
-/**
-* tracking::TrackingUtilizer::GetIntersection
-*/
-bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& inoutIntersect) {
+bool mm_tracking::TrackingUtilizer::GetIntersection(mm_tracking::Point2D& outIntersect) {
 
     bool stateSrnIns = false;
 
@@ -648,20 +627,17 @@ bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& inoutInterse
     }
 
     if (stateSrnIns) {
-        inoutIntersect = this->curIntersection;
+        outIntersect = this->curIntersection;
     }
     else {
-        inoutIntersect.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outIntersect.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
     }
 
     return (stateSrnIns);
 }
 
 
-/**
-* tracking::TrackingUtilizer::GetFieldOfView
-*/
-bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& inoutFov) {
+bool mm_tracking::TrackingUtilizer::GetFieldOfView(mm_tracking::Rectangle& outFov) {
 
     bool stateSrnIns = false;
 
@@ -673,24 +649,21 @@ bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& inoutFov) {
     }
 
     if (stateSrnIns) {
-        inoutFov = this->curFOV;
+        outFov = this->curFOV;
     }
     else {
-        inoutFov.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        inoutFov.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        inoutFov.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        inoutFov.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outFov.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outFov.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outFov.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outFov.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
     }
 
     return (stateSrnIns);
 }
 
 
-/**
-* tracking::TrackingUtilizer::GetUpdatedCamera
-*/
-bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Dim dim, tracking::Vector3D& inoutCamPos, 
-    tracking::Vector3D& inoutCamLookAt, tracking::Vector3D& inoutCamUp) {
+bool mm_tracking::TrackingUtilizer::GetUpdatedCamera(mm_tracking::TrackingUtilizer::Dim dim, mm_tracking::Vector3D& outCamPos, 
+    mm_tracking::Vector3D& outCamLookAt, mm_tracking::Vector3D& outCamUp) {
 
     bool stateBtnChgs = false;
     bool stateCamTrs  = false;
@@ -710,24 +683,21 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Di
     }
 
     if (stateBtnChgs && stateCamTrs) {
-        inoutCamPos    = this->curCameraPosition;
-        inoutCamLookAt = this->curCameraLookAt;
-        inoutCamUp     = this->curCameraUp;
+        outCamPos    = this->curCameraPosition;
+        outCamLookAt = this->curCameraLookAt;
+        outCamUp     = this->curCameraUp;
     }
     else {
-        inoutCamPos.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        inoutCamLookAt.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        inoutCamUp.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outCamPos.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outCamLookAt.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        outCamUp.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
     }
 
     return (stateBtnChgs && stateCamTrs);
 }
 
 
-/**
-* tracking::TrackingUtilizer::Calibration
-*/
-bool tracking::TrackingUtilizer::Calibration(void) {
+bool mm_tracking::TrackingUtilizer::Calibration(void) {
 
     bool stateCalib = false;
 
@@ -749,10 +719,7 @@ bool tracking::TrackingUtilizer::Calibration(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::SetCamera
-*/
-bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp) {
+bool mm_tracking::TrackingUtilizer::SetCurrentCamera(mm_tracking::Vector3D inCamPos, mm_tracking::Vector3D inCamLookAt, mm_tracking::Vector3D inCamUp) {
 
     this->curCameraPosition = inCamPos;
     this->curCameraLookAt   = inCamLookAt;
@@ -762,10 +729,7 @@ bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, t
 }
 
 
-/**
-* tracking::TrackingUtilizer::updateTrackingData
-*/
-bool tracking::TrackingUtilizer::updateTrackingData(void) {
+bool mm_tracking::TrackingUtilizer::updateTrackingData(void) {
 
     if (this->tracker == nullptr) {
         std::cerr << std::endl << "[ERROR] <TrackingUtilizer> There is no tracker connected." << std::endl << std::endl;
@@ -777,7 +741,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
 
     // Get fresh data from tracker
     bool retval = false;
-    tracking::Tracker::TrackingData data;
+    mm_tracking::Tracker::TrackingData data;
     if (this->tracker->GetData(this->rigidBodyName, this->buttonDeviceName, data)) {
         this->curButtonStates = data.buttonState;
         this->curPosition     = data.rigidBody.position;
@@ -812,10 +776,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::processButtonChanges
-*/
-bool tracking::TrackingUtilizer::processButtonChanges(void) {
+bool mm_tracking::TrackingUtilizer::processButtonChanges(void) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -874,8 +835,8 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
                 // coordinate system. This is required to align the interaction device 
                 // with the current view later on.
 
-                auto q1 = this->xform(tracking::Vector3D(0, 0, 1), this->startCamPosition - this->startCamLookAt);
-                auto q2 = this->xform(q1 * tracking::Vector3D(0, 1, 0), this->startCamUp);
+                auto q1 = this->xform(mm_tracking::Vector3D(0, 0, 1), this->startCamPosition - this->startCamLookAt);
+                auto q2 = this->xform(q1 * mm_tracking::Vector3D(0, 1, 0), this->startCamUp);
                 this->startRelativeOrientation = q2 * q1;
 
                 this->startOrientation         = this->curOrientation;
@@ -890,10 +851,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::processCameraTransformations3D
-*/
-bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
+bool mm_tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -942,9 +900,9 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             }
 
             // Apply rotation.
-            tracking::Vector3D startView = this->startCamPosition - this->startCamLookAt;
-            tracking::Vector3D up        = quat * this->startCamUp;
-            tracking::Vector3D view      = quat * startView;
+            mm_tracking::Vector3D startView = this->startCamPosition - this->startCamLookAt;
+            mm_tracking::Vector3D up        = quat * this->startCamUp;
+            mm_tracking::Vector3D view      = quat * startView;
 
             // Apply new view parameters.
             this->curCameraPosition = this->startCamLookAt + view;
@@ -1008,10 +966,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::processCameraTransformations
-*/
-bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
+bool mm_tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -1064,9 +1019,9 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
             }
 
             // Apply rotation.
-            tracking::Vector3D startView = this->startCamPosition - this->startCamLookAt;
-            tracking::Vector3D up = quat * this->startCamUp;
-            tracking::Vector3D view = quat * startView;
+            mm_tracking::Vector3D startView = this->startCamPosition - this->startCamLookAt;
+            mm_tracking::Vector3D up = quat * this->startCamUp;
+            mm_tracking::Vector3D view = quat * startView;
 
             // Apply new view parameters.
             this->curCameraPosition = this->startCamLookAt + view;
@@ -1131,10 +1086,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::processScreenInteraction
-*/
-bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
+bool mm_tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -1382,11 +1334,8 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::limit
-*/
 template<typename T>
-T tracking::TrackingUtilizer::limit(T val, T min, T max) {
+T mm_tracking::TrackingUtilizer::limit(T val, T min, T max) {
 
     T retval = val;
 
@@ -1396,11 +1345,9 @@ T tracking::TrackingUtilizer::limit(T val, T min, T max) {
     return retval;
 }
 
-/**
-* tracking::TrackingUtilizer::limit
-*/
+
 template<typename T>
-T tracking::TrackingUtilizer::limit(T val, T min, T max, bool& changed) {
+T mm_tracking::TrackingUtilizer::limit(T val, T min, T max, bool& changed) {
 
     T newval = limit<T>(val, min, max);
     changed = ((val == newval) ? (false) : (true));
@@ -1409,16 +1356,13 @@ T tracking::TrackingUtilizer::limit(T val, T min, T max, bool& changed) {
 }
 
 
-/**
-* tracking::TrackingUtilizer::xform
-*/
-tracking::Quaternion tracking::TrackingUtilizer::xform(const tracking::Vector3D& u, const tracking::Vector3D& v) {
+mm_tracking::Quaternion mm_tracking::TrackingUtilizer::xform(const mm_tracking::Vector3D& u, const mm_tracking::Vector3D& v) {
 
-    tracking::Quaternion retQuat;
+    mm_tracking::Quaternion retQuat;
 
     /// http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
     auto w = u.Cross(v);
-    auto q = tracking::Quaternion(w.X(), w.Y(), w.Z(), u.Dot(v));
+    auto q = mm_tracking::Quaternion(w.X(), w.Y(), w.Z(), u.Dot(v));
     q.SetW(q.W() + q.Norm());
     q.Normalise();
     return q;
@@ -1427,10 +1371,7 @@ tracking::Quaternion tracking::TrackingUtilizer::xform(const tracking::Vector3D&
 }
 
 
-/**
-* tracking::TrackingUtilizer::cn
-*/
-const std::string tracking::TrackingUtilizer::cn(void) const {
+const std::string mm_tracking::TrackingUtilizer::cn(void) const {
     std::string tmp = typeid(*this).name();
     return tmp.substr(tmp.find_last_of(':') + 1, tmp.length() - 1);
 }

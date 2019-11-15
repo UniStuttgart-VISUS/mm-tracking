@@ -5,14 +5,10 @@
  * Alle Rechte vorbehalten.
  */
 
-
 #include "Tracker.h"
 
 
-/**
- * tracking::Tracker::Tracker
- */
-tracking::Tracker::Tracker(void) : 
+mm_tracking::Tracker::Tracker(void) : 
     buttonDevices(),
     motionDevices(),
     isConnected(false),
@@ -24,7 +20,7 @@ tracking::Tracker::Tracker(void) :
 }
 
 
-tracking::Tracker::Tracker(Tracker::Params& inParams) :
+mm_tracking::Tracker::Tracker(Tracker::Params& inParams) :
     buttonDevices(),
     motionDevices(inParams.natnet_params),
     isConnected(false),
@@ -41,17 +37,12 @@ tracking::Tracker::Tracker(Tracker::Params& inParams) :
 }
 
 
-/**
-* tracking::Tracker::paramsPrint
-*/
-void tracking::Tracker::paramsPrint(void) {
+void mm_tracking::Tracker::paramsPrint(void) {
     std::cout << "[parameter] <Tracker> Active Node:                      " << ((this->activeNode.empty())?("<all>"):(this->activeNode.c_str())) << std::endl;
 }
 
-/**
-* tracking::Tracker::paramsCheck
-*/
-bool tracking::Tracker::paramsCheck(void) {
+
+bool mm_tracking::Tracker::paramsCheck(void) {
 
     bool retval = true;
 
@@ -61,23 +52,18 @@ bool tracking::Tracker::paramsCheck(void) {
     return retval;
 }
 
-/**
- * tracking::Tracker::~Tracker
- */
-tracking::Tracker::~Tracker(void) {
+
+mm_tracking::Tracker::~Tracker(void) {
 
     this->Disconnect();
 
-    for (VrpnButtonPoolType::iterator it = this->buttonDevices.begin(); it != this->buttonDevices.end(); ++it) {
-        (*it).reset(nullptr);
+    for (auto& v : this->buttonDevices) {
+        v.reset(nullptr);
     }
 }
 
 
-/**
- * tracking::Tracker::Connect
- */
-bool tracking::Tracker::Connect(void) {
+bool mm_tracking::Tracker::Connect(void) {
 
     // Terminate previous connection.
     this->Disconnect();
@@ -106,8 +92,8 @@ bool tracking::Tracker::Connect(void) {
 	
     // Connect button devices.
     bool vrpnConStatus = true;
-    for (VrpnButtonPoolType::iterator it = this->buttonDevices.begin(); it != this->buttonDevices.end(); ++it) {
-        if (!(*it)->Connect()) {
+    for (auto& v: this->buttonDevices) {
+        if (!v->Connect()) {
             this->Disconnect();
             vrpnConStatus = false;
         }
@@ -120,18 +106,15 @@ bool tracking::Tracker::Connect(void) {
         natnetConStatus = false;
     }
 
-    this->isConnected = (vrpnConStatus || natnetConStatus);
+    this->isConnected = (vrpnConStatus && natnetConStatus);
     return this->isConnected;
 }
 
 
-/**
- * tracking::Tracker::Disconnect
- */
-bool tracking::Tracker::Disconnect(void) {
+bool mm_tracking::Tracker::Disconnect(void) {
 
-    for (VrpnButtonPoolType::iterator it = this->buttonDevices.begin(); it != this->buttonDevices.end(); ++it) {
-        (*it)->Disconnect();
+    for (auto& v : this->buttonDevices) {
+        v->Disconnect();
     }
     this->motionDevices.Disconnect();
 
@@ -140,10 +123,7 @@ bool tracking::Tracker::Disconnect(void) {
 }
 
 
-/**
-* tracking::Tracker::GetData
-*/
-bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data) {
+bool mm_tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevice, mm_tracking::Tracker::TrackingData& data) {
 
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[debug] <Tracker> Requested: Button Device \"" << buttonDevice.c_str() << "\" and Rigid Body \"" << rigidBody.c_str() << "\"." << std::endl;
@@ -160,9 +140,9 @@ bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevic
 
         // Set data of requested button device 
         data.buttonState = 0;
-        for (VrpnButtonPoolType::iterator it = this->buttonDevices.begin(); it != this->buttonDevices.end(); ++it) {
-            if (buttonDevice == (*it)->GetDeviceName()) {
-                data.buttonState = ((*it)->GetButtonStates());
+        for (auto& v : this->buttonDevices) {
+            if (buttonDevice == v->GetDeviceName()) {
+                data.buttonState = (v->GetButtonStates());
                 break; /// Break if button device is found.
             }
         }
@@ -172,10 +152,7 @@ bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevic
 }
 
 
-/**
-* tracking::Tracker::GetRigidBodyNames
-*/
-void tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
+void mm_tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
 
     inoutNames = this->motionDevices.GetRigidBodyNames();
 }

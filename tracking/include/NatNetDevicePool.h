@@ -8,11 +8,6 @@
 #ifndef TRACKING_NATNETDEVICEPOOL_H_INCLUDED
 #define TRACKING_NATNETDEVICEPOOL_H_INCLUDED
 
-#if (defined(_MSC_VER) && (_MSC_VER > 1000))
-#pragma once
-#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
-
-
 #include "stdafx.h"
 
 #include "NatNetTypes.h"
@@ -20,7 +15,7 @@
 #include "NatNetCAPI.h"
 
 
-namespace tracking {
+namespace mm_tracking{
 
     /***************************************************************************
     *
@@ -50,8 +45,8 @@ namespace tracking {
 
         /** Data of one rigid body. */
         typedef struct {
-            tracking::Quaternion orientation;               /** The current orientation of the motion device. */
-            tracking::Vector3D   position;                  /** The current position of the motion device. */
+            mm_tracking::Quaternion orientation;               /** The current orientation of the motion device. */
+            mm_tracking::Vector3D   position;                  /** The current position of the motion device. */
         } RigidBodyData;
 
         ///////////////////////////////////////////////////////////////////////
@@ -93,7 +88,7 @@ namespace tracking {
         * 
         * @return The current orientation of the given rigid body.
         */
-        tracking::Quaternion GetOrientation(std::string& rbn); // const;
+        mm_tracking::Quaternion GetOrientation(std::string& rbn); // const;
 
         /**
         * Get position of rigid body.
@@ -103,7 +98,7 @@ namespace tracking {
         * 
         * @return The current position of the given rigid body.
         */
-        tracking::Vector3D GetPosition(std::string& rbn); // const;
+        mm_tracking::Vector3D GetPosition(std::string& rbn); // const;
 
         /**
         * Get all available rigid body names.
@@ -246,6 +241,6 @@ namespace tracking {
         
     };
 
-} /** end namespace tracking */
+} /** end namespace mm_tracking */
 
 #endif /** TRACKING_NATNETDEVICEPOOL_H_INCLUDED */

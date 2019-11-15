@@ -9,18 +9,12 @@
 #ifndef TRACKING_VRPNDEVICE_H_INCLUDED
 #define TRACKING_VRPNDEVICE_H_INCLUDED
 
-#if (defined(_MSC_VER) && (_MSC_VER > 1000))
-#pragma once
-#endif /** (defined(_MSC_VER) && (_MSC_VER > 1000)) */
-
-
 #include "stdafx.h"
-
 #include "vrpn_Tracker.h"
 #include "vrpn_Button.h"
 
 
-namespace tracking {
+namespace mm_tracking {
 
     /***************************************************************************
     *
@@ -166,17 +160,17 @@ namespace tracking {
 
     };
 
-} /** end namespace tracking */
+} /** end namespace mm_tracking */
 
 
 /// Template classes must be declared AND defined in the header file.
 
 
 /**
-* tracking::VrpnDevice::VrpnDevice
+* mm_tracking::VrpnDevice::VrpnDevice
 */
 template <class R>
-tracking::VrpnDevice<R>::VrpnDevice(void) :
+mm_tracking::VrpnDevice<R>::VrpnDevice(void) :
     remoteDevice(nullptr),
     deviceName("ControlBox"),
     serverName("mini"),
@@ -188,7 +182,7 @@ tracking::VrpnDevice<R>::VrpnDevice(void) :
 
 
 template <class R>
-tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams) :
+mm_tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams) :
     remoteDevice(nullptr),
     deviceName(inParams.deviceName),
     serverName(inParams.serverName),
@@ -200,10 +194,10 @@ tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams) :
 
 
 /**
-* tracking::VrpnDevice::paramsPrint
+* mm_tracking::VrpnDevice::paramsPrint
 */
 template <class R>
-void tracking::VrpnDevice<R>::paramsPrint(void) {
+void mm_tracking::VrpnDevice<R>::paramsPrint(void) {
     std::cout << "[parameter] <VrpnDevice> Device Name:                   " << this->deviceName.c_str() << std::endl;
     std::cout << "[parameter] <VrpnDevice> Server Name:                   " << this->serverName.c_str() << std::endl;
     std::cout << "[parameter] <VrpnDevice> Port:                          " << this->port << std::endl;
@@ -212,10 +206,10 @@ void tracking::VrpnDevice<R>::paramsPrint(void) {
 
 
 /**
-* tracking::VrpnDevice::paramsCheck
+* mm_tracking::VrpnDevice::paramsCheck
 */
 template <class R>
-bool tracking::VrpnDevice<R>::paramsCheck(void) {
+bool mm_tracking::VrpnDevice<R>::paramsCheck(void) {
 
     bool retval = true;
 
@@ -240,20 +234,20 @@ bool tracking::VrpnDevice<R>::paramsCheck(void) {
 
 
 /**
-* tracking::VrpnDevice::~VrpnDevice
+* mm_tracking::VrpnDevice::~VrpnDevice
 */
 template <class R>
-tracking::VrpnDevice<R>::~VrpnDevice(void) {
+mm_tracking::VrpnDevice<R>::~VrpnDevice(void) {
 
     this->Disconnect();
 }
 
 
 /**
-* tracking::VrpnDevice::connect
+* mm_tracking::VrpnDevice::connect
 */
 template <class R>
-bool tracking::VrpnDevice<R>::Connect(void) {
+bool mm_tracking::VrpnDevice<R>::Connect(void) {
 
     std::string url;
 
@@ -307,10 +301,10 @@ bool tracking::VrpnDevice<R>::Connect(void) {
 
 
 /**
-* tracking::VrpnDevice::disconnect
+* mm_tracking::VrpnDevice::disconnect
 */
 template <class R>
-bool tracking::VrpnDevice<R>::Disconnect(void) {
+bool mm_tracking::VrpnDevice<R>::Disconnect(void) {
 
     if (!this->remoteDevice) {
         return false;
@@ -330,10 +324,10 @@ bool tracking::VrpnDevice<R>::Disconnect(void) {
 
 
 /**
-* tracking::VrpnDevice::Register
+* mm_tracking::VrpnDevice::Register
 */
 template <class R> template <typename H>
-bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
+bool mm_tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
     if (!this->remoteDevice) {
         std::cerr << std::endl << "[ERROR] <VrpnDevice> No remote device present. (Hint: Call [Connect] prior to [Register])" << std::endl << std::endl;
@@ -350,10 +344,10 @@ bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
 
 /**
-* tracking::VrpnDevice::MainLoop
+* mm_tracking::VrpnDevice::MainLoop
 */
 template <class R>
-bool tracking::VrpnDevice<R>::MainLoop(void) {
+bool mm_tracking::VrpnDevice<R>::MainLoop(void) {
 
     if (!this->remoteDevice) { 
         std::cerr << std::endl << "[ERROR] <VrpnDevice> No remote device present. (Hint: Call [Connect] and [Register] prior to [MainLoop])" << std::endl << std::endl;
