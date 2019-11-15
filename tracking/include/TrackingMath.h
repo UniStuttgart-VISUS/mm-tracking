@@ -13,7 +13,7 @@
 #include <limits>
 
 
-namespace mm_tracking
+namespace tracking
 {
     /** Point2D - 2D ***********************************************************/
     class Point2D {
@@ -205,7 +205,7 @@ namespace mm_tracking
     };
 
     // Scalar multiplication from left.
-    extern mm_tracking::Vector3D operator *(const float lhs, const mm_tracking::Vector3D& rhs);
+    extern tracking::Vector3D operator *(const float lhs, const tracking::Vector3D& rhs);
 
 
     /** QUATERNION ************************************************************/
@@ -233,7 +233,7 @@ namespace mm_tracking
             return *this;
         }
 
-        inline mm_tracking::Vector3D operator *(const mm_tracking::Vector3D& rhs) const {
+        inline tracking::Vector3D operator *(const tracking::Vector3D& rhs) const {
             Vector3D u;
             u.Set(this->x, this->y, this->z);
             return (((2.0f) * ((u.Dot(rhs) * u)

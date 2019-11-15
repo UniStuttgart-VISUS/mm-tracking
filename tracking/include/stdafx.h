@@ -54,7 +54,7 @@
 
 #include "TrackingMath.h"
 
-namespace mm_tracking
+namespace tracking
 {
     typedef unsigned int ButtonMask;
     

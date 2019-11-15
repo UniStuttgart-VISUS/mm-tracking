@@ -8,7 +8,7 @@
 #include "VrpnButtonDevice.h"
 
 
-mm_tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remote>(),
+tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remote>(),
     runThreadLoop(false),
     states(0)
 {
@@ -16,7 +16,7 @@ mm_tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_R
 }
 
 
-mm_tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Params& inParams) : VrpnDevice<vrpn_Button_Remote>(inParams),
+tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Params& inParams) : VrpnDevice<vrpn_Button_Remote>(inParams),
     runThreadLoop(false),
     states(0)
 {
@@ -24,13 +24,13 @@ mm_tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::
 }
 
 
-mm_tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
+tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
 
     this->Disconnect();
 }
 
 
-bool mm_tracking::VrpnButtonDevice::Connect(void) {
+bool tracking::VrpnButtonDevice::Connect(void) {
 
     // Establish connection.
     if (!VrpnDevice<vrpn_Button_Remote>::Connect()) { 
@@ -58,7 +58,7 @@ bool mm_tracking::VrpnButtonDevice::Connect(void) {
 }
 
 
-bool mm_tracking::VrpnButtonDevice::Disconnect(void) {
+bool tracking::VrpnButtonDevice::Disconnect(void) {
 
     // End main loop thread
     this->runThreadLoop.store(false);
@@ -67,13 +67,13 @@ bool mm_tracking::VrpnButtonDevice::Disconnect(void) {
 }
 
 
-mm_tracking::ButtonMask mm_tracking::VrpnButtonDevice::GetButtonStates(void) const {
+tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
 
     return this->states.load();
 }
 
 
-void VRPN_CALLBACK mm_tracking::VrpnButtonDevice::onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData) {
+void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData) {
 
     auto that = static_cast<VrpnButtonDevice*>(userData);
     if (that == nullptr) {
@@ -82,8 +82,8 @@ void VRPN_CALLBACK mm_tracking::VrpnButtonDevice::onButtonChanged(void *userData
     }
 
     // Remember the button state.
-    mm_tracking::ButtonMask tmpStates = that->states.load();
-    mm_tracking::ButtonMask tmpMask   = 1 << vrpnData.button;
+    tracking::ButtonMask tmpStates = that->states.load();
+    tracking::ButtonMask tmpMask   = 1 << vrpnData.button;
     if (vrpnData.state != 0) {
         that->states.store(tmpStates |= tmpMask);
     }

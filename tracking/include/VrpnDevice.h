@@ -14,7 +14,7 @@
 #include "vrpn_Button.h"
 
 
-namespace mm_tracking {
+namespace tracking {
 
     /***************************************************************************
     *
@@ -160,17 +160,17 @@ namespace mm_tracking {
 
     };
 
-} /** end namespace mm_tracking */
+} /** end namespace tracking */
 
 
 /// Template classes must be declared AND defined in the header file.
 
 
 /**
-* mm_tracking::VrpnDevice::VrpnDevice
+* tracking::VrpnDevice::VrpnDevice
 */
 template <class R>
-mm_tracking::VrpnDevice<R>::VrpnDevice(void) :
+tracking::VrpnDevice<R>::VrpnDevice(void) :
     remoteDevice(nullptr),
     deviceName("ControlBox"),
     serverName("mini"),
@@ -182,7 +182,7 @@ mm_tracking::VrpnDevice<R>::VrpnDevice(void) :
 
 
 template <class R>
-mm_tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams) :
+tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams) :
     remoteDevice(nullptr),
     deviceName(inParams.deviceName),
     serverName(inParams.serverName),
@@ -194,10 +194,10 @@ mm_tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams)
 
 
 /**
-* mm_tracking::VrpnDevice::paramsPrint
+* tracking::VrpnDevice::paramsPrint
 */
 template <class R>
-void mm_tracking::VrpnDevice<R>::paramsPrint(void) {
+void tracking::VrpnDevice<R>::paramsPrint(void) {
     std::cout << "[parameter] <VrpnDevice> Device Name:                   " << this->deviceName.c_str() << std::endl;
     std::cout << "[parameter] <VrpnDevice> Server Name:                   " << this->serverName.c_str() << std::endl;
     std::cout << "[parameter] <VrpnDevice> Port:                          " << this->port << std::endl;
@@ -206,10 +206,10 @@ void mm_tracking::VrpnDevice<R>::paramsPrint(void) {
 
 
 /**
-* mm_tracking::VrpnDevice::paramsCheck
+* tracking::VrpnDevice::paramsCheck
 */
 template <class R>
-bool mm_tracking::VrpnDevice<R>::paramsCheck(void) {
+bool tracking::VrpnDevice<R>::paramsCheck(void) {
 
     bool retval = true;
 
@@ -234,20 +234,20 @@ bool mm_tracking::VrpnDevice<R>::paramsCheck(void) {
 
 
 /**
-* mm_tracking::VrpnDevice::~VrpnDevice
+* tracking::VrpnDevice::~VrpnDevice
 */
 template <class R>
-mm_tracking::VrpnDevice<R>::~VrpnDevice(void) {
+tracking::VrpnDevice<R>::~VrpnDevice(void) {
 
     this->Disconnect();
 }
 
 
 /**
-* mm_tracking::VrpnDevice::connect
+* tracking::VrpnDevice::connect
 */
 template <class R>
-bool mm_tracking::VrpnDevice<R>::Connect(void) {
+bool tracking::VrpnDevice<R>::Connect(void) {
 
     std::string url;
 
@@ -301,10 +301,10 @@ bool mm_tracking::VrpnDevice<R>::Connect(void) {
 
 
 /**
-* mm_tracking::VrpnDevice::disconnect
+* tracking::VrpnDevice::disconnect
 */
 template <class R>
-bool mm_tracking::VrpnDevice<R>::Disconnect(void) {
+bool tracking::VrpnDevice<R>::Disconnect(void) {
 
     if (!this->remoteDevice) {
         return false;
@@ -324,10 +324,10 @@ bool mm_tracking::VrpnDevice<R>::Disconnect(void) {
 
 
 /**
-* mm_tracking::VrpnDevice::Register
+* tracking::VrpnDevice::Register
 */
 template <class R> template <typename H>
-bool mm_tracking::VrpnDevice<R>::Register(H handler, void *userData) {
+bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
     if (!this->remoteDevice) {
         std::cerr << std::endl << "[ERROR] <VrpnDevice> No remote device present. (Hint: Call [Connect] prior to [Register])" << std::endl << std::endl;
@@ -344,10 +344,10 @@ bool mm_tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
 
 /**
-* mm_tracking::VrpnDevice::MainLoop
+* tracking::VrpnDevice::MainLoop
 */
 template <class R>
-bool mm_tracking::VrpnDevice<R>::MainLoop(void) {
+bool tracking::VrpnDevice<R>::MainLoop(void) {
 
     if (!this->remoteDevice) { 
         std::cerr << std::endl << "[ERROR] <VrpnDevice> No remote device present. (Hint: Call [Connect] and [Register] prior to [MainLoop])" << std::endl << std::endl;

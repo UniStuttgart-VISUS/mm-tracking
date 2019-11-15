@@ -12,7 +12,7 @@
 #include "VrpnDevice.h"
 
 
-namespace mm_tracking {
+namespace tracking {
 
     /***************************************************************************
     *
@@ -54,7 +54,7 @@ namespace mm_tracking {
         *
         * @return The current button states.
         */
-        mm_tracking::ButtonMask GetButtonStates(void) const;
+        tracking::ButtonMask GetButtonStates(void) const;
 
     private:
 
@@ -70,7 +70,7 @@ namespace mm_tracking {
         /** 
         * The current button states. 
         */
-        std::atomic<mm_tracking::ButtonMask> states;
+        std::atomic<tracking::ButtonMask> states;
 
         /***********************************************************************
         * functions
@@ -85,6 +85,6 @@ namespace mm_tracking {
         static void VRPN_CALLBACK onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData);
     };
 
-} /** end namespace mm_tracking */
+} /** end namespace tracking */
 
 #endif /** TRACKING_VRPNBUTTONDEVICE_H_INCLUDED */

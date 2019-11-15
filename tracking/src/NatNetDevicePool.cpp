@@ -8,7 +8,7 @@
 #include "NatNetDevicePool.h"
 
 
-mm_tracking::NatNetDevicePool::NatNetDevicePool(void) :
+tracking::NatNetDevicePool::NatNetDevicePool(void) :
     natnetClient(nullptr),
     rigidBodies(),
     callbackCounter({ 0, 0 } ),
@@ -23,7 +23,7 @@ mm_tracking::NatNetDevicePool::NatNetDevicePool(void) :
 }
 
 
-mm_tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
+tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
     natnetClient(nullptr),
     rigidBodies(),
     callbackCounter({ 0, 0 }),
@@ -38,7 +38,7 @@ mm_tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
 }
 
 
-void mm_tracking::NatNetDevicePool::paramsPrint(void) {
+void tracking::NatNetDevicePool::paramsPrint(void) {
     std::cout << "[parameter] <NatNetDevicePool> Client IP:               " << this->clientIP.c_str() << std::endl;
     std::cout << "[parameter] <NatNetDevicePool> Server IP:               " << this->serverIP.c_str() << std::endl;
     std::cout << "[parameter] <NatNetDevicePool> Command Port:            " << this->cmdPort << std::endl;
@@ -48,7 +48,7 @@ void mm_tracking::NatNetDevicePool::paramsPrint(void) {
 }
 
 
-bool mm_tracking::NatNetDevicePool::paramsCheck(void) {
+bool tracking::NatNetDevicePool::paramsCheck(void) {
 
     bool retval = true;
 
@@ -77,13 +77,13 @@ bool mm_tracking::NatNetDevicePool::paramsCheck(void) {
 }
 
 
-mm_tracking::NatNetDevicePool::~NatNetDevicePool(void) {
+tracking::NatNetDevicePool::~NatNetDevicePool(void) {
 
     this->Disconnect();
 }
 
 
-bool mm_tracking::NatNetDevicePool::Connect(void) {
+bool tracking::NatNetDevicePool::Connect(void) {
 
     ::sServerDescription serverDesc;
 
@@ -211,7 +211,7 @@ bool mm_tracking::NatNetDevicePool::Connect(void) {
 }
 
 
-bool mm_tracking::NatNetDevicePool::Disconnect(void) {
+bool tracking::NatNetDevicePool::Disconnect(void) {
 
     if (this->natnetClient) {
         ::ErrorCode errorcode = this->natnetClient->Disconnect();
@@ -234,9 +234,9 @@ bool mm_tracking::NatNetDevicePool::Disconnect(void) {
 }
 
 
-mm_tracking::Quaternion mm_tracking::NatNetDevicePool::GetOrientation(std::string& rbn) {
+tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(std::string& rbn) {
 
-    mm_tracking::Quaternion retOr((std::numeric_limits<float>::max)(),
+    tracking::Quaternion retOr((std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)());
@@ -259,9 +259,9 @@ mm_tracking::Quaternion mm_tracking::NatNetDevicePool::GetOrientation(std::strin
 }
 
 
-mm_tracking::Vector3D mm_tracking::NatNetDevicePool::GetPosition(std::string& rbn) {
+tracking::Vector3D tracking::NatNetDevicePool::GetPosition(std::string& rbn) {
 
-    mm_tracking::Vector3D retPos((std::numeric_limits<float>::max)(), 
+    tracking::Vector3D retPos((std::numeric_limits<float>::max)(), 
         (std::numeric_limits<float>::max)(), 
         (std::numeric_limits<float>::max)());
 
@@ -283,7 +283,7 @@ mm_tracking::Vector3D mm_tracking::NatNetDevicePool::GetPosition(std::string& rb
 }
 
 
-std::vector<std::string> mm_tracking::NatNetDevicePool::GetRigidBodyNames(void) const {
+std::vector<std::string> tracking::NatNetDevicePool::GetRigidBodyNames(void) const {
 
     std::vector<std::string> retval;
     retval.clear();
@@ -296,7 +296,7 @@ std::vector<std::string> mm_tracking::NatNetDevicePool::GetRigidBodyNames(void) 
 }
 
 
-void __cdecl mm_tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
+void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
 
 	auto that = static_cast<NatNetDevicePool *>(pUserData);
     if ((pFrameOfData == nullptr) || (that == nullptr)) {
@@ -366,7 +366,7 @@ void __cdecl mm_tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfDa
 }
 
 
-void __cdecl mm_tracking::NatNetDevicePool::onMessage(Verbosity level, const char *message) {
+void __cdecl tracking::NatNetDevicePool::onMessage(Verbosity level, const char *message) {
 
     switch (level) {
         case (::Verbosity::Verbosity_None):    break;

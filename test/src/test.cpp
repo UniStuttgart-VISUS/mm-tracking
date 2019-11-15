@@ -9,7 +9,7 @@
 
 
 using namespace std;
-using namespace mm_tracking;
+using namespace tracking;
 
 
 /**** HOWTO: ******************************************************************
@@ -38,11 +38,11 @@ int main() {
     tp.natnet_params.verboseClient  = true;
     /// VRPN button devices
     tp.vrpn_params.clear();
-    mm_tracking::VrpnDevice<vrpn_Button_Remote>::Params btnDeviceParams;
+    tracking::VrpnDevice<vrpn_Button_Remote>::Params btnDeviceParams;
     btnDeviceParams.deviceName      = "ControlBox";
     btnDeviceParams.serverName      = "mini";
     btnDeviceParams.port            = 3884;
-    btnDeviceParams.protocol        = mm_tracking::VrpnDevice<vrpn_Button_Remote>::Protocols::VRPN_TCP;
+    btnDeviceParams.protocol        = tracking::VrpnDevice<vrpn_Button_Remote>::Protocols::VRPN_TCP;
     tp.vrpn_params.push_back(btnDeviceParams);
 
     /// TrackingUtilizer Parameters
@@ -94,8 +94,8 @@ int main() {
 
     // LOOP ///////////////////////////////////////////////////////////////////
 
-    mm_tracking::Point2D ist;
-    mm_tracking::Rectangle fov;
+    tracking::Point2D ist;
+    tracking::Rectangle fov;
     bool state;
 
     bool exit = false;

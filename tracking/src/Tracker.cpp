@@ -8,7 +8,7 @@
 #include "Tracker.h"
 
 
-mm_tracking::Tracker::Tracker(void) : 
+tracking::Tracker::Tracker(void) : 
     buttonDevices(),
     motionDevices(),
     isConnected(false),
@@ -20,7 +20,7 @@ mm_tracking::Tracker::Tracker(void) :
 }
 
 
-mm_tracking::Tracker::Tracker(Tracker::Params& inParams) :
+tracking::Tracker::Tracker(Tracker::Params& inParams) :
     buttonDevices(),
     motionDevices(inParams.natnet_params),
     isConnected(false),
@@ -37,12 +37,12 @@ mm_tracking::Tracker::Tracker(Tracker::Params& inParams) :
 }
 
 
-void mm_tracking::Tracker::paramsPrint(void) {
+void tracking::Tracker::paramsPrint(void) {
     std::cout << "[parameter] <Tracker> Active Node:                      " << ((this->activeNode.empty())?("<all>"):(this->activeNode.c_str())) << std::endl;
 }
 
 
-bool mm_tracking::Tracker::paramsCheck(void) {
+bool tracking::Tracker::paramsCheck(void) {
 
     bool retval = true;
 
@@ -53,7 +53,7 @@ bool mm_tracking::Tracker::paramsCheck(void) {
 }
 
 
-mm_tracking::Tracker::~Tracker(void) {
+tracking::Tracker::~Tracker(void) {
 
     this->Disconnect();
 
@@ -63,7 +63,7 @@ mm_tracking::Tracker::~Tracker(void) {
 }
 
 
-bool mm_tracking::Tracker::Connect(void) {
+bool tracking::Tracker::Connect(void) {
 
     // Terminate previous connection.
     this->Disconnect();
@@ -111,7 +111,7 @@ bool mm_tracking::Tracker::Connect(void) {
 }
 
 
-bool mm_tracking::Tracker::Disconnect(void) {
+bool tracking::Tracker::Disconnect(void) {
 
     for (auto& v : this->buttonDevices) {
         v->Disconnect();
@@ -123,7 +123,7 @@ bool mm_tracking::Tracker::Disconnect(void) {
 }
 
 
-bool mm_tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevice, mm_tracking::Tracker::TrackingData& data) {
+bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data) {
 
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[debug] <Tracker> Requested: Button Device \"" << buttonDevice.c_str() << "\" and Rigid Body \"" << rigidBody.c_str() << "\"." << std::endl;
@@ -152,7 +152,7 @@ bool mm_tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDe
 }
 
 
-void mm_tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
+void tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
 
     inoutNames = this->motionDevices.GetRigidBodyNames();
 }

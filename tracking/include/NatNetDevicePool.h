@@ -15,7 +15,7 @@
 #include "NatNetCAPI.h"
 
 
-namespace mm_tracking{
+namespace tracking{
 
     /***************************************************************************
     *
@@ -45,8 +45,8 @@ namespace mm_tracking{
 
         /** Data of one rigid body. */
         typedef struct {
-            mm_tracking::Quaternion orientation;               /** The current orientation of the motion device. */
-            mm_tracking::Vector3D   position;                  /** The current position of the motion device. */
+            tracking::Quaternion orientation;               /** The current orientation of the motion device. */
+            tracking::Vector3D   position;                  /** The current position of the motion device. */
         } RigidBodyData;
 
         ///////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ namespace mm_tracking{
         * 
         * @return The current orientation of the given rigid body.
         */
-        mm_tracking::Quaternion GetOrientation(std::string& rbn); // const;
+        tracking::Quaternion GetOrientation(std::string& rbn); // const;
 
         /**
         * Get position of rigid body.
@@ -98,7 +98,7 @@ namespace mm_tracking{
         * 
         * @return The current position of the given rigid body.
         */
-        mm_tracking::Vector3D GetPosition(std::string& rbn); // const;
+        tracking::Vector3D GetPosition(std::string& rbn); // const;
 
         /**
         * Get all available rigid body names.
@@ -241,6 +241,6 @@ namespace mm_tracking{
         
     };
 
-} /** end namespace mm_tracking */
+} /** end namespace tracking */
 
 #endif /** TRACKING_NATNETDEVICEPOOL_H_INCLUDED */

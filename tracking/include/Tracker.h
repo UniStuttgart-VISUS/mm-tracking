@@ -19,7 +19,7 @@
 #include "NatNetDevicePool.h"
 
 
-namespace mm_tracking {
+namespace tracking {
 
     /***************************************************************************
     *
@@ -41,7 +41,7 @@ namespace mm_tracking {
         /** Current tracking raw data. */
         typedef struct {
             NatNetDevicePool::RigidBodyData rigidBody;
-            mm_tracking::ButtonMask            buttonState;
+            tracking::ButtonMask            buttonState;
         } TrackingData;
 
         ///////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ namespace mm_tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetData(std::string& rigidBody, std::string& buttonDevice, mm_tracking::Tracker::TrackingData& data);
+        bool GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data);
 
         /**
         * Get all available rigid body names.
@@ -138,6 +138,6 @@ namespace mm_tracking {
 
     };
 
-} /** end namespace mm_tracking */
+} /** end namespace tracking */
 
 #endif /** TRACKING_TRACKER_H_INCLUDED */

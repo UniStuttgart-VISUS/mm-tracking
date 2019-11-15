@@ -18,7 +18,7 @@
 #include "Tracker.h"
 
 
-namespace mm_tracking {
+namespace tracking {
 
     /***************************************************************************
     *
@@ -94,11 +94,11 @@ namespace mm_tracking {
         * CTOR
         */
         TrackingUtilizer(void);
-        TrackingUtilizer(std::shared_ptr<mm_tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(std::shared_ptr<tracking::Tracker> inTrackerPtr);
         TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams);
-        TrackingUtilizer(mm_tracking::Tracker::Params& inTrackerParams);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, mm_tracking::Tracker::Params& inTrackerParams);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<mm_tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(tracking::Tracker::Params& inTrackerParams);
+        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, tracking::Tracker::Params& inTrackerParams);
+        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
 
         /**
         // Copy CTOR 
@@ -131,7 +131,7 @@ namespace mm_tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetRawData(mm_tracking::ButtonMask& outBtnState, mm_tracking::Vector3D& outPos, mm_tracking::Quaternion& outOri);
+        bool GetRawData(tracking::ButtonMask& outBtnState, tracking::Vector3D& outPos, tracking::Quaternion& outOri);
 
         /**
         *  Get the current state of the select button.
@@ -149,7 +149,7 @@ namespace mm_tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetIntersection(mm_tracking::Point2D& outIntersect);
+        bool GetIntersection(tracking::Point2D& outIntersect);
 
         /**
         *  Get the current field of view.
@@ -158,7 +158,7 @@ namespace mm_tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetFieldOfView(mm_tracking::Rectangle& outFov);
+        bool GetFieldOfView(tracking::Rectangle& outFov);
 
         /**
         * Get the updated camera vectors depending on pressed buttons.
@@ -175,7 +175,7 @@ namespace mm_tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, mm_tracking::Vector3D& outCamPos, mm_tracking::Vector3D& outCamLookAt, mm_tracking::Vector3D& outCamUp);
+        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, tracking::Vector3D& outCamPos, tracking::Vector3D& outCamLookAt, tracking::Vector3D& outCamUp);
 
         /**
         * Get the button device name.
@@ -207,7 +207,7 @@ namespace mm_tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool SetCurrentCamera(mm_tracking::Vector3D inCamPos, mm_tracking::Vector3D inCamLookAt, mm_tracking::Vector3D inCamUp);
+        bool SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp);
 
         /**
         * Set the calibration orientation of the Pointing device. 
@@ -225,32 +225,32 @@ namespace mm_tracking {
         **********************************************************************/
 
         /** The Pointer to the Tracker which provides the tracking data. */
-        std::shared_ptr<mm_tracking::Tracker> tracker;
+        std::shared_ptr<tracking::Tracker> tracker;
 
-        mm_tracking::Vector3D                 curCameraPosition;
-        mm_tracking::Vector3D                 curCameraUp;
-        mm_tracking::Vector3D                 curCameraLookAt;
+        tracking::Vector3D                 curCameraPosition;
+        tracking::Vector3D                 curCameraUp;
+        tracking::Vector3D                 curCameraLookAt;
 
-        mm_tracking::Point2D                  curIntersection;
-        mm_tracking::Rectangle                curFOV;
-        mm_tracking::Quaternion               curOrientation;
-        mm_tracking::Vector3D                 curPosition;
-        mm_tracking::ButtonMask               curButtonStates;
+        tracking::Point2D                  curIntersection;
+        tracking::Rectangle                curFOV;
+        tracking::Quaternion               curOrientation;
+        tracking::Vector3D                 curPosition;
+        tracking::ButtonMask               curButtonStates;
 
         bool                               curSelecting;
 
-        std::vector<mm_tracking::Vector3D>    positionBuffer;
+        std::vector<tracking::Vector3D>    positionBuffer;
         unsigned int                       bufferIdx;
         bool                               constPosition;
 
-        mm_tracking::ButtonMask               lastButtonStates;
+        tracking::ButtonMask               lastButtonStates;
 
-        mm_tracking::Vector3D                 startCamLookAt;
-        mm_tracking::Vector3D                 startCamPosition;
-        mm_tracking::Vector3D                 startCamUp;
-        mm_tracking::Vector3D                 startPosition;
-        mm_tracking::Quaternion               startOrientation;
-        mm_tracking::Quaternion               startRelativeOrientation;
+        tracking::Vector3D                 startCamLookAt;
+        tracking::Vector3D                 startCamPosition;
+        tracking::Vector3D                 startCamUp;
+        tracking::Vector3D                 startPosition;
+        tracking::Quaternion               startOrientation;
+        tracking::Quaternion               startRelativeOrientation;
 
         bool                               isRotating;
         bool                               isTranslating;
@@ -278,10 +278,10 @@ namespace mm_tracking {
         float                              physicalHeight;
         float                              physicalWidth;
         
-        mm_tracking::Quaternion               calibrationOrientation;
-        mm_tracking::Vector3D                 physicalOrigin;
-        mm_tracking::Vector3D                 physicalXDir;
-        mm_tracking::Vector3D                 physicalYDir;
+        tracking::Quaternion               calibrationOrientation;
+        tracking::Vector3D                 physicalOrigin;
+        tracking::Vector3D                 physicalXDir;
+        tracking::Vector3D                 physicalYDir;
 
         TrackingUtilizer::FovMode          fovMode;
         float                              fovHeight;
@@ -348,7 +348,7 @@ namespace mm_tracking {
         *
         * @return Answer the (normalised) rotation for matching 'u' on 'v'.
         */
-        mm_tracking::Quaternion xform(const mm_tracking::Vector3D& u, const mm_tracking::Vector3D& v);
+        tracking::Quaternion xform(const tracking::Vector3D& u, const tracking::Vector3D& v);
 
         /**
         * Returns the class name. --- UNUSED ---
@@ -356,6 +356,6 @@ namespace mm_tracking {
         const std::string cn(void) const;
     };
 
-} /** end namespace mm_tracking */
+} /** end namespace tracking */
 
 #endif /** TRACKING_TRACKINGUTILIZER_H_INCLUDED */
