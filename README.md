@@ -20,7 +20,7 @@ While the available rigid bodies are provided by the NatNet server, all availabl
 Only one `Tracker` class should be declared at a time.
 
 The `TrackingUtilizer` manipulates the raw data from the `Tracker`. By changing the orientation of a pointing device while pressing the associated button, camera parameters can be manipulated. Further the intersection of the pointing device with the powerwall as well as the field of view is provided (in relative screen space coordinates). The class also allows to acccess the raw tracking data.
-Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously (see included test program 'check' for reference). Each `TrackingUtilizer` utilizes only one rigid body (motion or pointing device) and and button device. They are defined by their names in the corresponding parameters.
+Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously. Each `TrackingUtilizer` utilizes only one rigid body (motion or pointing device) and and button device. They are defined by their names in the corresponding parameters.
 
 ## Test
 
