@@ -20,7 +20,7 @@ tracking::Tracker::Tracker(void) :
 }
 
 
-tracking::Tracker::Tracker(Tracker::Params& inParams) :
+tracking::Tracker::Tracker(Tracker::Params inParams) :
     buttonDevices(),
     motionDevices(inParams.natnet_params),
     isConnected(false),

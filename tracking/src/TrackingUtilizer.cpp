@@ -50,7 +50,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(std::shared_ptr<tracking::Tracker> 
 }
 
 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams) :
+tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params inUtilizerParams) :
     tracker(nullptr),
     curCameraPosition(),
     curCameraUp(),
@@ -73,7 +73,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilize
 }
 
 
-tracking::TrackingUtilizer::TrackingUtilizer(tracking::Tracker::Params& inTrackerParams) :
+tracking::TrackingUtilizer::TrackingUtilizer(tracking::Tracker::Params inTrackerParams) :
     tracker(nullptr), 
     curCameraPosition(),
     curCameraUp(),
@@ -96,7 +96,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(tracking::Tracker::Params& inTracke
 }
 
 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, tracking::Tracker::Params& inTrackerParams) :
+tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params inUtilizerParams, tracking::Tracker::Params inTrackerParams) :
     tracker(nullptr), 
     curCameraPosition(),
     curCameraUp(),
@@ -119,7 +119,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilize
 }
 
 
-tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) :
+tracking::TrackingUtilizer::TrackingUtilizer(TrackingUtilizer::Params inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) :
     tracker(inTrackerPtr), 
     curCameraPosition(),
     curCameraUp(),

@@ -9,7 +9,6 @@
 
 
 using namespace std;
-using namespace tracking;
 
 
 /**** HOWTO: ******************************************************************
@@ -27,14 +26,14 @@ int main() {
     // PARAMETERS for Tracker and TrackingUtilizer /////////////////////////////
 
     /// Tracker Parameters
-    Tracker::Params tp;
+    tracking::Tracker::Params tp;
     tp.activeNode                   = ""; // = all
     /// NatNet
     tp.natnet_params.clientIP       = "129.69.205.123"; //TODO >>> => CHANGE!
     tp.natnet_params.serverIP       = "129.69.205.86";
     tp.natnet_params.cmdPort        = 1510;
     tp.natnet_params.dataPort       = 1511;
-    tp.natnet_params.conType        = NatNetDevicePool::ConnectionType::UniCast;
+    tp.natnet_params.conType        = tracking::NatNetDevicePool::ConnectionType::UniCast;
     tp.natnet_params.verboseClient  = true;
     /// VRPN button devices
     tp.vrpn_params.clear();
@@ -46,7 +45,7 @@ int main() {
     tp.vrpn_params.push_back(btnDeviceParams);
 
     /// TrackingUtilizer Parameters
-    TrackingUtilizer::Params tup;
+    tracking::TrackingUtilizer::Params tup;
     tup.buttonDeviceName            = btnDeviceParams.deviceName; /// Insert btnDeviceParams.deviceName only for appropriate rigid body.
     tup.rigidBodyName               = ""; // >>> Will be set in line 87 depending on what rigid bodies are available.
     tup.selectButton                = -1;
@@ -59,12 +58,12 @@ int main() {
     tup.translateSpeed              = 10.0f;
     tup.zoomSpeed                   = 20.0f;
     tup.singleInteraction           = false;
-    tup.fovMode                     = TrackingUtilizer::FovMode::WIDTH_AND_ASPECT_RATIO;
+    tup.fovMode                     = tracking::TrackingUtilizer::FovMode::WIDTH_AND_ASPECT_RATIO;
     tup.fovHeight                   = 0.2f;
     tup.fovWidth                    = 0.2f;
     tup.fovHoriAngle                = 60.0f;
     tup.fovVertAngle                = 30.0f;
-    tup.fovAspectRatio              = TrackingUtilizer::FovAspectRatio::AR_1_77__1; // 16:9
+    tup.fovAspectRatio              = tracking::TrackingUtilizer::FovAspectRatio::AR_1_77__1; // 16:9
 
 
     // TRACKING INITIALISATION ////////////////////////////////////////////////
@@ -72,7 +71,7 @@ int main() {
     // Tracker
     /// Handles all communication with NatNet and VRPN.
     /// Creating one (!) Tracker which runs in separate thread.
-    auto tracker = std::make_shared<Tracker>(tp);
+    auto tracker = std::make_shared<tracking::Tracker>(tp);
     if (!tracker->Connect()) {
         std::cerr << std::endl << "[ERROR] <" << progName.c_str() << "> Failed to establish tracker connection." << std::endl << std::endl;
         return 0;
@@ -84,11 +83,11 @@ int main() {
     std::vector<std::string> rigidBodies;
     rigidBodies.clear();
     tracker->GetRigidBodyNames(rigidBodies);
-    std::vector<TrackingUtilizer> trackingUtilizers;
+    std::vector<tracking::TrackingUtilizer> trackingUtilizers;
     trackingUtilizers.clear();
     for (auto it : rigidBodies) {
         tup.rigidBodyName = it;
-        trackingUtilizers.push_back(TrackingUtilizer(tup, tracker));
+        trackingUtilizers.push_back(tracking::TrackingUtilizer(tup, tracker));
     }
 
 

@@ -95,10 +95,10 @@ namespace tracking {
         */
         TrackingUtilizer(void);
         TrackingUtilizer(std::shared_ptr<tracking::Tracker> inTrackerPtr);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams);
-        TrackingUtilizer(tracking::Tracker::Params& inTrackerParams);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, tracking::Tracker::Params& inTrackerParams);
-        TrackingUtilizer(TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(TrackingUtilizer::Params inUtilizerParams);
+        TrackingUtilizer(tracking::Tracker::Params inTrackerParams);
+        TrackingUtilizer(TrackingUtilizer::Params inUtilizerParams, tracking::Tracker::Params inTrackerParams);
+        TrackingUtilizer(TrackingUtilizer::Params inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
 
         /**
         // Copy CTOR 
