@@ -8,19 +8,7 @@
 #include "Tracker.h"
 
 
-tracking::Tracker::Tracker(void) : 
-    buttonDevices(),
-    motionDevices(),
-    isConnected(false),
-    activeNode("")
-{
-    this->paramsPrint();
-
-    // Not creating any button device(s) ...
-}
-
-
-tracking::Tracker::Tracker(Tracker::Params inParams) :
+tracking::Tracker::Tracker(tracking::Tracker::Params& inParams) :
     buttonDevices(),
     motionDevices(inParams.natnet_params),
     isConnected(false),

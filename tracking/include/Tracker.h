@@ -49,9 +49,7 @@ namespace tracking {
         /**
         * CTOR
         */
-        Tracker(void);
-
-        Tracker(Tracker::Params inParams);
+        Tracker(tracking::Tracker::Params& inParams);
 
         /**
         * DTOR
