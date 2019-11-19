@@ -34,20 +34,20 @@ namespace tracking{
         };
 
         /** Data structure for setting parameters as batch. */
-        typedef struct { 
+        struct Params {
             std::string                      clientIP;      /** The IP address of the NatNet client.       */
             std::string                      serverIP;      /** The IP address of the NatNet server.       */
             unsigned int                     cmdPort;       /** The NatNet command port.                   */
             unsigned int                     dataPort;      /** The NatNet data port.                      */
             NatNetDevicePool::ConnectionType conType;       /** The NatNet connection type.                */
             bool                             verboseClient; /** Turn on/off NatNet client massage output.  */
-        } Params;
+        };
 
         /** Data of one rigid body. */
-        typedef struct {
+        struct RigidBodyData {
             tracking::Quaternion orientation;               /** The current orientation of the motion device. */
             tracking::Vector3D   position;                  /** The current position of the motion device. */
-        } RigidBodyData;
+        };
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ namespace tracking{
         */
         NatNetDevicePool(void);
 
-        NatNetDevicePool(NatNetDevicePool::Params& inParams);
+        NatNetDevicePool(const NatNetDevicePool::Params& inParams);
 
         /**
         * DTOR

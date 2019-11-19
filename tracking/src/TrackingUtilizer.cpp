@@ -8,7 +8,7 @@
 #include "TrackingUtilizer.h"
 
 
-tracking::TrackingUtilizer::TrackingUtilizer(tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) :
+tracking::TrackingUtilizer::TrackingUtilizer(const tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) :
     tracker(inTrackerPtr), 
     curCameraPosition(),
     curCameraUp(),
@@ -21,7 +21,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(tracking::TrackingUtilizer::Params&
     bufferIdx(0),
     constPosition(false)
 {
-    this->paramsInit(inUtilizerParams);
+    //this->paramsInit(inUtilizerParams);
     this->paramsRead();
     this->paramsPrint();
 }
@@ -65,36 +65,36 @@ void tracking::TrackingUtilizer::paramsInit(void) {
 }
 
 
-void tracking::TrackingUtilizer::paramsInit(TrackingUtilizer::Params& p) {
-
-    this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->curIntersection.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->curFOV.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->buttonDeviceName       = p.buttonDeviceName;
-    this->rigidBodyName          = p.rigidBodyName;
-    this->selectButton           = p.selectButton;
-    this->rotateButton           = p.rotateButton;
-    this->translateButton        = p.translateButton;
-    this->zoomButton             = p.zoomButton;
-    this->invertRotate           = p.invertRotate;
-    this->invertTranslate        = p.invertTranslate;
-    this->invertZoom             = p.invertZoom;
-    this->translateSpeed         = p.translateSpeed;
-    this->zoomSpeed              = p.zoomSpeed;
-    this->singleInteraction      = p.singleInteraction;
-    this->fovMode                = p.fovMode;
-    this->fovHeight              = p.fovHeight;
-    this->fovWidth               = p.fovWidth;
-    this->fovHoriAngle           = p.fovHoriAngle;
-    this->fovVertAngle           = p.fovVertAngle;
-    this->fovAspectRatio         = p.fovAspectRatio;
-}
+//void tracking::TrackingUtilizer::paramsInit(const tracking::TrackingUtilizer::Params& p) {
+//
+//    this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+//
+//    this->curIntersection.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+//
+//    this->curFOV.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+//    this->curFOV.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+//    this->curFOV.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+//    this->curFOV.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+//
+//    this->buttonDeviceName       = p.buttonDeviceName;
+//    this->rigidBodyName          = p.rigidBodyName;
+//    this->selectButton           = p.selectButton;
+//    this->rotateButton           = p.rotateButton;
+//    this->translateButton        = p.translateButton;
+//    this->zoomButton             = p.zoomButton;
+//    this->invertRotate           = p.invertRotate;
+//    this->invertTranslate        = p.invertTranslate;
+//    this->invertZoom             = p.invertZoom;
+//    this->translateSpeed         = p.translateSpeed;
+//    this->zoomSpeed              = p.zoomSpeed;
+//    this->singleInteraction      = p.singleInteraction;
+//    this->fovMode                = p.fovMode;
+//    this->fovHeight              = p.fovHeight;
+//    this->fovWidth               = p.fovWidth;
+//    this->fovHoriAngle           = p.fovHoriAngle;
+//    this->fovVertAngle           = p.fovVertAngle;
+//    this->fovAspectRatio         = p.fovAspectRatio;
+//}
 
 
 void tracking::TrackingUtilizer::paramsPrint(void) {

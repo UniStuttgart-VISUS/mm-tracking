@@ -8,7 +8,7 @@
 #include "VrpnButtonDevice.h"
 
 
-tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remote>(),
+tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_Button_Remote>(),
     runThreadLoop(false),
     states(0)
 {
@@ -16,7 +16,7 @@ tracking::VrpnButtonDevice::VrpnButtonDevice(void) : VrpnDevice<vrpn_Button_Remo
 }
 
 
-tracking::VrpnButtonDevice::VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Params& inParams) : VrpnDevice<vrpn_Button_Remote>(inParams),
+tracking::VrpnButtonDevice::VrpnButtonDevice(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams) : tracking::VrpnDevice<vrpn_Button_Remote>(inParams),
     runThreadLoop(false),
     states(0)
 {

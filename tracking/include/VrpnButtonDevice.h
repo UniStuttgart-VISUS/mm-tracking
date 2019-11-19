@@ -19,7 +19,7 @@ namespace tracking {
     * VRPN button device.
     *
     ***************************************************************************/
-    class VrpnButtonDevice : public VrpnDevice<vrpn_Button_Remote> {
+    class VrpnButtonDevice : public tracking::VrpnDevice<vrpn_Button_Remote> {
 
     public:
 
@@ -28,7 +28,7 @@ namespace tracking {
         */
         VrpnButtonDevice(void);
 
-        VrpnButtonDevice(VrpnDevice<vrpn_Button_Remote>::Params& inParams);
+        VrpnButtonDevice(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams);
 
         /**
         * DTOR

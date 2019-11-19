@@ -23,7 +23,7 @@ tracking::NatNetDevicePool::NatNetDevicePool(void) :
 }
 
 
-tracking::NatNetDevicePool::NatNetDevicePool(NatNetDevicePool::Params& p) :
+tracking::NatNetDevicePool::NatNetDevicePool(const NatNetDevicePool::Params& p) :
     natnetClient(nullptr),
     rigidBodies(),
     callbackCounter({ 0, 0 }),

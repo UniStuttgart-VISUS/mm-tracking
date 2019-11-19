@@ -26,18 +26,18 @@ namespace tracking {
     public:
 
         /** Supported network protocols for VRPN. */
-        typedef enum {
+        enum Protocols  {
             VRPN_TCP = 0,
             VRPN_UDP = 1
-        } Protocols;
+        };
 
         /** Data structure for setting parameters as batch. */
-        typedef struct  {
-            std::string                       deviceName;   /** The VRPN button device name. */
-            std::string                       serverName;   /** The VRPN server name.        */
-            unsigned int                      port;         /** The VRPN port.               */
-            typename VrpnDevice<R>::Protocols protocol;     /** The VRPN protocol.           */
-        } Params;
+        struct Params  {
+            std::string                                 deviceName;   /** The VRPN button device name. */
+            std::string                                 serverName;   /** The VRPN server name.        */
+            unsigned int                                port;         /** The VRPN port.               */
+            typename tracking::VrpnDevice<R>::Protocols protocol;     /** The VRPN protocol.           */
+        };
 
         ///////////////////////////////////////////////////////////////////////
 
@@ -46,7 +46,7 @@ namespace tracking {
         */
         VrpnDevice(void);
 
-        VrpnDevice(typename VrpnDevice<R>::Params& inParams);
+        VrpnDevice(const typename tracking::VrpnDevice<R>::Params& inParams);
 
         /**
         * DTOR
@@ -182,7 +182,7 @@ tracking::VrpnDevice<R>::VrpnDevice(void) :
 
 
 template <class R>
-tracking::VrpnDevice<R>::VrpnDevice(typename VrpnDevice<R>::Params& inParams) :
+tracking::VrpnDevice<R>::VrpnDevice(const typename VrpnDevice<R>::Params& inParams) :
     remoteDevice(nullptr),
     deviceName(inParams.deviceName),
     serverName(inParams.serverName),

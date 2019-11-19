@@ -32,24 +32,24 @@ namespace tracking {
     public:
 
         /** Data structure for setting parameters as batch. */
-        typedef struct {
-            std::string                                         activeNode;      /** The name of the active node which should receive the tracking data exclusively. */
-            std::vector<VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
-            NatNetDevicePool::Params                            natnet_params;
-        } Params;
+        struct Params {
+            std::string                                                   activeNode;      /** The name of the active node which should receive the tracking data exclusively. */
+            std::vector<tracking::VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
+            tracking::NatNetDevicePool::Params                            natnet_params;
+        };
 
         /** Current tracking raw data. */
-        typedef struct {
-            NatNetDevicePool::RigidBodyData rigidBody;
-            tracking::ButtonMask            buttonState;
-        } TrackingData;
+        struct TrackingData  {
+            tracking::NatNetDevicePool::RigidBodyData rigidBody;
+            tracking::ButtonMask                      buttonState;
+        };
 
         ///////////////////////////////////////////////////////////////////////
 
         /**
         * CTOR
         */
-        Tracker(tracking::Tracker::Params& inParams);
+        Tracker(const tracking::Tracker::Params& inParams);
 
         /**
         * DTOR
@@ -104,7 +104,7 @@ namespace tracking {
         * types
         **********************************************************************/
 
-        typedef std::vector<std::unique_ptr<VrpnButtonDevice>> VrpnButtonPoolType;
+        typedef std::vector<std::unique_ptr<tracking::VrpnButtonDevice>> VrpnButtonPoolType;
 
         /**********************************************************************
         * variables
@@ -114,7 +114,7 @@ namespace tracking {
         VrpnButtonPoolType buttonDevices;
 
         /** The NatNat motion devices that handle position and orientation of rigid bodies. */
-        NatNetDevicePool motionDevices;
+        tracking::NatNetDevicePool motionDevices;
 
         /** Connection status. */
         bool isConnected;

@@ -67,7 +67,7 @@ namespace tracking {
         };
 
         /** Data structure for setting parameters as batch. */
-        typedef struct {
+        struct Params {
             std::string                       buttonDeviceName;        /** Name of the button device to use.                                                             */
             std::string                       rigidBodyName;           /** Name of the rigid body to use.                                                                */
             unsigned int                      selectButton;            /** The button that must be pressed for selection (set to -1 to dissolve link to any button).     */
@@ -86,14 +86,14 @@ namespace tracking {
             float                             fovHoriAngle;            /** Set fixed horizontal angle in degrees for fov.                                                */
             float                             fovVertAngle;            /** Set fixed vertical angle in degrees for fov.                                                  */
             TrackingUtilizer::FovAspectRatio  fovAspectRatio;          /** Set fixed aspect ratio for fov for given angle.                                               */
-        } Params;
+        };
 
         ///////////////////////////////////////////////////////////////////////
 
         /**
         * CTOR
         */
-        TrackingUtilizer(tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(const tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
 
         /**
         * DTOR
@@ -277,7 +277,7 @@ namespace tracking {
 
         /** Initialize parameters. */
         void paramsInit(void);
-        void paramsInit(TrackingUtilizer::Params& p);
+        void paramsInit(const tracking::TrackingUtilizer::Params& p);
 
         /** Print used parameter values. */
         void paramsPrint(void);
