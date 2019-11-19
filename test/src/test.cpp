@@ -27,26 +27,24 @@ int main() {
 
     /// Tracker Parameters
     tracking::Tracker::Params tp;
+    tp.vrpn_params.clear();
+    tracking::VrpnDevice<vrpn_Button_Remote>::Params bdp;
     tp.activeNode                   = ""; // = all
-    /// NatNet
     tp.natnet_params.clientIP       = "129.69.205.76"; // MINYOU
     tp.natnet_params.serverIP       = "129.69.205.86"; // MINI
     tp.natnet_params.cmdPort        = 1510;
     tp.natnet_params.dataPort       = 1511;
     tp.natnet_params.conType        = tracking::NatNetDevicePool::ConnectionType::UniCast;
     tp.natnet_params.verboseClient  = true;
-    /// VRPN button devices
-    tp.vrpn_params.clear();
-    tracking::VrpnDevice<vrpn_Button_Remote>::Params btnDeviceParams;
-    btnDeviceParams.deviceName      = "ControlBox";
-    btnDeviceParams.serverName      = "mini";
-    btnDeviceParams.port            = 3884;
-    btnDeviceParams.protocol        = tracking::VrpnDevice<vrpn_Button_Remote>::Protocols::VRPN_TCP;
-    tp.vrpn_params.push_back(btnDeviceParams);
+    bdp.deviceName                  = "ControlBox";
+    bdp.serverName                  = "mini";
+    bdp.port                        = 3884;
+    bdp.protocol                    = tracking::VrpnDevice<vrpn_Button_Remote>::Protocols::VRPN_TCP;
+    tp.vrpn_params.emplace_back(bdp);
 
     /// TrackingUtilizer Parameters
     tracking::TrackingUtilizer::Params tup;
-    tup.buttonDeviceName            = btnDeviceParams.deviceName; /// Insert btnDeviceParams.deviceName only for appropriate rigid body.
+    tup.buttonDeviceName            = bdp.deviceName; /// Insert btnDeviceParams.deviceName only for appropriate rigid body.
     tup.rigidBodyName               = ""; // >>> Will be set in line 87 depending on what rigid bodies are available.
     tup.selectButton                = -1;
     tup.rotateButton                = -1;
@@ -71,7 +69,8 @@ int main() {
     // Tracker
     /// Handles all communication with NatNet and VRPN.
     /// Creating one (!) Tracker which runs in separate thread.
-    auto tracker = std::make_shared<tracking::Tracker>(tp);
+    auto tracker = std::make_shared<tracking::Tracker>();
+    tracker->Initialise(tp);
     if (!tracker->Connect()) {
         std::cerr << std::endl << "[ERROR] <" << progName.c_str() << "> Failed to establish tracker connection." << std::endl << std::endl;
         return 0;

@@ -36,7 +36,7 @@ if(WIN32)
   						  "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Thread.h"     "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Tracker.h" 
   						  "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_Types.h"      "${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn/vrpn_WindowsH.h")
 	
-    set(VRPN_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
+    set(VRPN_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/vrpn_include")
     file(MAKE_DIRECTORY ${VRPN_INCLUDE_DIR}) 
 
     # Add the vrpn project as an external project and set the cmake commands
@@ -80,7 +80,7 @@ if(WIN32)
     add_dependencies(${PROJECT_NAME} "vrpn")
     set(TRACKING_LIBS ${NATNET_LIBRARIES} ${VRPN_LIBRARY} ${QUAT_LIBRARY})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${TRACKING_LIBS})
-    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include> $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/natnet/include>)
+    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/natnet/include>)
     target_compile_definitions(${PROJECT_NAME} PRIVATE "${EXPORT_NAME}_EXPORTS")
   
     # INSTALLATION
@@ -93,9 +93,9 @@ if(WIN32)
     install(FILES ${NATNET_LIBRARIES} DESTINATION "lib")
     install(FILES ${TRACKING_INSTALL_CONF} DESTINATION "bin")
     # Copy all header files 
-    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION "include")    
+    install(DIRECTORY "${VRPN_INCLUDE_DIR}/" DESTINATION "include") 
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" DESTINATION "include") 
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/natnet/include/" DESTINATION "include")
-
 
     # Grouping in Visual Studio
     set_target_properties(${PROJECT_NAME} PROPERTIES FOLDER plugins)

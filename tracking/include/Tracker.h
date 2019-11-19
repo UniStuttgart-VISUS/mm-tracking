@@ -49,7 +49,7 @@ namespace tracking {
         /**
         * CTOR
         */
-        Tracker(const tracking::Tracker::Params& inParams);
+        Tracker(void);
 
         /**
         * DTOR
@@ -90,6 +90,8 @@ namespace tracking {
         * @return All available rigid body names.
         */
         void GetRigidBodyNames(std::vector<std::string>& inoutNames) const;
+
+        bool Initialise(const tracking::Tracker::Params& inParams);
 
         /**********************************************************************/
         // SET

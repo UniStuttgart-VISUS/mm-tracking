@@ -8,20 +8,13 @@
 #include "Tracker.h"
 
 
-tracking::Tracker::Tracker(const tracking::Tracker::Params& inParams) :
+tracking::Tracker::Tracker(void) :
     buttonDevices(),
-    motionDevices(inParams.natnet_params),
+    motionDevices(),
     isConnected(false),
-    activeNode(inParams.activeNode)
+    activeNode()
 {
-    this->paramsPrint();
-
-    // Create button device(s)
-    this->buttonDevices.clear();
-    for (int i = 0; i < inParams.vrpn_params.size(); ++i) {
-        this->buttonDevices.push_back(std::make_unique<VrpnButtonDevice>(inParams.vrpn_params[i]));
-    }
-
+    // Intentionally empty...
 }
 
 
@@ -143,4 +136,21 @@ bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevic
 void tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
 
     inoutNames = this->motionDevices.GetRigidBodyNames();
+}
+
+
+bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
+{
+    auto retval = this->motionDevices.Initialise(inParams.natnet_params);
+    activeNode = inParams.activeNode;
+
+    this->paramsPrint();
+
+    // Create button device(s)
+    this->buttonDevices.clear();
+    for (int i = 0; i < inParams.vrpn_params.size(); ++i) {
+        this->buttonDevices.push_back(std::make_unique<tracking::VrpnButtonDevice>(inParams.vrpn_params[i]));
+    }
+
+    return retval;
 }

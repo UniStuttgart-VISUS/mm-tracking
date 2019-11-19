@@ -107,6 +107,8 @@ namespace tracking{
         */
         std::vector<std::string> GetRigidBodyNames(void) const;
 
+        bool Initialise(const NatNetDevicePool::Params& inParams);
+
          /*********************************************************************/
          // SET
 

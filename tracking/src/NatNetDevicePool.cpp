@@ -296,6 +296,22 @@ std::vector<std::string> tracking::NatNetDevicePool::GetRigidBodyNames(void) con
 }
 
 
+bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inParams) {
+    this->natnetClient = nullptr;
+    this->callbackCounter = { 0, 0 };
+    this->clientIP = inParams.clientIP;
+    this->serverIP = inParams.serverIP;
+    this->cmdPort = inParams.cmdPort;
+    this->dataPort = inParams.dataPort;
+    this->conType = inParams.conType;
+    this->verboseClient = inParams.verboseClient;
+
+    this->paramsPrint();
+
+    return true;
+}
+
+
 void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
 
 	auto that = static_cast<NatNetDevicePool *>(pUserData);
