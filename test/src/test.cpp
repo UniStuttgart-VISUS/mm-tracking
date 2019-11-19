@@ -29,8 +29,8 @@ int main() {
     tracking::Tracker::Params tp;
     tp.activeNode                   = ""; // = all
     /// NatNet
-    tp.natnet_params.clientIP       = "129.69.205.123"; //TODO >>> => CHANGE!
-    tp.natnet_params.serverIP       = "129.69.205.86";
+    tp.natnet_params.clientIP       = "129.69.205.76"; // MINYOU
+    tp.natnet_params.serverIP       = "129.69.205.86"; // MINI
     tp.natnet_params.cmdPort        = 1510;
     tp.natnet_params.dataPort       = 1511;
     tp.natnet_params.conType        = tracking::NatNetDevicePool::ConnectionType::UniCast;
