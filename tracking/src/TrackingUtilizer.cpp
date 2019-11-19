@@ -8,22 +8,39 @@
 #include "TrackingUtilizer.h"
 
 
-tracking::TrackingUtilizer::TrackingUtilizer(const tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) :
-    tracker(inTrackerPtr), 
-    curCameraPosition(),
-    curCameraUp(),
-    curCameraLookAt(),
-    curOrientation(),
-    curPosition(),
-    curButtonStates(0),
-    curSelecting(false),
-    positionBuffer(),
-    bufferIdx(0),
-    constPosition(false)
-{
-    this->paramsInit(inUtilizerParams);
-    this->paramsRead();
-    this->paramsPrint();
+tracking::TrackingUtilizer::TrackingUtilizer(void) 
+    : tracker(nullptr)
+    , curCameraPosition()
+    , curCameraUp()
+    , curCameraLookAt()
+    , curOrientation()
+    , curPosition()
+    , curButtonStates(0)
+    , curSelecting(false)
+    , positionBuffer()
+    , bufferIdx(0)
+    , constPosition(false)
+
+    , buttonDeviceName("ControlBox")
+    , rigidBodyName("Stick")
+    , selectButton(-1)
+    , rotateButton(-1)
+    , translateButton(-1)
+    , zoomButton(-1)
+    , invertRotate(true)
+    , invertTranslate(true)
+    , invertZoom(true)
+    , translateSpeed(10.0f)
+    , zoomSpeed(20.0f)
+    , singleInteraction(false)
+    , fovMode(TrackingUtilizer::FovMode::WIDTH_AND_HEIGHT)
+    , fovHeight(0.2f)
+    , fovWidth(0.2f)
+    , fovHoriAngle(60.0f)
+    , fovVertAngle(30.0f)
+    , fovAspectRatio(TrackingUtilizer::FovAspectRatio::AR_1_77__1) {
+
+    // intentionally empty...
 }
 
 
@@ -33,8 +50,96 @@ tracking::TrackingUtilizer::~TrackingUtilizer(void) {
 }
 
 
-void tracking::TrackingUtilizer::paramsInit(void) {
-      
+bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Params & inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) {
+
+    /*
+    bool check = true;
+    this->initialised = false;
+
+
+
+
+
+    int  btn_min = -1;
+    int  btn_max = 100;
+
+    this->selectButton = this->limit<int>(this->selectButton, btn_min, btn_max, changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"selectButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->rotateButton = this->limit<int>(this->rotateButton, btn_min, btn_max, changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"rotateButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->translateButton = this->limit<int>(this->translateButton, btn_min, btn_max, changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"translateButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->zoomButton = this->limit<int>(this->zoomButton, btn_min, btn_max, changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"zoomButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->translateSpeed = this->limit<float>(this->translateSpeed, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"translateSpeed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->zoomSpeed = this->limit<float>(this->zoomSpeed, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"zoomSpeed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->fovHeight = this->limit<float>(this->fovHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->fovWidth = this->limit<float>(this->fovWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->fovHoriAngle = this->limit<float>(this->fovHoriAngle, 0.0f, 180.0f, changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovHoriAngle\" must be in range [" << 0.0f << "," << 180.0f << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->fovVertAngle = this->limit<float>(this->fovVertAngle, 0.0f, 180.0f, changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovVertAngle\" must be in range [" << 0.0f << "," << 180.0f << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->physicalHeight = this->limit<float>(this->physicalHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"physicalHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
+        retval = false;
+    }
+    this->physicalWidth = this->limit<float>(this->physicalWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    if (changed) {
+        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"physicalWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
+        retval = false;
+    }
+
+    /// No check necessary for:
+    /// this->buttonDeviceName
+    /// this->rigidBodyName
+    /// this->invertRotate
+    /// this->invertTranslate
+    /// this->invertZoom
+    /// this->fovMode
+    /// this->fovAspectRatio
+    /// this->singleInteraction
+    /// this->physicalorigin
+    /// this->physicalxdir
+    /// this->physicalydir
+    /// this->calibrationorientation
+
+
+
     this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
 
     this->curIntersection.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
@@ -44,89 +149,80 @@ void tracking::TrackingUtilizer::paramsInit(void) {
     this->curFOV.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
     this->curFOV.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
 
-    this->buttonDeviceName  = "ControlBox";
-    this->rigidBodyName     = "Stick";
-    this->selectButton      = -1;
-    this->rotateButton      = -1;
-    this->translateButton   = -1;
-    this->zoomButton        = -1;
-    this->invertRotate      = true;
-    this->invertTranslate   = true;
-    this->invertZoom        = true;
-    this->translateSpeed    = 10.0f;
-    this->zoomSpeed         = 20.0f;
-    this->singleInteraction = false;
-    this->fovMode           = TrackingUtilizer::FovMode::WIDTH_AND_HEIGHT;
-    this->fovHeight         = 0.2f;
-    this->fovWidth          = 0.2f;
-    this->fovHoriAngle      = 60.0f;
-    this->fovVertAngle      = 30.0f;
-    this->fovAspectRatio    = TrackingUtilizer::FovAspectRatio::AR_1_77__1;
+    this->buttonDeviceName = p.buttonDeviceName;
+    this->rigidBodyName = p.rigidBodyName;
+    this->selectButton = p.selectButton;
+    this->rotateButton = p.rotateButton;
+    this->translateButton = p.translateButton;
+    this->zoomButton = p.zoomButton;
+
+    this->invertRotate = p.invertRotate;
+    this->invertTranslate = p.invertTranslate;
+    this->invertZoom = p.invertZoom;
+
+    this->translateSpeed = p.translateSpeed;
+    this->zoomSpeed = p.zoomSpeed;
+
+    this->singleInteraction = p.singleInteraction;
+
+    this->fovMode = p.fovMode;
+    this->fovHeight = p.fovHeight;
+    this->fovWidth = p.fovWidth;
+    this->fovHoriAngle = p.fovHoriAngle;
+    this->fovVertAngle = p.fovVertAngle;
+    this->fovAspectRatio = p.fovAspectRatio;
+
+
+
+    if (check) {
+
+
+
+
+
+
+
+        this->readParamsFromFile();
+        this->printParams();
+        this->initialised = true;
+    }
+
+    */
+    return this->initialised;
 }
 
 
-void tracking::TrackingUtilizer::paramsInit(const tracking::TrackingUtilizer::Params& p) {
 
-    this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->curIntersection.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->curFOV.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->buttonDeviceName       = p.buttonDeviceName;
-    this->rigidBodyName          = p.rigidBodyName;
-    this->selectButton           = p.selectButton;
-    this->rotateButton           = p.rotateButton;
-    this->translateButton        = p.translateButton;
-    this->zoomButton             = p.zoomButton;
-    this->invertRotate           = p.invertRotate;
-    this->invertTranslate        = p.invertTranslate;
-    this->invertZoom             = p.invertZoom;
-    this->translateSpeed         = p.translateSpeed;
-    this->zoomSpeed              = p.zoomSpeed;
-    this->singleInteraction      = p.singleInteraction;
-    this->fovMode                = p.fovMode;
-    this->fovHeight              = p.fovHeight;
-    this->fovWidth               = p.fovWidth;
-    this->fovHoriAngle           = p.fovHoriAngle;
-    this->fovVertAngle           = p.fovVertAngle;
-    this->fovAspectRatio         = p.fovAspectRatio;
-}
-
-
-void tracking::TrackingUtilizer::paramsPrint(void) {
-    std::cout << "[parameter] <TrackingUtilizer> Button Device Name:      " << this->buttonDeviceName.c_str() << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Rigid Body Name:         " << this->rigidBodyName.c_str() << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Select Button:           " << this->selectButton << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Rotate Button:           " << this->rotateButton << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Translate Button:        " << this->translateButton << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Zoom Button:             " << this->zoomButton << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Invert Rotate:           " << ((this->invertRotate)?("true"):("false")) << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Invert Translate:        " << ((this->invertTranslate) ? ("true") : ("false")) << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Invert Zoom:             " << ((this->invertZoom) ? ("true") : ("false")) << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Translate Speed:         " << this->translateSpeed << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Zoom Speed:              " << this->zoomSpeed << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Single Interaction:      " << ((this->singleInteraction) ? ("true") : ("false")) << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> FOV Mode:                " << (int)this->fovMode << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> FOV Height:              " << this->fovHeight << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> FOV Width:               " << this->fovWidth << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> FOV Horizontal Angle:    " << this->fovHoriAngle << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> FOV Vertical Angle:      " << this->fovVertAngle << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> FOV Aspect Ratio:        " << (int)this->fovAspectRatio << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Physical Height:         " << this->physicalHeight << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Physical Width:          " << this->physicalWidth << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Physical Origin:         (" << this->physicalOrigin.X() << "," << this->physicalOrigin.Y() << "," << this->physicalOrigin.Z() << ")" << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Physical X Dir:          (" << this->physicalXDir.X() << "," << this->physicalXDir.Y() << "," << this->physicalXDir.Z() << ")" << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Physical Y Dir:          (" << this->physicalYDir.X() << "," << this->physicalYDir.Y() << "," << this->physicalYDir.Z() << ")" << std::endl;
-    std::cout << "[parameter] <TrackingUtilizer> Calibration Orientation: (" << this->calibrationOrientation.X() << "," << this->calibrationOrientation.Y() << 
+void tracking::TrackingUtilizer::printParams(void) {
+    std::cout << "[PARAMETER] [TrackingUtilizer] Button Device Name:      " << this->buttonDeviceName.c_str() << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Rigid Body Name:         " << this->rigidBodyName.c_str() << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Select Button:           " << this->selectButton << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Rotate Button:           " << this->rotateButton << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Translate Button:        " << this->translateButton << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Zoom Button:             " << this->zoomButton << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Invert Rotate:           " << ((this->invertRotate)?("true"):("false")) << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Invert Translate:        " << ((this->invertTranslate) ? ("true") : ("false")) << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Invert Zoom:             " << ((this->invertZoom) ? ("true") : ("false")) << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Translate Speed:         " << this->translateSpeed << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Zoom Speed:              " << this->zoomSpeed << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Single Interaction:      " << ((this->singleInteraction) ? ("true") : ("false")) << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] FOV Mode:                " << (int)this->fovMode << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] FOV Height:              " << this->fovHeight << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] FOV Width:               " << this->fovWidth << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] FOV Horizontal Angle:    " << this->fovHoriAngle << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] FOV Vertical Angle:      " << this->fovVertAngle << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] FOV Aspect Ratio:        " << (int)this->fovAspectRatio << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Height:         " << this->physicalHeight << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Width:          " << this->physicalWidth << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Origin:         (" << this->physicalOrigin.X() << "," << this->physicalOrigin.Y() << "," << this->physicalOrigin.Z() << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical X Dir:          (" << this->physicalXDir.X() << "," << this->physicalXDir.Y() << "," << this->physicalXDir.Z() << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Y Dir:          (" << this->physicalYDir.X() << "," << this->physicalYDir.Y() << "," << this->physicalYDir.Z() << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Calibration Orientation: (" << this->calibrationOrientation.X() << "," << this->calibrationOrientation.Y() << 
         "," << this->calibrationOrientation.Z() << "," << this->calibrationOrientation.W() << ")" << std::endl;
 }
 
 
-bool tracking::TrackingUtilizer::paramsRead(void) {
+bool tracking::TrackingUtilizer::readParamsFromFile(void) {
 
     std::string line, tag, name;
     float x, y, z, w;
@@ -135,7 +231,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
     const std::string filename = "tracking.conf";
     std::ifstream file(filename);
     if (!file.good()) {
-        std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Failed to open \"" << filename.c_str() << "\" for reading." << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Failed to open \"" << filename.c_str() << "\" for reading." << std::endl << std::endl;
     }
 
     unsigned int lineNmbr = 1;
@@ -143,7 +239,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
     {
         std::istringstream istream(line);
         if (!(istream >> tag)) { 
-            std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read line tag in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read line tag in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
             break; 
         }
 
@@ -151,7 +247,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_HEIGHT") {
             if (!(istream >> x)) {
-                std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read value for PHYSICAL_SCREEN_HEIGHT in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read value for PHYSICAL_SCREEN_HEIGHT in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -159,7 +255,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_WIDTH") {
             if (!(istream >> x)) {
-                std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read value for PHYSICAL_SCREEN_WIDTH in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read value for PHYSICAL_SCREEN_WIDTH in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -167,7 +263,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_ORIGIN") {
             if (!(istream >> x >> y >> z)) {
-                std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read values for PHYSICAL_SCREEN_ORIGIN in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_ORIGIN in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -175,7 +271,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_X_DIR") {
             if (!(istream >> x >> y >> z)) {
-                std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read values for PHYSICAL_SCREEN_X_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_X_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -183,7 +279,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_Y_DIR") {
             if (!(istream >> x >> y >> z)) {
-                std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read values for PHYSICAL_SCREEN_Y_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_Y_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -191,7 +287,7 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         }
         else if (tag == "PHYSICAL_CALIBRATION") {
             if (!(istream >> name >> x >> y >> z >> w)) {
-                std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Can not read values for PHYSICAL_CALIBRATION in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_CALIBRATION in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -201,7 +297,8 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
             }
         }
         else {
-            std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Unknown line tag in \"" << filename.c_str() << "\"" << std::endl << std::endl;
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Unknown line tag in \"" << filename.c_str() << "\". " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
             file.close();
             break;
         }
@@ -213,11 +310,12 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
         this->Calibration();
         std::ofstream file(filename, std::ifstream::app);
         if (!file.good()) {
-            std::cerr << std::endl << "[ERROR] <TrackingUtilizer> Failed to open \"" << filename.c_str() << "\" for writing." << std::endl << std::endl;
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Failed to open \"" << filename.c_str() << "\" for writing. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         }
         file << "PHYSICAL_CALIBRATION " << this->rigidBodyName.c_str() << " " << this->calibrationOrientation.X() << " " <<
             this->calibrationOrientation.Y() << " " << this->calibrationOrientation.Z() << " " << this->calibrationOrientation.W() << std::endl;
-        std::cout << "[info] <TrackingUtilizer> Wrote calibration orientation to \"" << filename.c_str() << "\"" << std::endl;
+        std::cout << "[INFO] [TrackingUtilizer] Wrote current calibration orientation to \"" << filename.c_str() << "\"" << std::endl;
     }
 
     file.close();
@@ -226,94 +324,13 @@ bool tracking::TrackingUtilizer::paramsRead(void) {
 }
 
 
-bool tracking::TrackingUtilizer::paramsCheck(void) {
-
-    bool retval  = true;
-    bool changed = true;
-
-    int  btn_min = -1;
-    int  btn_max = 100;
-
-    this->selectButton = this->limit<int>(this->selectButton, btn_min, btn_max, changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"selectButton\" must be in range ["<< btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->rotateButton = this->limit<int>(this->rotateButton, btn_min, btn_max, changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"rotateButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->translateButton = this->limit<int>(this->translateButton, btn_min, btn_max, changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"translateButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->zoomButton= this->limit<int>(this->zoomButton, btn_min, btn_max, changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"zoomButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->translateSpeed = this->limit<float>(this->translateSpeed, 0.0f, (std::numeric_limits<float>::max)(), changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"translateSpeed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->zoomSpeed = this->limit<float>(this->zoomSpeed, 0.0f, (std::numeric_limits<float>::max)(), changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"zoomSpeed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->fovHeight = this->limit<float>(this->fovHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"fovHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->fovWidth = this->limit<float>(this->fovWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"fovWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->fovHoriAngle = this->limit<float>(this->fovHoriAngle, 0.0f, 180.0f, changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"fovHoriAngle\" must be in range [" << 0.0f << "," << 180.0f << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->fovVertAngle = this->limit<float>(this->fovVertAngle, 0.0f, 180.0f, changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"fovVertAngle\" must be in range [" << 0.0f << "," << 180.0f << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->physicalHeight = this->limit<float>(this->physicalHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"physicalHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
-    }
-    this->physicalWidth = this->limit<float>(this->physicalWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
-    if (changed) {
-        std::cout << std::endl << "[WARNING] <TrackingUtilizer> Parameter \"physicalWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
-    }
-
-    /// No check necessary for:
-    //this->buttonDeviceName
-    //this->rigidBodyName
-    //this->invertRotate
-    //this->invertTranslate
-    //this->invertZoom
-    //this->fovMode
-    //this->fovAspectRatio
-    // this->singleInteraction
-    //this->physicalorigin
-    //this->physicalxdir
-    //this->physicalydir
-    //this->calibrationorientation
-
-    return retval;
-}
-
-
 bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& outBtnState, tracking::Vector3D& outPos, tracking::Quaternion& outOri) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
     bool stateRawData = false;
 
@@ -338,6 +355,12 @@ bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& outBtnState, t
 
 bool tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
 
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
     bool stateBtnChgs = false;
 
     // Request updated tracking data.
@@ -360,6 +383,12 @@ bool tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
 
 bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& outIntersect) {
 
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
     bool stateSrnIns = false;
 
     // Request updated tracking data.
@@ -381,6 +410,12 @@ bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& outIntersect
 
 
 bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& outFov) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
     bool stateSrnIns = false;
 
@@ -407,6 +442,12 @@ bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& outFov) {
 
 bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Dim dim, tracking::Vector3D& outCamPos, 
     tracking::Vector3D& outCamLookAt, tracking::Vector3D& outCamUp) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
     bool stateBtnChgs = false;
     bool stateCamTrs  = false;
@@ -440,7 +481,29 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Di
 }
 
 
+bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
+    this->curCameraPosition = inCamPos;
+    this->curCameraLookAt = inCamLookAt;
+    this->curCameraUp = inCamUp;
+
+    return true;
+}
+
+
 bool tracking::TrackingUtilizer::Calibration(void) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
     bool stateCalib = false;
 
@@ -454,7 +517,7 @@ bool tracking::TrackingUtilizer::Calibration(void) {
         this->calibrationOrientation.Set(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
-    std::cout << "[info] <TrackingUtilizer> >>> RIGID BODY \"" << this->rigidBodyName.c_str() << "\" CALIBRATION ORIENTATION " <<
+    std::cout << "[INFO] [TrackingUtilizer] >>> RIGID BODY \"" << this->rigidBodyName.c_str() << "\" CALIBRATION ORIENTATION " <<
         this->calibrationOrientation.X() << ";" << this->calibrationOrientation.Y() << ";" <<
         this->calibrationOrientation.Z() << ";" << this->calibrationOrientation.W() << std::endl;
 
@@ -462,25 +525,13 @@ bool tracking::TrackingUtilizer::Calibration(void) {
 }
 
 
-bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp) {
-
-    this->curCameraPosition = inCamPos;
-    this->curCameraLookAt   = inCamLookAt;
-    this->curCameraUp       = inCamUp;
-
-    return true;
-}
-
-
 bool tracking::TrackingUtilizer::updateTrackingData(void) {
 
     if (this->tracker == nullptr) {
-        std::cerr << std::endl << "[ERROR] <TrackingUtilizer> There is no tracker connected." << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] There is no tracker connected. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
-
-    // Check for valid parameters
-    this->paramsCheck();
 
     // Get fresh data from tracker
     bool retval = false;
@@ -491,7 +542,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
         this->curOrientation  = data.rigidBody.orientation;
 
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[debug] <TrackingUtilizer> Buffer Index = " << bufferIdx << " - Position Buffer Size = " << this->positionBuffer.size() << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Buffer Index = " << bufferIdx << " - Position Buffer Size = " << this->positionBuffer.size() << std::endl;
 #endif
 
         // Add current position to position buffer
@@ -511,7 +562,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
     }
 
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[debug] <TrackingUtilizer> Position = (" << this->curPosition.X() << ", " << this->curPosition.Y() << ", " << this->curPosition.Z() << "), Orientation = (" <<
+    std::cout << "[DEBUG] [TrackingUtilizer] Position = (" << this->curPosition.X() << ", " << this->curPosition.Y() << ", " << this->curPosition.Z() << "), Orientation = (" <<
         this->curOrientation.X() << ", " << this->curOrientation.Y() << ", " << this->curOrientation.Z() << ", " << this->curOrientation.W() << ")." << std::endl;
 #endif
       
@@ -523,7 +574,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[debug] <TrackingUtilizer> Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
 #endif
         return false;
     }
@@ -547,22 +598,22 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
             case(0): button = this->rotateButton;
                      isPressed = ((this->curButtonStates & (1 << button)) != 0)?(true):(false);
                      this->isRotating = isPressed;
-                     std::cout << "[info] <TrackingUtilizer> Rotate Button " << button << " is " << ((this->isRotating) ? ("PRESSED") : ("released")) << "." << std::endl;
+                     std::cout << "[INFO] [TrackingUtilizer] Rotate Button " << button << " is " << ((this->isRotating) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             case(1): button = this->translateButton;
                      isPressed = ((this->curButtonStates & (1 << button)) != 0) ? (true) : (false);
                      this->isTranslating = isPressed;
-                     std::cout << "[info] <TrackingUtilizer> Translate Button " << button << " is " << ((this->isTranslating) ? ("PRESSED") : ("released")) << "." << std::endl;
+                     std::cout << "[INFO] [TrackingUtilizer] Translate Button " << button << " is " << ((this->isTranslating) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             case(2): button = this->zoomButton;
                      isPressed = ((this->curButtonStates & (1 << button)) != 0) ? (true) : (false);
                      this->isZooming = isPressed;
-                     std::cout << "[info] <TrackingUtilizer> Zoom Button " << button << " is " << ((this->isZooming) ? ("PRESSED") : ("released")) << "." << std::endl;
+                     std::cout << "[INFO] [TrackingUtilizer] Zoom Button " << button << " is " << ((this->isZooming) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             case(3): button = this->selectButton;
                      this->curSelecting = ((this->curButtonStates & (1 << button)) != 0) ? (true) : (false);
                      isPressed = false;  // Current configuration has not to be stored ....
-                     std::cout << "[info] <TrackingUtilizer> Select Button " << button << " is " << ((this->curSelecting) ? ("PRESSED") : ("released")) << "." << std::endl;
+                     std::cout << "[INFO] [TrackingUtilizer] Select Button " << button << " is " << ((this->curSelecting) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             }
 
@@ -598,7 +649,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[debug] <TrackingUtilizer> Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
 #endif
         return false;
     }
@@ -623,7 +674,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
         if (this->isRotating) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Apply 6DOF ROTATION." << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ROTATION." << std::endl;
 #endif
             // Compute relative rotation since button was pressed.
             auto quat = this->curOrientation * this->startOrientation.Inverse();
@@ -657,7 +708,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
         if (this->isTranslating) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Apply 6DOF TRANSLATION." << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF TRANSLATION." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
             auto delta = this->curPosition -this->startPosition;
@@ -681,7 +732,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
         if (this->isZooming) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Apply 6DOF ZOOM." << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ZOOM." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
             auto diff = this->curPosition - this->startPosition;
@@ -713,7 +764,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[debug] <TrackingUtilizer> Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
 #endif
         return false;
     }
@@ -736,13 +787,15 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
     if (xact > 0) {
 
-        std::cerr << std::endl << "[ERROR] <TrackingUtilizer> 2D camera transformation is not yet implemented ...." << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] 2D camera transformation is not yet implemented.  " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
 
-/** TODO for 2D ...
+// TODO implementation for 2D ...
+/*
 
         if (this->isRotating) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Apply 6DOF ROTATION." << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ROTATION." << std::endl;
 #endif
             // Compute relative rotation since button was pressed.
             auto quat = this->curOrientation * this->startOrientation.Inverse();
@@ -776,7 +829,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
         if (this->isTranslating) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Apply 6DOF TRANSLATION." << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF TRANSLATION." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
             auto delta = this->curPosition - this->startPosition;
@@ -800,7 +853,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
         if (this->isZooming) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Apply 6DOF ZOOM." << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ZOOM." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
             auto diff = this->curPosition - this->startPosition;
@@ -833,7 +886,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
 
     if (this->constPosition) {
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[debug] <TrackingUtilizer> Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body \"" << this->rigidBodyName.c_str() << "\" is not inside tracking area. " << std::endl;
 #endif
         return false;
     }
@@ -895,12 +948,12 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
         rbDv.Normalise();
        
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[debug] <TrackingUtilizer> Rigid body position (" <<  this->curPosition.X() << "," << this->curPosition.Y() << "," << this->curPosition.Z() << 
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body position (" <<  this->curPosition.X() << "," << this->curPosition.Y() << "," << this->curPosition.Z() << 
             ", orientation (" << this->curOrientation.X() << "," << this->curOrientation.Y() << "," << this->curOrientation.Z() << "," << this->curOrientation.W() << ")" << std::endl;
-        std::cout << "[debug] <TrackingUtilizer> Rigid body Point2Ding direction (" << rbDv.X() << "," << rbDv.Y() << "," << rbDv.Z() << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body Point2Ding direction (" << rbDv.X() << "," << rbDv.Y() << "," << rbDv.Z() << ")" << std::endl;
         auto urC = pOv + (pWv * pWf) + (pHv * pHf); // upper right corner
-        std::cout << "[debug] <TrackingUtilizer> Screen spans from (" << pOv.X() << "," << pOv.Y() << "," << pOv.Z()<< " to " << urC.X() << "," << urC.Y() << "," << urC.Z() << ")" << std::endl;
-        std::cout << "[debug] <TrackingUtilizer> Screen normal (" << pNv.X() << "," << pNv.Y() << "," << pNv.Z() << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Screen spans from (" << pOv.X() << "," << pOv.Y() << "," << pOv.Z()<< " to " << urC.X() << "," << urC.Y() << "," << urC.Z() << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Screen normal (" << pNv.X() << "," << pNv.Y() << "," << pNv.Z() << ")" << std::endl;
 #endif
         // Intersection is only possible if screen normal and the Point2Ding direction are in opposite direction.
         if (pNv.Dot(rbDv) < 0.0f) { // pN.Dot(pDir) must be != 0 anyway ...
@@ -911,7 +964,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
             auto delta = pNv.Dot(rbRelPosv) / pNv.Dot(((-1.0f) * rbDv));  //Using first intercept theorem ...
             auto rbIs = this->curPosition + delta * rbDv;
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Intersects at (" << rbIs.X() << "," << rbIs.Y() << "," << rbIs.Z() << ")" << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Intersects at (" << rbIs.X() << "," << rbIs.Y() << "," << rbIs.Z() << ")" << std::endl;
 #endif
             // Intersection in regard to powerwall origin
             auto pIs = rbIs - pOv;
@@ -919,7 +972,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
             float x = (pWv.Dot(pIs)) / pWf;
             float y = (pHv.Dot(pIs)) / pHf;
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[debug] <TrackingUtilizer> Relative intersection at (" << x << "," << y << ")" << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Relative intersection at (" << x << "," << y << ")" << std::endl;
 #endif
             // Ensure that intersection lies on physical screen (inside of area spanned by pWv and pHv)
             // Recognise only intersections insides of powerwall screen 
@@ -1063,7 +1116,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
                 }
 
 #ifdef TRACKING_DEBUG_OUTPUT
-                std::cout << "[debug] <TrackingUtilizer> Relative FIELD OF VIEW coordinates: LEFT_TOP (" <<
+                std::cout << "[DEBUG] [TrackingUtilizer] Relative FIELD OF VIEW coordinates: LEFT_TOP (" <<
                     this->curFOV.left_top.X() << "," << this->curFOV.left_top.Y() << ") | LEFT_BOTTOM (" <<
                     this->curFOV.left_bottom.X() << "," << this->curFOV.left_bottom.Y() << ") | RIGHT_TOP (" <<
                     this->curFOV.right_top.X() << "," << this->curFOV.right_top.Y() << ") | RIGHT_BOTTOM (" <<
@@ -1111,10 +1164,4 @@ tracking::Quaternion tracking::TrackingUtilizer::xform(const tracking::Vector3D&
     return q;
 
     return retQuat;
-}
-
-
-const std::string tracking::TrackingUtilizer::cn(void) const {
-    std::string tmp = typeid(*this).name();
-    return tmp.substr(tmp.find_last_of(':') + 1, tmp.length() - 1);
 }

@@ -8,20 +8,14 @@
 #include "VrpnButtonDevice.h"
 
 
-tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_Button_Remote>(),
-    runThreadLoop(false),
-    states(0)
-{
+tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_Button_Remote>()
+    , initialised(false)
+    , runThreadLoop(false)
+    , states(0) {
 
+    // intentionally empty...
 }
 
-
-tracking::VrpnButtonDevice::VrpnButtonDevice(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams) : tracking::VrpnDevice<vrpn_Button_Remote>(inParams),
-    runThreadLoop(false),
-    states(0)
-{
-
-}
 
 
 tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
@@ -30,10 +24,24 @@ tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
 }
 
 
+bool tracking::VrpnButtonDevice::Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams) {
+
+    this->initialised = tracking::VrpnDevice<vrpn_Button_Remote>::Initialise(inParams);
+
+    return this->initialised;
+}
+
+
 bool tracking::VrpnButtonDevice::Connect(void) {
 
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
     // Establish connection.
-    if (!VrpnDevice<vrpn_Button_Remote>::Connect()) { 
+    if (!tracking::VrpnDevice<vrpn_Button_Remote>::Connect()) { 
         return false;
     }
 
@@ -41,12 +49,12 @@ bool tracking::VrpnButtonDevice::Connect(void) {
     this->Register<vrpn_BUTTONCHANGEHANDLER>(&VrpnButtonDevice::onButtonChanged, this);
 
     // Start vrpn main loop thread.
-    std::cout << "[info] <VrpnButtonDevice> Starting VRPN main loop thread for \"" << this->GetDeviceName().c_str() << "\"" << std::endl;
+    std::cout << "[INFO] [VrpnButtonDevice] Starting VRPN main loop thread for \"" << this->GetDeviceName().c_str() << "\"" << std::endl;
     this->runThreadLoop.store(true);
     std::thread thread([this]() {
         while (this->runThreadLoop.load()) {
 #ifdef TRACKING_DEBUG_OUTPUT
-            //std::cout << "[debug] <VrpnButtonDevice> Inside VRPN main loop ..." << std::endl;
+            //std::cout << "[DEBUG] [VrpnButtonDevice] Inside VRPN main loop ..." << std::endl;
 #endif
             this->MainLoop();
             std::this_thread::yield();
@@ -63,11 +71,17 @@ bool tracking::VrpnButtonDevice::Disconnect(void) {
     // End main loop thread
     this->runThreadLoop.store(false);
 
-    return VrpnDevice<vrpn_Button_Remote>::Disconnect();
+    return tracking::VrpnDevice<vrpn_Button_Remote>::Disconnect();
 }
 
 
 tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
     return this->states.load();
 }
@@ -77,7 +91,8 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, c
 
     auto that = static_cast<VrpnButtonDevice*>(userData);
     if (that == nullptr) {
-        std::cerr << std::endl << "[ERROR] <VrpnButtonDevice> Invalid user data. " << __FILE__ << " " << __LINE__ << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Invalid user data. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return;
     }
 
@@ -91,6 +106,6 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, c
         that->states.store(tmpStates &= ~tmpMask);
     }
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[debug] <VrpnButtonDevice> Button = " << vrpnData.button << " - State = " << ((that->states.load() & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;
+    std::cout << "[DEBUG] [VrpnButtonDevice] Button = " << vrpnData.button << " | State = " << ((that->states.load() & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;
 #endif
 }

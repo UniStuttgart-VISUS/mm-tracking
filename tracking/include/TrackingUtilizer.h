@@ -93,12 +93,19 @@ namespace tracking {
         /**
         * CTOR
         */
-        TrackingUtilizer(const tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
+        TrackingUtilizer(void);
 
         /**
         * DTOR
         */
         virtual ~TrackingUtilizer(void);
+
+        /**
+        * Initialisation.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool Initialise(const tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
 
         /**********************************************************************/
         // GET
@@ -205,6 +212,8 @@ namespace tracking {
         * variables
         **********************************************************************/
 
+        bool initialised;
+
         /** The Pointer to the Tracker which provides the tracking data. */
         std::shared_ptr<tracking::Tracker> tracker;
 
@@ -275,18 +284,11 @@ namespace tracking {
         * functions
         **********************************************************************/
 
-        /** Initialize parameters. */
-        void paramsInit(void);
-        void paramsInit(const tracking::TrackingUtilizer::Params& p);
-
         /** Print used parameter values. */
-        void paramsPrint(void);
+        void printParams(void);
 
         /** Read physical values from file. */
-        bool paramsRead(void);
-
-        /** Print used parameter values. */
-        bool paramsCheck(void);
+        bool readParamsFromFile(void);
 
         /**
         * Request updated tracking data.
@@ -331,10 +333,6 @@ namespace tracking {
         */
         tracking::Quaternion xform(const tracking::Vector3D& u, const tracking::Vector3D& v);
 
-        /**
-        * Returns the class name. --- UNUSED ---
-        */
-        const std::string cn(void) const;
     };
 
 } /** end namespace tracking */

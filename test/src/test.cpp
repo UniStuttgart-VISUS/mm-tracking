@@ -24,13 +24,13 @@ int main() {
     std::string progName = "test";
 
     // PARAMETERS for Tracker and TrackingUtilizer /////////////////////////////
-
     /// Tracker Parameters
     tracking::Tracker::Params tp;
+    /*
     tp.vrpn_params.clear();
     tracking::VrpnDevice<vrpn_Button_Remote>::Params bdp;
     tp.activeNode                   = ""; // = all
-    tp.natnet_params.clientIP       = "129.69.205.76"; // MINYOU
+    tp.natnet_params.client_ip       = "129.69.205.76"; // MINYOU
     tp.natnet_params.serverIP       = "129.69.205.86"; // MINI
     tp.natnet_params.cmdPort        = 1510;
     tp.natnet_params.dataPort       = 1511;
@@ -41,9 +41,11 @@ int main() {
     bdp.port                        = 3884;
     bdp.protocol                    = tracking::VrpnDevice<vrpn_Button_Remote>::Protocols::VRPN_TCP;
     tp.vrpn_params.emplace_back(bdp);
+    */
 
     /// TrackingUtilizer Parameters
     tracking::TrackingUtilizer::Params tup;
+    /*
     tup.buttonDeviceName            = bdp.deviceName; /// Insert btnDeviceParams.deviceName only for appropriate rigid body.
     tup.rigidBodyName               = ""; // >>> Will be set in line 87 depending on what rigid bodies are available.
     tup.selectButton                = -1;
@@ -62,7 +64,7 @@ int main() {
     tup.fovHoriAngle                = 60.0f;
     tup.fovVertAngle                = 30.0f;
     tup.fovAspectRatio              = tracking::TrackingUtilizer::FovAspectRatio::AR_1_77__1; // 16:9
-
+    */
 
     // TRACKING INITIALISATION ////////////////////////////////////////////////
 
@@ -71,6 +73,8 @@ int main() {
     /// Creating one (!) Tracker which runs in separate thread.
     auto tracker = std::make_shared<tracking::Tracker>();
     tracker->Initialise(tp);
+
+
     if (!tracker->Connect()) {
         std::cerr << std::endl << "[ERROR] <" << progName.c_str() << "> Failed to establish tracker connection." << std::endl << std::endl;
         return 0;
@@ -86,7 +90,8 @@ int main() {
     trackingUtilizers.clear();
     for (auto it : rigidBodies) {
         tup.rigidBodyName = it;
-        trackingUtilizers.push_back(tracking::TrackingUtilizer(tup, tracker));
+        trackingUtilizers.emplace_back(tracking::TrackingUtilizer());
+        trackingUtilizers.back().Initialise(tp, tracker);
     }
 
 

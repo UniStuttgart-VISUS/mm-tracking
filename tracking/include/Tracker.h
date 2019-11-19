@@ -33,7 +33,8 @@ namespace tracking {
 
         /** Data structure for setting parameters as batch. */
         struct Params {
-            std::string                                                   activeNode;      /** The name of the active node which should receive the tracking data exclusively. */
+            const char*                                                   active_node;      /** The name of the active node which should receive the tracking data exclusively. */
+            size_t                                                        active_node_len;
             std::vector<tracking::VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
             tracking::NatNetDevicePool::Params                            natnet_params;
         };
@@ -55,6 +56,13 @@ namespace tracking {
         * DTOR
         */
         ~Tracker(void);
+
+        /**
+        * Initialisation.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool Initialise(const tracking::Tracker::Params& inParams);
 
         /**
         * Callback for connection tracking.
@@ -82,7 +90,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data);
+        bool GetData(const std::string& inRigidBody, const std::string& inButtonDevice, tracking::Tracker::TrackingData& outData);
 
         /**
         * Get all available rigid body names.
@@ -90,15 +98,6 @@ namespace tracking {
         * @return All available rigid body names.
         */
         void GetRigidBodyNames(std::vector<std::string>& inoutNames) const;
-
-        bool Initialise(const tracking::Tracker::Params& inParams);
-
-        /**********************************************************************/
-        // SET
-
-        inline void SetActiveNode(std::string an) {
-            this->activeNode = an;
-        }
 
     private:
 
@@ -111,6 +110,8 @@ namespace tracking {
         /**********************************************************************
         * variables
         **********************************************************************/
+
+        bool initialised;
 
         /** The VRPN devices that handle button presses. */
         VrpnButtonPoolType buttonDevices;
@@ -130,11 +131,7 @@ namespace tracking {
         * functions
         **********************************************************************/
 
-        /** Print used parameter values. */
-        void paramsPrint(void);
-
-        /** Print used parameter values. */
-        bool paramsCheck(void);
+        void printParams(void);
 
     };
 

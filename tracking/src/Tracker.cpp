@@ -8,29 +8,14 @@
 #include "Tracker.h"
 
 
-tracking::Tracker::Tracker(void) :
-    buttonDevices(),
-    motionDevices(),
-    isConnected(false),
-    activeNode()
-{
-    // Intentionally empty...
-}
+tracking::Tracker::Tracker(void)
+    : initialised(false)
+    , buttonDevices()
+    , motionDevices()
+    , isConnected(false)
+    , activeNode() {
 
-
-void tracking::Tracker::paramsPrint(void) {
-    std::cout << "[parameter] <Tracker> Active Node:                      " << ((this->activeNode.empty())?("<all>"):(this->activeNode.c_str())) << std::endl;
-}
-
-
-bool tracking::Tracker::paramsCheck(void) {
-
-    bool retval = true;
-
-    /// No check necessary for:
-    // this->activeNode
-
-    return retval;
+    // intentionally empty...
 }
 
 
@@ -44,7 +29,58 @@ tracking::Tracker::~Tracker(void) {
 }
 
 
+bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
+{
+    bool check = true;
+    this->initialised = false;
+
+    if (!this->motionDevices.Initialise(inParams.natnet_params)) {
+        check = false;
+    }
+
+    this->buttonDevices.clear();
+    for (int i = 0; i < inParams.vrpn_params.size(); ++i) {
+        this->buttonDevices.emplace_back(std::make_unique<tracking::VrpnButtonDevice>());
+        if (!this->buttonDevices.back()->Initialise(inParams.vrpn_params[i])) {
+            check = false;
+        }
+    }
+
+    std::string active_node(inParams.active_node);
+    if (active_node.length() != inParams.active_node_len) {
+        std::cout << std::endl << "[ERROR] [Tracker<R>] String \"active_node\" has not expected length. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
+    if (active_node.empty()) {
+        std::cout << std::endl << "[ERROR] [Tracker<R>] Parameter \"active_node\" must not be empty string. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
+
+    if (check) {
+        activeNode = active_node;
+
+        this->printParams();
+        this->initialised = true;
+    }
+
+    return this->initialised;
+}
+
+
+void tracking::Tracker::printParams(void) {
+    std::cout << "[PARAMETER] [Tracker] Active Node:                      " << ((this->activeNode.empty()) ? ("<all>") : (this->activeNode.c_str())) << std::endl;
+}
+
+
 bool tracking::Tracker::Connect(void) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
     // Terminate previous connection.
     this->Disconnect();
@@ -67,7 +103,7 @@ bool tracking::Tracker::Connect(void) {
 #endif /** _WIN32 */
 
     if (!this->activeNode.empty() && (computerName != activeNode)) {
-        std::cout << std::endl << "[WARNING] <Tracker> Node \"" << computerName.c_str() << "\" is not enabled to receive tracker updates (otherwise set as active node)." << std::endl << std::endl;
+        std::cout << std::endl << "[WARNING] [Tracker] Node \"" << computerName.c_str() << "\" is not enabled to receive tracker updates (otherwise set as active node)." << std::endl << std::endl;
         return false;
     }
 	
@@ -104,10 +140,16 @@ bool tracking::Tracker::Disconnect(void) {
 }
 
 
-bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevice, tracking::Tracker::TrackingData& data) {
+bool tracking::Tracker::GetData(const std::string& inRigidBody, const std::string& inButtonDevice, tracking::Tracker::TrackingData& outData) {
+
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
 
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[debug] <Tracker> Requested: Button Device \"" << buttonDevice.c_str() << "\" and Rigid Body \"" << rigidBody.c_str() << "\"." << std::endl;
+    std::cout << "[DEBUG] [Tracker] Requested: Button Device \"" << buttonDevice.c_str() << "\" and Rigid Body \"" << rigidBody.c_str() << "\"." << std::endl;
 #endif
 
     bool retval = false;
@@ -116,14 +158,14 @@ bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevic
         retval = true;
 
         // Set data of requested rigid body
-        data.rigidBody.orientation = this->motionDevices.GetOrientation(rigidBody);
-        data.rigidBody.position    = this->motionDevices.GetPosition(rigidBody);
+        outData.rigidBody.orientation = this->motionDevices.GetOrientation(inRigidBody);
+        outData.rigidBody.position    = this->motionDevices.GetPosition(inRigidBody);
 
         // Set data of requested button device 
-        data.buttonState = 0;
+        outData.buttonState = 0;
         for (auto& v : this->buttonDevices) {
-            if (buttonDevice == v->GetDeviceName()) {
-                data.buttonState = (v->GetButtonStates());
+            if (inButtonDevice == v->GetDeviceName()) {
+                outData.buttonState = (v->GetButtonStates());
                 break; /// Break if button device is found.
             }
         }
@@ -135,22 +177,11 @@ bool tracking::Tracker::GetData(std::string& rigidBody, std::string& buttonDevic
 
 void tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
 
-    inoutNames = this->motionDevices.GetRigidBodyNames();
-}
-
-
-bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
-{
-    auto retval = this->motionDevices.Initialise(inParams.natnet_params);
-    activeNode = inParams.activeNode;
-
-    this->paramsPrint();
-
-    // Create button device(s)
-    this->buttonDevices.clear();
-    for (int i = 0; i < inParams.vrpn_params.size(); ++i) {
-        this->buttonDevices.push_back(std::make_unique<tracking::VrpnButtonDevice>(inParams.vrpn_params[i]));
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return;
     }
 
-    return retval;
+    inoutNames = this->motionDevices.GetRigidBodyNames();
 }

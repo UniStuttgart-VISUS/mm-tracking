@@ -28,12 +28,17 @@ namespace tracking {
         */
         VrpnButtonDevice(void);
 
-        VrpnButtonDevice(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams);
-
         /**
         * DTOR
         */
         ~VrpnButtonDevice(void);
+
+        /**
+        * Initialisation.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams);
 
         /**
         * Connect to vrpn button device.
@@ -49,6 +54,9 @@ namespace tracking {
         */
         bool Disconnect(void);
 
+        /**********************************************************************/
+        // GET
+
         /**
         * Get current button states.
         *
@@ -61,6 +69,8 @@ namespace tracking {
         /***********************************************************************
         * variables
         **********************************************************************/
+
+        bool initialised;
 
         /** 
         * Determines the running state of the Vrpn thread. 

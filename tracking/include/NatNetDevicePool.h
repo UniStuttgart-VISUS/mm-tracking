@@ -35,8 +35,10 @@ namespace tracking{
 
         /** Data structure for setting parameters as batch. */
         struct Params {
-            std::string                      clientIP;      /** The IP address of the NatNet client.       */
-            std::string                      serverIP;      /** The IP address of the NatNet server.       */
+            const char*                      client_ip;      /** The IP address of the NatNet client.       */
+            size_t                           client_ip_len;  
+            std::string                      server_ip;      /** The IP address of the NatNet server.       */
+            size_t                           server_ip_len;  
             unsigned int                     cmdPort;       /** The NatNet command port.                   */
             unsigned int                     dataPort;      /** The NatNet data port.                      */
             NatNetDevicePool::ConnectionType conType;       /** The NatNet connection type.                */
@@ -56,12 +58,17 @@ namespace tracking{
         */
         NatNetDevicePool(void);
 
-        NatNetDevicePool(const NatNetDevicePool::Params& inParams);
-
         /**
         * DTOR
         */
         ~NatNetDevicePool(void);
+
+        /**
+        * Initialisation.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool Initialise(const NatNetDevicePool::Params& inParams);
 
         /**
         * Connect to natnet server.
@@ -88,7 +95,7 @@ namespace tracking{
         * 
         * @return The current orientation of the given rigid body.
         */
-        tracking::Quaternion GetOrientation(std::string& rbn); // const;
+        tracking::Quaternion GetOrientation(const std::string& rbn); 
 
         /**
         * Get position of rigid body.
@@ -98,7 +105,7 @@ namespace tracking{
         * 
         * @return The current position of the given rigid body.
         */
-        tracking::Vector3D GetPosition(std::string& rbn); // const;
+        tracking::Vector3D GetPosition(const std::string& rbn); 
 
         /**
         * Get all available rigid body names.
@@ -106,35 +113,6 @@ namespace tracking{
         * @return All available rigid body names.
         */
         std::vector<std::string> GetRigidBodyNames(void) const;
-
-        bool Initialise(const NatNetDevicePool::Params& inParams);
-
-         /*********************************************************************/
-         // SET
-
-         inline void SetClientIP(std::string cip) {
-             this->clientIP = cip;
-         }
-
-         inline void SetServertIP(std::string sip) {
-             this->serverIP = sip;
-         }
-
-         inline void SetCmdPort(unsigned int cp) {
-             this->cmdPort = cp;
-         }
-
-         inline void SetDataPort(unsigned int dp) {
-             this->dataPort = dp;
-         }
-
-         inline void SetConnectionType(NatNetDevicePool::ConnectionType ct) {
-             this->conType = ct;
-         }
-
-         inline void SetClientVerbose(bool  v) {
-             this->verboseClient = v;
-         }
 
     private:
 
@@ -153,14 +131,12 @@ namespace tracking{
         */
         class RigidBody {
         public:
-            RigidBody(int ctor_id, std::string ctor_name) : 
-                id(ctor_id), 
-                name(ctor_name),
-                read(0), 
-                write(1), 
-                lockFreeData()
-            { 
-            
+            RigidBody(int ctor_id, std::string ctor_name) 
+                : id(ctor_id)
+                , name(ctor_name)
+                , read(0)
+                , write(1)
+                , lockFreeData() { 
             }
 
             const int                 id;                // ID of motoin device (never changes)
@@ -168,17 +144,16 @@ namespace tracking{
             std::atomic<unsigned int> read;              // index of readable RigidBodyData
             std::atomic<unsigned int> write;             // index of writable RigidBodyData
             RigidBodyData             lockFreeData[3];   // triple buffer of data for one rigid body
-
         };
 
         /**********************************************************************
         * variables
         **********************************************************************/
 
-        /** Pointer to the NatNet client. */
+        bool initialised;
+
         std::unique_ptr<NatNetClient> natnetClient;
 
-        /** Data of all available rigid bodies. */
         std::vector<std::shared_ptr<RigidBody>> rigidBodies;
 
         std::array<unsigned int, 2> callbackCounter; // [last, current]
@@ -211,7 +186,7 @@ namespace tracking{
         NatNetDevicePool::ConnectionType conType;
 
         /**
-        * TODO.
+        * If 'true' message NatNet log callback is set.
         */
         bool verboseClient;
 
@@ -220,10 +195,7 @@ namespace tracking{
         **********************************************************************/
 
         /** Print used parameter values. */
-        void paramsPrint(void);
-
-        /** Print used parameter values. */
-        bool paramsCheck(void);
+        void printParams(void);
 
         /**
         * NatNet client callback for data.
