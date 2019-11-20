@@ -422,10 +422,10 @@ void __cdecl tracking::NatNetDevicePool::onMessage(Verbosity level, const char *
 
     switch (level) {
         case (::Verbosity::Verbosity_None):    break;
-        case (::Verbosity::Verbosity_Debug):   std::cout << "[DEBUG]   [NatNetClient] "   << message << std::endl; break;
-        case (::Verbosity::Verbosity_Info):    std::cout << "[INFO]    [NatNetClient] "    << message << std::endl; break;
+        case (::Verbosity::Verbosity_Debug):   std::cout << "[DEBUG] [NatNetClient] "   << message << std::endl; break;
+        case (::Verbosity::Verbosity_Info):    std::cout << "[INFO] [NatNetClient] "    << message << std::endl; break;
         case (::Verbosity::Verbosity_Warning): std::cout << "[WARNING] [NatNetClient] " << message << std::endl; break;
-        case (::Verbosity::Verbosity_Error):   std::cout << "[ERROR]   [NatNetClient] "   << message << std::endl; break;
+        case (::Verbosity::Verbosity_Error):   std::cout << "[ERROR] [NatNetClient] "   << message << std::endl; break;
         default: break;
     }
 }

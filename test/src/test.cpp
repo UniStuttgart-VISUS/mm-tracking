@@ -31,16 +31,16 @@ int main() {
     std::string active_node(""); /// ALL
     tp.active_node                   = active_node.c_str();
     tp.active_node_len               = active_node.length();
-    std::string client_ip("129.69.205.123"); /// 76 = MINYOU
+    std::string client_ip("129.69.205.123"); /// (.76 = MINYOU) >>> Change to appropriate Client IP
     tp.natnet_params.client_ip       = client_ip.c_str();
     tp.natnet_params.client_ip_len   = client_ip.length();
-    std::string server_ip("129.69.205.86"); /// MINI
+    std::string server_ip("129.69.205.86"); /// (.86 = MINI)
     tp.natnet_params.server_ip       = server_ip.c_str();
     tp.natnet_params.server_ip_len   = server_ip.length();
     tp.natnet_params.cmd_port        = 1510;
     tp.natnet_params.data_port       = 1511;
     tp.natnet_params.con_type        = tracking::NatNetDevicePool::ConnectionType::UniCast;
-    tp.natnet_params.verbose_client  = true;
+    tp.natnet_params.verbose_client  = false;
 
     tracking::VrpnDevice<vrpn_Button_Remote>::Params bp;
     std::vector<tracking::VrpnDevice<vrpn_Button_Remote>::Params> bps;
@@ -145,7 +145,7 @@ int main() {
             // Intersection
             state = tu.GetIntersection(ist);
             std::cout << std::fixed << std::setprecision(4) <<
-                "[info] <" << progName.c_str() << "> RIGID-BODY \"" << tu.GetRigidBodyName().c_str() << "\" - INTERSECTION (valid = "
+                "[INFO] [" << progName.c_str() << "] RIGID-BODY \"" << tu.GetRigidBodyName().c_str() << "\" - INTERSECTION (valid = "
                 << ((state) ? ("TRUE") : ("FALSE")) << ") ";
             if (state) {
                 std::cout << " - Coordinates: (" << ist.X() << "," << ist.Y() << ") ";
