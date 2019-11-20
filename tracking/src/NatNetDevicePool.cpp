@@ -31,55 +31,67 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
     this->initialised = false;
     this->natnetClient = nullptr;
 
-    std::string client_ip(inParams.client_ip);
-    if (client_ip.length() != inParams.client_ip_len) {
-        std::cout << std::endl << "[ERROR] [NatNetClient] String \"client_ip\" has not expected length. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+    std::string client_ip;
+    try {
+        client_ip = std::string(inParams.client_ip);
+        if (client_ip.length() != inParams.client_ip_len) {
+            std::cerr << std::endl << "[ERROR] [NatNetClient] String \"client_ip\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+        if (client_ip.empty()) {
+            std::cerr << std::endl << "[ERROR] [NatNetClient] Parameter \"client_ip\" must not be empty string. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'active_node': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
-    if (client_ip.empty()) {
-        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"client_ip\" must not be empty string. " <<
+
+    std::string server_ip;
+    try {
+        server_ip = std::string(inParams.server_ip);
+        if (server_ip.length() != inParams.server_ip_len) {
+            std::cerr << std::endl << "[ERROR] [NatNetClient] String \"server_ip\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+        if (server_ip.empty()) {
+            std::cerr << std::endl << "[ERROR] [NatNetClient] Parameter \"server_ip\" must not be empty string. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'active_node': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
+
+    if (inParams.cmd_port >= 65535) {
+        std::cerr << std::endl << "[ERROR] [NatNetClient] Parameter \"cmd_port\" must be less than 65535. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
 
-    std::string server_ip(inParams.server_ip);
-    if (server_ip.length() != inParams.server_ip_len) {
-        std::cout << std::endl << "[ERROR] [NatNetClient] String \"server_ip\" has not expected length. " <<
+    if (inParams.data_port >= 65535) {
+        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"data_port\" must be less than 65535. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
-    if (server_ip.empty()) {
-        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"server_ip\" must not be empty string. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        check = false;
-    }
-
-    if (inParams.cmdPort >= 65535) {
-        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"cmdPort\" must be less than 65535. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        check = false;
-    }
-
-    if (inParams.dataPort >= 65535) {
-        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"dataPort\" must be less than 65535. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        check = false;
-    }
-
-    /// No check necessary for:
-    /// this->conType
-    /// this->verbose
 
     if (check) {
         this->callbackCounter = { 0, 0 };
         this->clientIP = client_ip;
         this->serverIP = server_ip;
 
-        this->cmdPort = inParams.cmdPort;
-        this->dataPort = inParams.dataPort;
-        this->conType = inParams.conType;
-        this->verboseClient = inParams.verboseClient;
+        this->cmdPort = inParams.cmd_port;
+        this->dataPort = inParams.data_port;
+        this->conType = inParams.con_type;
+        this->verboseClient = inParams.verbose_client;
 
         this->printParams();
         this->initialised = true;
@@ -108,7 +120,7 @@ tracking::NatNetDevicePool::~NatNetDevicePool(void) {
 bool tracking::NatNetDevicePool::Connect(void) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -238,7 +250,7 @@ bool tracking::NatNetDevicePool::Disconnect(void) {
             std::cout << "[INFO] [NatNetDevicePool] Successfully disconnected from NatNet server." << std::endl;
         }
         else {
-            std::cout << "[ERROR] [NatNetDevicePool] Disconnected from NatNet server. - NATNET ERROR CODE: " << (int)errorcode << " (see NatNetTypes.h, line 115). " <<
+            std::cerr << "[ERROR] [NatNetDevicePool] Disconnected from NatNet server. - NATNET ERROR CODE: " << (int)errorcode << " (see NatNetTypes.h, line 115). " <<
                 "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         }
     }
@@ -261,7 +273,7 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
         (std::numeric_limits<float>::max)());
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return retOr;
     }
@@ -292,7 +304,7 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rb
         (std::numeric_limits<float>::max)());
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return retPos;
     }
@@ -322,7 +334,7 @@ std::vector<std::string> tracking::NatNetDevicePool::GetRigidBodyNames(void) con
     retval.clear();
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return retval;
     }

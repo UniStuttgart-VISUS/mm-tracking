@@ -35,7 +35,7 @@ bool tracking::VrpnButtonDevice::Initialise(const tracking::VrpnDevice<vrpn_Butt
 bool tracking::VrpnButtonDevice::Connect(void) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -78,7 +78,7 @@ bool tracking::VrpnButtonDevice::Disconnect(void) {
 tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }

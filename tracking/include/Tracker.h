@@ -35,7 +35,8 @@ namespace tracking {
         struct Params {
             const char*                                                   active_node;      /** The name of the active node which should receive the tracking data exclusively. */
             size_t                                                        active_node_len;
-            std::vector<tracking::VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
+            tracking::VrpnDevice<vrpn_Button_Remote>::Params*             vrpn_params;
+            size_t                                                        vrpn_params_count;
             tracking::NatNetDevicePool::Params                            natnet_params;
         };
 

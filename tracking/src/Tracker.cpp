@@ -34,32 +34,47 @@ bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
     bool check = true;
     this->initialised = false;
 
-    if (!this->motionDevices.Initialise(inParams.natnet_params)) {
+    std::string active_node;
+    try {
+        active_node = std::string(inParams.active_node);
+        if (active_node.length() != inParams.active_node_len) {
+            std::cerr << std::endl << "[ERROR] [Tracker] String \"active_node\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'active_node': " << e.what() << 
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
 
     this->buttonDevices.clear();
-    for (int i = 0; i < inParams.vrpn_params.size(); ++i) {
-        this->buttonDevices.emplace_back(std::make_unique<tracking::VrpnButtonDevice>());
-        if (!this->buttonDevices.back()->Initialise(inParams.vrpn_params[i])) {
-            check = false;
+    std::vector<tracking::VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
+    try {
+        for (size_t i = 0; i < inParams.vrpn_params_count; i++) {
+            vrpn_params.emplace_back(inParams.vrpn_params[i]);
         }
     }
-
-    std::string active_node(inParams.active_node);
-    if (active_node.length() != inParams.active_node_len) {
-        std::cout << std::endl << "[ERROR] [Tracker<R>] String \"active_node\" has not expected length. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading 'vrpn_params' array: " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
-    if (active_node.empty()) {
-        std::cout << std::endl << "[ERROR] [Tracker<R>] Parameter \"active_node\" must not be empty string. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+
+    if (!this->motionDevices.Initialise(inParams.natnet_params)) {
         check = false;
     }
 
     if (check) {
         activeNode = active_node;
+
+        for (int i = 0; i < vrpn_params.size(); ++i) {
+            this->buttonDevices.emplace_back(std::make_unique<tracking::VrpnButtonDevice>());
+            if (!this->buttonDevices.back()->Initialise(vrpn_params[i])) {
+                check = false;
+            }
+        }
 
         this->printParams();
         this->initialised = true;
@@ -77,7 +92,7 @@ void tracking::Tracker::printParams(void) {
 bool tracking::Tracker::Connect(void) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -143,7 +158,7 @@ bool tracking::Tracker::Disconnect(void) {
 bool tracking::Tracker::GetData(const std::string& inRigidBody, const std::string& inButtonDevice, tracking::Tracker::TrackingData& outData) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -178,7 +193,7 @@ bool tracking::Tracker::GetData(const std::string& inRigidBody, const std::strin
 void tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return;
     }

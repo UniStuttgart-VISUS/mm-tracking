@@ -37,12 +37,12 @@ namespace tracking{
         struct Params {
             const char*                      client_ip;      /** The IP address of the NatNet client.       */
             size_t                           client_ip_len;  
-            std::string                      server_ip;      /** The IP address of the NatNet server.       */
+            const char *                     server_ip;      /** The IP address of the NatNet server.       */
             size_t                           server_ip_len;  
-            unsigned int                     cmdPort;       /** The NatNet command port.                   */
-            unsigned int                     dataPort;      /** The NatNet data port.                      */
-            NatNetDevicePool::ConnectionType conType;       /** The NatNet connection type.                */
-            bool                             verboseClient; /** Turn on/off NatNet client massage output.  */
+            unsigned int                     cmd_port;       /** The NatNet command port.                   */
+            unsigned int                     data_port;      /** The NatNet data port.                      */
+            NatNetDevicePool::ConnectionType con_type;       /** The NatNet connection type.                */
+            bool                             verbose_client; /** Turn on/off NatNet client massage output.  */
         };
 
         /** Data of one rigid body. */

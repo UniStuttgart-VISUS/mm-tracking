@@ -68,24 +68,26 @@ namespace tracking {
 
         /** Data structure for setting parameters as batch. */
         struct Params {
-            std::string                       buttonDeviceName;        /** Name of the button device to use.                                                             */
-            std::string                       rigidBodyName;           /** Name of the rigid body to use.                                                                */
-            unsigned int                      selectButton;            /** The button that must be pressed for selection (set to -1 to dissolve link to any button).     */
-            unsigned int                      rotateButton;            /** The button that must be pressed for rotation (set to -1 to dissolve link to any button).      */
-            unsigned int                      translateButton;         /** The button that must be pressed for translation (set to -1 to dissolve link to any button).   */
-            unsigned int                      zoomButton;              /** The button that must be pressed for dolly zoom (set to -1 to dissolve link to any button).    */
-            bool                              invertRotate;            /** Inverts the rotation direction.                                                               */
-            bool                              invertTranslate;         /** Inverts the rotation direction.                                                               */
-            bool                              invertZoom;              /** Inverts the zoom direction.                                                                   */
-            float                             translateSpeed;          /** The translation speed.                                                                        */
-            float                             zoomSpeed;               /** Transformation of distance to zoom speed.                                                     */
-            bool                              singleInteraction;       /** Disables multiple interactions at the same time.                                              */
-            TrackingUtilizer::FovMode         fovMode;                 /** Select the parameters to define field of view projected on screen.                            */
-            float                             fovHeight;               /** Set relative fixed width for fov on screen.                                                   */
-            float                             fovWidth;                /** Set relative fixed height for fov on screen.                                                  */
-            float                             fovHoriAngle;            /** Set fixed horizontal angle in degrees for fov.                                                */
-            float                             fovVertAngle;            /** Set fixed vertical angle in degrees for fov.                                                  */
-            TrackingUtilizer::FovAspectRatio  fovAspectRatio;          /** Set fixed aspect ratio for fov for given angle.                                               */
+            const char*                       btn_device_name;       /** Name of the button device to use.                                                             */
+            size_t                            btn_device_name_len;
+            const char*                       rigid_body_name;       /** Name of the rigid body to use.                                                                */
+            size_t                            rigid_body_name_len;
+            unsigned int                      select_btn;            /** The button that must be pressed for selection (set to -1 to dissolve link to any button).     */
+            unsigned int                      rotate_btn;            /** The button that must be pressed for rotation (set to -1 to dissolve link to any button).      */
+            unsigned int                      translate_btn;         /** The button that must be pressed for translation (set to -1 to dissolve link to any button).   */
+            unsigned int                      zoom_btn;              /** The button that must be pressed for dolly zoom (set to -1 to dissolve link to any button).    */
+            bool                              invert_rotate;         /** Inverts the rotation direction.                                                               */
+            bool                              invert_translate;      /** Inverts the rotation direction.                                                               */
+            bool                              invert_zoom;           /** Inverts the zoom direction.                                                                   */
+            float                             translate_speed;       /** The translation speed.                                                                        */
+            float                             zoom_speed;            /** Transformation of distance to zoom speed.                                                     */
+            bool                              single_interaction;    /** Disables multiple interactions at the same time.                                              */
+            TrackingUtilizer::FovMode         fov_mode;              /** Select the parameters to define field of view projected on screen.                            */
+            float                             fov_height;            /** Set relative fixed width for fov on screen.                                                   */
+            float                             fov_width;             /** Set relative fixed height for fov on screen.                                                  */
+            float                             fov_horiz_angle;       /** Set fixed horizontal angle in degrees for fov.                                                */
+            float                             fov_vert_angle;        /** Set fixed vertical angle in degrees for fov.                                                  */
+            TrackingUtilizer::FovAspectRatio  fov_aspect_ratio;      /** Set fixed aspect ratio for fov for given angle.                                               */
         };
 
         ///////////////////////////////////////////////////////////////////////
@@ -105,7 +107,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool Initialise(const tracking::TrackingUtilizer::Params& inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr);
+        bool Initialise(const tracking::TrackingUtilizer::Params& inParams, std::shared_ptr<tracking::Tracker> inTracker);
 
         /**********************************************************************/
         // GET
@@ -220,28 +222,22 @@ namespace tracking {
         tracking::Vector3D                 curCameraPosition;
         tracking::Vector3D                 curCameraUp;
         tracking::Vector3D                 curCameraLookAt;
-
         tracking::Point2D                  curIntersection;
         tracking::Rectangle                curFOV;
         tracking::Quaternion               curOrientation;
         tracking::Vector3D                 curPosition;
         tracking::ButtonMask               curButtonStates;
-
         bool                               curSelecting;
-
         std::vector<tracking::Vector3D>    positionBuffer;
         unsigned int                       bufferIdx;
         bool                               constPosition;
-
         tracking::ButtonMask               lastButtonStates;
-
         tracking::Vector3D                 startCamLookAt;
         tracking::Vector3D                 startCamPosition;
         tracking::Vector3D                 startCamUp;
         tracking::Vector3D                 startPosition;
         tracking::Quaternion               startOrientation;
         tracking::Quaternion               startRelativeOrientation;
-
         bool                               isRotating;
         bool                               isTranslating;
         bool                               isZooming;
@@ -250,36 +246,30 @@ namespace tracking {
 
         std::string                        buttonDeviceName;
         std::string                        rigidBodyName;
-
         int                                selectButton; 
         int                                rotateButton;
         int                                translateButton;
         int                                zoomButton;
-
         bool                               invertRotate;
         bool                               invertTranslate;
         bool                               invertZoom;
-
         float                              translateSpeed;
         float                              zoomSpeed;
-
         bool                               singleInteraction;
-
-        float                              physicalHeight;
-        float                              physicalWidth;
-        
-        tracking::Quaternion               calibrationOrientation;
-        tracking::Vector3D                 physicalOrigin;
-        tracking::Vector3D                 physicalXDir;
-        tracking::Vector3D                 physicalYDir;
-
         TrackingUtilizer::FovMode          fovMode;
         float                              fovHeight;
         float                              fovWidth;
         float                              fovHoriAngle;
         float                              fovVertAngle;
         TrackingUtilizer::FovAspectRatio   fovAspectRatio;
-        
+
+        float                              physicalHeight;
+        float                              physicalWidth;
+        tracking::Quaternion               calibrationOrientation;
+        tracking::Vector3D                 physicalOrigin;
+        tracking::Vector3D                 physicalXDir;
+        tracking::Vector3D                 physicalYDir;
+
         /***********************************************************************
         * functions
         **********************************************************************/

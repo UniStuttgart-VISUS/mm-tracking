@@ -9,18 +9,30 @@
 
 
 tracking::TrackingUtilizer::TrackingUtilizer(void) 
-    : tracker(nullptr)
+    : initialised(false)
+    , tracker(nullptr)
     , curCameraPosition()
     , curCameraUp()
     , curCameraLookAt()
+    , curIntersection()
+    , curFOV()
     , curOrientation()
     , curPosition()
-    , curButtonStates(0)
+    , curButtonStates()
     , curSelecting(false)
     , positionBuffer()
     , bufferIdx(0)
     , constPosition(false)
-
+    , lastButtonStates(0)
+    , startCamLookAt()
+    , startCamPosition()
+    , startCamUp()
+    , startPosition()
+    , startOrientation()
+    , startRelativeOrientation()
+    , isRotating(false)
+    , isTranslating(false)
+    , isZooming(false)
     , buttonDeviceName("ControlBox")
     , rigidBodyName("Stick")
     , selectButton(-1)
@@ -38,7 +50,13 @@ tracking::TrackingUtilizer::TrackingUtilizer(void)
     , fovWidth(0.2f)
     , fovHoriAngle(60.0f)
     , fovVertAngle(30.0f)
-    , fovAspectRatio(TrackingUtilizer::FovAspectRatio::AR_1_77__1) {
+    , fovAspectRatio(TrackingUtilizer::FovAspectRatio::AR_1_77__1) 
+    , physicalHeight(2.4f)
+    , physicalWidth(6.0f)
+    , calibrationOrientation()
+    , physicalOrigin(-3.0f, 0.3f, 0.0f)
+    , physicalXDir(1.0f, 0.0f, 0.0f)
+    , physicalYDir(0.0f, 1.0f, 0.0f) {
 
     // intentionally empty...
 }
@@ -50,144 +68,169 @@ tracking::TrackingUtilizer::~TrackingUtilizer(void) {
 }
 
 
-bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Params & inUtilizerParams, std::shared_ptr<tracking::Tracker> inTrackerPtr) {
+bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Params & inParams, std::shared_ptr<tracking::Tracker> inTracker) {
 
-    /*
     bool check = true;
     this->initialised = false;
 
+    if (inTracker == nullptr) {
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Pointer to tracker is nullptr. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+    this->tracker = inTracker;
 
+    std::string btn_device_name;
+    try {
+        btn_device_name = std::string(inParams.btn_device_name);
+        if (btn_device_name.length() != inParams.btn_device_name_len) {
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] String \"btn_device_name\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+        if (btn_device_name.empty()) {
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"btn_device_name\" must not be empty string. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Error reading string param 'btn_device_name': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
 
-
+    std::string rigid_body_name;
+    try {
+        rigid_body_name = std::string(inParams.rigid_body_name);
+        if (rigid_body_name.length() != inParams.rigid_body_name_len) {
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] String \"rigid_body_name\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+        if (rigid_body_name.empty()) {
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"rigid_body_name\" must not be empty string. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Error reading string param 'rigid_body_name': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
 
     int  btn_min = -1;
     int  btn_max = 100;
+    bool changed = false;
 
-    this->selectButton = this->limit<int>(this->selectButton, btn_min, btn_max, changed);
+    this->limit<int>(inParams.select_btn, btn_min, btn_max, changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"selectButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"selectButton\" must be in range [" << btn_min << "," << btn_max << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->rotateButton = this->limit<int>(this->rotateButton, btn_min, btn_max, changed);
+    this->limit<int>(inParams.rotate_btn, btn_min, btn_max, changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"rotateButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"rotate_btn\" must be in range [" << btn_min << "," << btn_max << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->translateButton = this->limit<int>(this->translateButton, btn_min, btn_max, changed);
+    this->limit<int>(inParams.translate_btn, btn_min, btn_max, changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"translateButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"translate_btn\" must be in range [" << btn_min << "," << btn_max << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->zoomButton = this->limit<int>(this->zoomButton, btn_min, btn_max, changed);
+    this->limit<int>(inParams.zoom_btn, btn_min, btn_max, changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"zoomButton\" must be in range [" << btn_min << "," << btn_max << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"zoom_btn\" must be in range [" << btn_min << "," << btn_max << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->translateSpeed = this->limit<float>(this->translateSpeed, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    this->limit<float>(inParams.translate_speed, 0.0f, (std::numeric_limits<float>::max)(), changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"translateSpeed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"translate_speed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->zoomSpeed = this->limit<float>(this->zoomSpeed, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    this->limit<float>(inParams.zoom_speed, 0.0f, (std::numeric_limits<float>::max)(), changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"zoomSpeed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"zoom_speed\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->fovHeight = this->limit<float>(this->fovHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    this->limit<float>(inParams.fov_height, 0.0f, (std::numeric_limits<float>::max)(), changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"fov_height\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->fovWidth = this->limit<float>(this->fovWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    this->limit<float>(inParams.fov_width, 0.0f, (std::numeric_limits<float>::max)(), changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"fov_width\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->fovHoriAngle = this->limit<float>(this->fovHoriAngle, 0.0f, 180.0f, changed);
+    this->limit<float>(inParams.fov_horiz_angle, 0.0f, 180.0f, changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovHoriAngle\" must be in range [" << 0.0f << "," << 180.0f << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"fov_horiz_angle\" must be in range [" << 0.0f << "," << 180.0f << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->fovVertAngle = this->limit<float>(this->fovVertAngle, 0.0f, 180.0f, changed);
+    this->limit<float>(inParams.fov_vert_angle, 0.0f, 180.0f, changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"fovVertAngle\" must be in range [" << 0.0f << "," << 180.0f << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"fov_vert_angle\" must be in range [" << 0.0f << "," << 180.0f << "]. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->physicalHeight = this->limit<float>(this->physicalHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
+
+    this->limit<float>(this->physicalHeight, 0.0f, (std::numeric_limits<float>::max)(), changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"physicalHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"physicalHeight\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    this->physicalWidth = this->limit<float>(this->physicalWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
+    this->limit<float>(this->physicalWidth, 0.0f, (std::numeric_limits<float>::max)(), changed);
     if (changed) {
-        std::cout << std::endl << "[WARNING] [TrackingUtilizer] Parameter \"physicalWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]." << std::endl << std::endl;
-        retval = false;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"physicalWidth\" must be in range [" << 0.0f << "," << (std::numeric_limits<float>::max)() << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-
-    /// No check necessary for:
-    /// this->buttonDeviceName
-    /// this->rigidBodyName
-    /// this->invertRotate
-    /// this->invertTranslate
-    /// this->invertZoom
-    /// this->fovMode
-    /// this->fovAspectRatio
-    /// this->singleInteraction
-    /// this->physicalorigin
-    /// this->physicalxdir
-    /// this->physicalydir
-    /// this->calibrationorientation
-
-
-
-    this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->curIntersection.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->curFOV.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-    this->curFOV.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-
-    this->buttonDeviceName = p.buttonDeviceName;
-    this->rigidBodyName = p.rigidBodyName;
-    this->selectButton = p.selectButton;
-    this->rotateButton = p.rotateButton;
-    this->translateButton = p.translateButton;
-    this->zoomButton = p.zoomButton;
-
-    this->invertRotate = p.invertRotate;
-    this->invertTranslate = p.invertTranslate;
-    this->invertZoom = p.invertZoom;
-
-    this->translateSpeed = p.translateSpeed;
-    this->zoomSpeed = p.zoomSpeed;
-
-    this->singleInteraction = p.singleInteraction;
-
-    this->fovMode = p.fovMode;
-    this->fovHeight = p.fovHeight;
-    this->fovWidth = p.fovWidth;
-    this->fovHoriAngle = p.fovHoriAngle;
-    this->fovVertAngle = p.fovVertAngle;
-    this->fovAspectRatio = p.fovAspectRatio;
-
-
 
     if (check) {
+        this->buttonDeviceName = btn_device_name;
+        this->rigidBodyName = rigid_body_name;
+        this->selectButton = inParams.select_btn;
+        this->rotateButton = inParams.rotate_btn;
+        this->translateButton = inParams.translate_btn;
+        this->zoomButton = inParams.zoom_btn;
+        this->invertRotate = inParams.invert_rotate;
+        this->invertTranslate = inParams.invert_translate;
+        this->invertZoom = inParams.invert_zoom;
+        this->translateSpeed = inParams.translate_speed;
+        this->zoomSpeed = inParams.zoom_speed;
+        this->singleInteraction = inParams.single_interaction;
+        this->fovMode = inParams.fov_mode;
+        this->fovHeight = inParams.fov_height;
+        this->fovWidth = inParams.fov_width;
+        this->fovHoriAngle = inParams.fov_horiz_angle;
+        this->fovVertAngle = inParams.fov_vert_angle;
+        this->fovAspectRatio = inParams.fov_aspect_ratio;
 
+        this->curPosition.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        this->curIntersection.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        this->curFOV.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        this->curFOV.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        this->curFOV.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        this->curFOV.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
 
-
-
-
-
-
-        this->readParamsFromFile();
         this->printParams();
         this->initialised = true;
+
+        this->initialised = this->readParamsFromFile();
     }
 
-    */
     return this->initialised;
 }
 
@@ -231,7 +274,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
     const std::string filename = "tracking.conf";
     std::ifstream file(filename);
     if (!file.good()) {
-        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Failed to open \"" << filename.c_str() << "\" for reading." << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Failed to open \"" << filename.c_str() << "\" for reading. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
     }
 
     unsigned int lineNmbr = 1;
@@ -239,7 +283,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
     {
         std::istringstream istream(line);
         if (!(istream >> tag)) { 
-            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read line tag in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read line tag in \"" << filename.c_str() << "\" in line number: " << lineNmbr << " " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
             break; 
         }
 
@@ -247,7 +292,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_HEIGHT") {
             if (!(istream >> x)) {
-                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read value for PHYSICAL_SCREEN_HEIGHT in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read value for PHYSICAL_SCREEN_HEIGHT in \"" << filename.c_str() << "\" in line number: " << lineNmbr << " " <<
+                    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -255,7 +301,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_WIDTH") {
             if (!(istream >> x)) {
-                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read value for PHYSICAL_SCREEN_WIDTH in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read value for PHYSICAL_SCREEN_WIDTH in \"" << filename.c_str() << "\" in line number: " << lineNmbr << " " <<
+                    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -263,7 +310,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_ORIGIN") {
             if (!(istream >> x >> y >> z)) {
-                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_ORIGIN in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_ORIGIN in \"" << filename.c_str() << "\" in line number: " << lineNmbr << " " <<
+                    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -271,7 +319,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_X_DIR") {
             if (!(istream >> x >> y >> z)) {
-                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_X_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_X_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << " " <<
+                    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -279,7 +328,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
         }
         else if (tag == "PHYSICAL_SCREEN_Y_DIR") {
             if (!(istream >> x >> y >> z)) {
-                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_Y_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_SCREEN_Y_DIR in \"" << filename.c_str() << "\" in line number: " << lineNmbr << " " <<
+                    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -287,7 +337,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
         }
         else if (tag == "PHYSICAL_CALIBRATION") {
             if (!(istream >> name >> x >> y >> z >> w)) {
-                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_CALIBRATION in \"" << filename.c_str() << "\" in line number: " << lineNmbr << std::endl << std::endl;
+                std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Can not read values for PHYSICAL_CALIBRATION in \"" << filename.c_str() << "\" in line number: " << lineNmbr <<  " " <<
+                    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
                 file.close();
                 break;
             }
@@ -327,7 +378,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
 bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& outBtnState, tracking::Vector3D& outPos, tracking::Quaternion& outOri) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -356,7 +407,7 @@ bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& outBtnState, t
 bool tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -384,7 +435,7 @@ bool tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
 bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& outIntersect) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -412,7 +463,7 @@ bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& outIntersect
 bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& outFov) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -444,7 +495,7 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Di
     tracking::Vector3D& outCamLookAt, tracking::Vector3D& outCamUp) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -484,7 +535,7 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Di
 bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -500,7 +551,7 @@ bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, t
 bool tracking::TrackingUtilizer::Calibration(void) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }

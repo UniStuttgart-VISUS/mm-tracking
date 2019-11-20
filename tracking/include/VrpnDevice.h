@@ -191,37 +191,50 @@ bool tracking::VrpnDevice<R>::Initialise(const typename VrpnDevice<R>::Params& i
     bool check = true;
     this->initialised = false;
 
-    std::string device_name(inParams.device_name);
-    if (device_name.length() != inParams.device_name_len) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] String \"device_name\" has not expected length. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        check = false;
+    std::string device_name;
+    try {
+        device_name = std::string(inParams.device_name);
+        if (device_name.length() != inParams.device_name_len) {
+            std::cerr << std::endl << "[ERROR] [VrpnDevice] String \"device_name\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+        if (device_name.empty()) {
+            std::cerr << std::endl << "[ERROR] [VrpnDevice] Parameter \"device_name\" must not be empty string. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        }
     }
-    if (device_name.empty()) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] Parameter \"device_name\" must not be empty string. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'active_node': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
 
-    std::string server_name(inParams.server_name);
-    if (server_name.length() != inParams.server_name_len) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] String \"server_name\" has not expected length. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        check = false;
+    std::string server_name;
+    try {
+        server_name = std::string(inParams.server_name);
+        if (server_name.length() != inParams.server_name_len) {
+            std::cerr << std::endl << "[ERROR] [VrpnDevice] String \"server_name\" has not expected length. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
+        if (server_name.empty()) {
+            std::cerr << std::endl << "[ERROR] [VrpnDevice] Parameter \"server_name\" must not be empty string. " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            check = false;
+        }
     }
-    if (server_name.empty()) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] Parameter \"server_name\" must not be empty string. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'active_node': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
 
     if (inParams.port >= 65535) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] Parameter \"port\" must be less than 65535. " <<
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Parameter \"port\" must be less than 65535. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
-
-    /// No check necessary for:
-    /// this->protocol
 
     if (check) {
         this->deviceName = device_name;
@@ -257,7 +270,7 @@ template <class R>
 bool tracking::VrpnDevice<R>::Connect(void) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -333,7 +346,7 @@ template <class R> template <typename H>
 bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -357,7 +370,7 @@ template <class R>
 bool tracking::VrpnDevice<R>::MainLoop(void) {
 
     if (!this->initialised) {
-        std::cout << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
