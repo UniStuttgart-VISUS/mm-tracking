@@ -71,6 +71,7 @@ namespace tracking {
         **********************************************************************/
 
         bool initialised;
+        bool connected;
 
         /** 
         * Determines the running state of the Vrpn thread. 

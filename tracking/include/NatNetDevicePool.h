@@ -112,7 +112,9 @@ namespace tracking{
         *
         * @return All available rigid body names.
         */
-        std::vector<std::string> GetRigidBodyNames(void) const;
+        inline std::vector<std::string>& GetRigidBodyNames(void) {
+            return this->rigidBodyNames;
+        }
 
     private:
 
@@ -151,12 +153,15 @@ namespace tracking{
         **********************************************************************/
 
         bool initialised;
+        bool connected;
 
         std::unique_ptr<NatNetClient> natnetClient;
 
         std::vector<std::shared_ptr<RigidBody>> rigidBodies;
 
-        std::array<unsigned int, 2> callbackCounter; // [last, current]
+        int callbackCounter;
+
+        std::vector<std::string> rigidBodyNames;
 
         /** parameters ********************************************************/
 

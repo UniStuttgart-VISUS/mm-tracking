@@ -98,7 +98,11 @@ int main() {
     // TrackingUtilizers
     /// Manage tracking data for one rigid body each.
     /// Creating a TrackingUtilizer for each found rigid body (and corresponding button device).
-    std::vector<std::string> rigidBodies = tracker->GetRigidBodyNames();
+    size_t rigiBodyCount = tracker->GetRigidBodyCount();
+    std::vector<std::string> rigidBodies;
+    for (size_t i = 0; i < rigiBodyCount; i++) {
+        rigidBodies.emplace_back(std::string(tracker->GetRigidBodyName(i)));
+    }
     std::vector<tracking::TrackingUtilizer> utilizers;
     utilizers.clear();
     for (auto rb : rigidBodies) {
@@ -111,7 +115,7 @@ int main() {
 
         }
     }
-    
+
     // LOOP ///////////////////////////////////////////////////////////////////
 
     tracking::Point2D ist;

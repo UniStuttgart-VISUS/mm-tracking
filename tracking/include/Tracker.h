@@ -23,7 +23,7 @@ namespace tracking {
 
     /***************************************************************************
     *
-    * Collects 6 DOF tracking data of rigid bodies (via NetNet) and 
+    * Collects 6 DOF tracking data of rigid bodies (via NetNet) and
     * the states of VRPN button devices.
     *
     ***************************************************************************/
@@ -41,7 +41,7 @@ namespace tracking {
         };
 
         /** Current tracking raw data. */
-        struct TrackingData  {
+        struct TrackingData {
             tracking::NatNetDevicePool::RigidBodyData rigidBody;
             tracking::ButtonMask                      buttonState;
         };
@@ -74,7 +74,7 @@ namespace tracking {
 
         /**
         * Callback for disconnection tracking.
-        *   
+        *
         * @return True for success, false otherwise.
         */
         bool Disconnect(void);
@@ -94,11 +94,27 @@ namespace tracking {
         bool GetData(const char* inRigidBody, const char* inButtonDevice, tracking::Tracker::TrackingData& outData);
 
         /**
+        * Get number of available rigid body names.
+        *
+        * @return All available rigid body names.
+        */
+        inline size_t GetRigidBodyCount(void) {
+            return this->motionDevices.GetRigidBodyNames().size();
+        }
+
+        /**
         * Get all available rigid body names.
         *
         * @return All available rigid body names.
         */
-        std::vector<std::string> GetRigidBodyNames(void);
+        const char* GetRigidBodyName(size_t index) {
+            if (index < this->motionDevices.GetRigidBodyNames().size()) {
+                return this->motionDevices.GetRigidBodyNames()[index].c_str();
+            }
+            else {
+                return nullptr;
+            }
+        }
 
     private:
 
@@ -113,15 +129,13 @@ namespace tracking {
         **********************************************************************/
 
         bool initialised;
+        bool connected;
 
         /** The VRPN devices that handle button presses. */
         VrpnButtonPoolType buttonDevices;
 
         /** The NatNat motion devices that handle position and orientation of rigid bodies. */
         tracking::NatNetDevicePool motionDevices;
-
-        /** Connection status. */
-        bool isConnected;
 
         /** parameters ********************************************************/
 

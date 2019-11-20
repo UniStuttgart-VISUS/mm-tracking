@@ -10,6 +10,7 @@
 
 tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_Button_Remote>()
     , initialised(false)
+    , connected(false)
     , runThreadLoop(false)
     , states(0) {
 
@@ -62,6 +63,8 @@ bool tracking::VrpnButtonDevice::Connect(void) {
     });
     thread.detach();
 
+    this->connected = true;
+
     return true;
 }
 
@@ -71,6 +74,8 @@ bool tracking::VrpnButtonDevice::Disconnect(void) {
     // End main loop thread
     this->runThreadLoop.store(false);
 
+    this->connected = false;
+
     return tracking::VrpnDevice<vrpn_Button_Remote>::Disconnect();
 }
 
@@ -79,6 +84,11 @@ tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+    if (!this->connected) {
+        std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }

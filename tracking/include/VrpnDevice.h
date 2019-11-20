@@ -81,25 +81,6 @@ namespace tracking {
             return this->deviceName;
         }
 
-        /**********************************************************************/
-        // SET
-
-        inline void SetDeviceName(std::string dn) {
-            this->deviceName = dn;
-        }
-
-        inline void SetServerName(std::string sn) {
-            this->serverName = sn;
-        }
-
-        inline void SetPort(unsigned int p) {
-            this->port = p;
-        }
-
-        inline void SetProtocol(typename VrpnDevice<R>::Protocols p) {
-            this->protocol = p;
-        }
-
     protected:
 
         /**
@@ -126,6 +107,7 @@ namespace tracking {
         **********************************************************************/
 
         bool initialised;
+        bool connected;
 
         /** 
         * Pointer to remoteDevice vrpn device (e.g. button, tracker).
@@ -175,6 +157,7 @@ namespace tracking {
 template <class R>
 tracking::VrpnDevice<R>::VrpnDevice(void)
     : initialised(false)
+    , connected(false)
     , remoteDevice(nullptr)
     , deviceName("ControlBox")
     , serverName("mini")
@@ -318,6 +301,9 @@ bool tracking::VrpnDevice<R>::Connect(void) {
     std::cout << "[INFO] [VrpnDevice] Successfully connected to VRPN server." << std::endl;
 
     connection->removeReference(); /// Adjust reference count manually.
+
+    this->connected = true;
+
     return true;
 }
 
@@ -338,6 +324,8 @@ bool tracking::VrpnDevice<R>::Disconnect(void) {
 
     std::cout << "[INFO] [VrpnDevice] Successfully disconnected from VRPN server." << std::endl;
 
+    this->connected = false;
+
     return true;
 }
 
@@ -347,6 +335,11 @@ bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+    if (!this->connected) {
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -371,6 +364,11 @@ bool tracking::VrpnDevice<R>::MainLoop(void) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+    if (!this->connected) {
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }

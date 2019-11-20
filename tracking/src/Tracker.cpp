@@ -10,9 +10,9 @@
 
 tracking::Tracker::Tracker(void)
     : initialised(false)
+    , connected(false)
     , buttonDevices()
     , motionDevices()
-    , isConnected(false)
     , activeNode() {
 
     // intentionally empty...
@@ -138,8 +138,8 @@ bool tracking::Tracker::Connect(void) {
         natnetConStatus = false;
     }
 
-    this->isConnected = (vrpnConStatus && natnetConStatus);
-    return this->isConnected;
+    this->connected = (vrpnConStatus && natnetConStatus);
+    return this->connected;
 }
 
 
@@ -150,7 +150,7 @@ bool tracking::Tracker::Disconnect(void) {
     }
     this->motionDevices.Disconnect();
 
-    this->isConnected = false;
+    this->connected = false;
     return true;
 }
 
@@ -159,6 +159,11 @@ bool tracking::Tracker::GetData(const char* inRigidBody, const char* inButtonDev
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+    if (!this->connected) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -183,39 +188,21 @@ bool tracking::Tracker::GetData(const char* inRigidBody, const char* inButtonDev
     }
 
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[DEBUG] [Tracker] Requested: Button Device \"" << buttonDevice.c_str() << "\" and Rigid Body \"" << rigidBody.c_str() << "\"." << std::endl;
+    std::cout << "[DEBUG] [Tracker] Requested: Button Device \"" << buttonDeviceName.c_str() << "\" and Rigid Body \"" << rigidBodyName.c_str() << "\"." << std::endl;
 #endif
 
-    bool retval = false;
+    // Set data of requested rigid body
+    outData.rigidBody.orientation = this->motionDevices.GetOrientation(rigidBodyName);
+    outData.rigidBody.position    = this->motionDevices.GetPosition(rigidBodyName);
 
-    if (this->isConnected) {
-        retval = true;
-
-        // Set data of requested rigid body
-        outData.rigidBody.orientation = this->motionDevices.GetOrientation(rigidBodyName);
-        outData.rigidBody.position    = this->motionDevices.GetPosition(rigidBodyName);
-
-        // Set data of requested button device 
-        outData.buttonState = 0;
-        for (auto& v : this->buttonDevices) {
-            if (buttonDeviceName == v->GetDeviceName()) {
-                outData.buttonState = (v->GetButtonStates());
-                break; /// Break if button device is found.
-            }
+    // Set data of requested button device 
+    outData.buttonState = 0;
+    for (auto& v : this->buttonDevices) {
+        if (buttonDeviceName == v->GetDeviceName()) {
+            outData.buttonState = (v->GetButtonStates());
+            break; /// Break if button device is found.
         }
     }
 
-    return retval;
-}
-
-
-std::vector<std::string> tracking::Tracker::GetRigidBodyNames(void) {
-
-    if (!this->initialised) {
-        std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        return std::vector<std::string>();
-    }
-
-    return this->motionDevices.GetRigidBodyNames();
+    return true;
 }

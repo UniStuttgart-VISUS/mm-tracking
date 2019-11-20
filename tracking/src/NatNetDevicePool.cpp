@@ -10,9 +10,11 @@
 
 tracking::NatNetDevicePool::NatNetDevicePool(void)
     : initialised(false)
+    , connected(false)
     , natnetClient(nullptr)
     , rigidBodies()
-    , callbackCounter({ 0, 0 } )
+    , callbackCounter(0)
+    , rigidBodyNames()
     , clientIP("129.69.205.76") // minyou
     , serverIP("129.69.205.86") // mini
     , cmdPort(1510)
@@ -84,7 +86,7 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
     }
 
     if (check) {
-        this->callbackCounter = { 0, 0 };
+        this->callbackCounter = 0;
         this->clientIP = client_ip;
         this->serverIP = server_ip;
 
@@ -212,6 +214,7 @@ bool tracking::NatNetDevicePool::Connect(void) {
     }
 
     // Look up rigid body data descriptions.
+    this->rigidBodyNames.clear();
     std::cout << "[INFO] [NatNetDevicePool] Looking up rigid bodies ..." << std::endl;
     errorcode = this->natnetClient->GetDataDescriptionList(&dataDesc);
     if (errorcode == ErrorCode_OK) {
@@ -225,6 +228,7 @@ bool tracking::NatNetDevicePool::Connect(void) {
                 }
                 // Create new lock free ring for rigid body data
                 this->rigidBodies.emplace_back(std::make_shared<RigidBody>(rb->ID, rb->szName));
+                this->rigidBodyNames.emplace_back(this->rigidBodies.back()->name);
 
                 std::cout << "[INFO] [NatNetDevicePool] >>> PROVIDED RIGID BODY \"" << this->rigidBodies.back()->name.c_str() << "\"."<< std::endl;
             }
@@ -236,6 +240,8 @@ bool tracking::NatNetDevicePool::Connect(void) {
         this->Disconnect();
         return false;
     }
+
+    this->connected = true;
 
     return true;
 }
@@ -261,6 +267,8 @@ bool tracking::NatNetDevicePool::Disconnect(void) {
     }
     this->rigidBodies.clear();
 
+    this->connected = false;
+
     return true;
 }
 
@@ -277,22 +285,35 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return retOr;
     }
+    if (!this->connected) {
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not connected. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return retOr;
+    }
 
     // Check for updated data
-    if (this->callbackCounter[0] == this->callbackCounter[1]) {
-        this->callbackCounter[0] = this->callbackCounter[1] = 0;
+#ifdef TRACKING_DEBUG_OUTPUT
+    std::cout << "[DEBUG]  [NatNetDevicePool] Callback Counter = " << this->callbackCounter << std::endl;
+#endif
+    if (this->callbackCounter <= 0) {
+        this->callbackCounter--;
+        if (this->callbackCounter < -10) {
         std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
             ">>> Please check your firewall settings if this warning appears repeatedly! " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        }
     }
-
+    else {
+        this->callbackCounter = 0;
+    }
+   
     for (auto it : this->rigidBodies) {
         if (rbn == it->name) {
             retOr = it->lockFreeData[it->read.load()].orientation;
             break;
         }
     }
-
+    
     return retOr;
 }
 
@@ -308,13 +329,26 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rb
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return retPos;
     }
+    if (!this->connected) {
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not connected. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return retPos;
+    }
 
     // Check for updated data
-    if (this->callbackCounter[0] == this->callbackCounter[1]) {
-        this->callbackCounter[0] = this->callbackCounter[1] = 0;
-        std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " << 
-            ">>> Please check your firewall settings if this warning appears repeatedly! " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+#ifdef TRACKING_DEBUG_OUTPUT
+    std::cout << "[DEBUG]  [NatNetDevicePool] Callback Counter = " << this->callbackCounter << std::endl;
+#endif
+    if (this->callbackCounter <= 0) {
+        this->callbackCounter--;
+        if (this->callbackCounter < -10) {
+            std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
+                ">>> Please check your firewall settings if this warning appears repeatedly! " <<
+                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        }
+    }
+    else {
+        this->callbackCounter = 0;
     }
 
     for (auto it : this->rigidBodies) { 
@@ -328,24 +362,6 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rb
 }
 
 
-std::vector<std::string> tracking::NatNetDevicePool::GetRigidBodyNames(void) const {
-
-    std::vector<std::string> retval;
-    retval.clear();
-
-    if (!this->initialised) {
-        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Not initialised. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        return retval;
-    }
-
-    for (auto it : this->rigidBodies) { 
-        retval.emplace_back(it->name);
-    }
-
-    return retval;
-}
-
 
 void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
 
@@ -357,11 +373,11 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
     }
 
     // Simple counter to be able to check if callback has been called
-    ++that->callbackCounter[1];
+    that->callbackCounter++;
     // Prevent overflow
-    if (that->callbackCounter[1] > ((std::numeric_limits<unsigned int>::max)() - 2)) {
-        that->callbackCounter[0] = 0;
-        that->callbackCounter[1] = 1;
+    if ((that->callbackCounter > ((std::numeric_limits<int>::max)() - 2)) || 
+        (that->callbackCounter < ((std::numeric_limits<int>::min)() + 2))) {
+        that->callbackCounter = 0;
     }
 
     for (int i = 0; i < pFrameOfData->nRigidBodies; ++i) {
@@ -377,7 +393,7 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
             || (pFrameOfData->RigidBodies[i].z  != 0.0f)
             );
 #ifdef TRACKING_DEBUG_OUTPUT
-        //std::cout << "[DEBUG] <NatNetDevicePool::onData> ID = " << pFrameOfData->RigidBodies[i].ID << " MeanError = " << pFrameOfData->RigidBodies[i].MeanError <<
+        //std::cout << "[DEBUG] [NatNetDevicePool] ID = " << pFrameOfData->RigidBodies[i].ID << " MeanError = " << pFrameOfData->RigidBodies[i].MeanError <<
         //    "; Params = " << pFrameOfData->RigidBodies[i].params << "; Orientation = " << pFrameOfData->RigidBodies[i].qx << ", " <<
         //    pFrameOfData->RigidBodies[i].qy << ", " << pFrameOfData->RigidBodies[i].qz << ", " << pFrameOfData->RigidBodies[i].qw <<
         //    "; Position = " << pFrameOfData->RigidBodies[i].x << ", " << pFrameOfData->RigidBodies[i].y << ", " << pFrameOfData->RigidBodies[i].z << "; (isValid = " << isValid << ")." << std::endl;
@@ -404,7 +420,7 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
                     unsigned int free = (it->read.load() + 1) % 3;
                     free = (it->write.load() == free) ? ((it->write.load() + 1) % 3) : (free);
 #ifdef TRACKING_DEBUG_OUTPUT
-                    //std::cout << "[DEBUG] <NatNetDevicePool::onData> READ = " << it->read.load() << " - WRTIE = " << it->write.load() << " - FREE = " << free << "." << std::endl;
+                    //std::cout << "[DEBUG] [NatNetDevicePool] READ = " << it->read.load() << " - WRTIE = " << it->write.load() << " - FREE = " << free << "." << std::endl;
 #endif
                     // Swap lock free read/write buffers
                     it->read.store(it->write.load());
