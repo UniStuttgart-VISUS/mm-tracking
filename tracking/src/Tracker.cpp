@@ -155,11 +155,30 @@ bool tracking::Tracker::Disconnect(void) {
 }
 
 
-bool tracking::Tracker::GetData(const std::string& inRigidBody, const std::string& inButtonDevice, tracking::Tracker::TrackingData& outData) {
+bool tracking::Tracker::GetData(const char* inRigidBody, const char* inButtonDevice, tracking::Tracker::TrackingData& outData) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
+    std::string rigidBodyName, buttonDeviceName;
+    try {
+        rigidBodyName = std::string(inRigidBody);
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'inRigidBody': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
+    try {
+        buttonDeviceName = std::string(inButtonDevice);
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'inButtonDevice': " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
@@ -173,13 +192,13 @@ bool tracking::Tracker::GetData(const std::string& inRigidBody, const std::strin
         retval = true;
 
         // Set data of requested rigid body
-        outData.rigidBody.orientation = this->motionDevices.GetOrientation(inRigidBody);
-        outData.rigidBody.position    = this->motionDevices.GetPosition(inRigidBody);
+        outData.rigidBody.orientation = this->motionDevices.GetOrientation(rigidBodyName);
+        outData.rigidBody.position    = this->motionDevices.GetPosition(rigidBodyName);
 
         // Set data of requested button device 
         outData.buttonState = 0;
         for (auto& v : this->buttonDevices) {
-            if (inButtonDevice == v->GetDeviceName()) {
+            if (buttonDeviceName == v->GetDeviceName()) {
                 outData.buttonState = (v->GetButtonStates());
                 break; /// Break if button device is found.
             }
@@ -190,13 +209,13 @@ bool tracking::Tracker::GetData(const std::string& inRigidBody, const std::strin
 }
 
 
-void tracking::Tracker::GetRigidBodyNames(std::vector<std::string>& inoutNames) const {
+std::vector<std::string> tracking::Tracker::GetRigidBodyNames(void) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        return;
+        return std::vector<std::string>();
     }
 
-    inoutNames = this->motionDevices.GetRigidBodyNames();
+    return this->motionDevices.GetRigidBodyNames();
 }

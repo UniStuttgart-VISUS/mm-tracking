@@ -27,7 +27,6 @@ int main() {
 
     /// Tracker Parameters
     tracking::Tracker::Params tp;
-
     std::string active_node(""); /// ALL
     tp.active_node                   = active_node.c_str();
     tp.active_node_len               = active_node.length();
@@ -99,14 +98,12 @@ int main() {
     // TrackingUtilizers
     /// Manage tracking data for one rigid body each.
     /// Creating a TrackingUtilizer for each found rigid body (and corresponding button device).
-    std::vector<std::string> rigidBodies;
-    rigidBodies.clear();
-    tracker->GetRigidBodyNames(rigidBodies);
+    std::vector<std::string> rigidBodies = tracker->GetRigidBodyNames();
     std::vector<tracking::TrackingUtilizer> utilizers;
     utilizers.clear();
-    for (auto it : rigidBodies) {
-        tup.rigid_body_name = it.c_str();
-        tup.rigid_body_name_len = it.length();
+    for (auto rb : rigidBodies) {
+        tup.rigid_body_name = rb.c_str();
+        tup.rigid_body_name_len = rb.length();
         utilizers.emplace_back(tracking::TrackingUtilizer());
         if (!utilizers.back().Initialise(tup, tracker)) {
             std::cerr << std::endl << "[ERROR] [test] Failed to initialise <TrackingUtilizer>. " << "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
@@ -115,7 +112,6 @@ int main() {
         }
     }
     
-
     // LOOP ///////////////////////////////////////////////////////////////////
 
     tracking::Point2D ist;
@@ -145,7 +141,7 @@ int main() {
             // Intersection
             state = tu.GetIntersection(ist);
             std::cout << std::fixed << std::setprecision(4) <<
-                "[INFO] [" << progName.c_str() << "] RIGID-BODY \"" << tu.GetRigidBodyName().c_str() << "\" - INTERSECTION (valid = "
+                "[INFO] [" << progName.c_str() << "] RIGID-BODY \"" << tu.GetRigidBodyName() << "\" - INTERSECTION (valid = "
                 << ((state) ? ("TRUE") : ("FALSE")) << ") ";
             if (state) {
                 std::cout << " - Coordinates: (" << ist.X() << "," << ist.Y() << ") ";

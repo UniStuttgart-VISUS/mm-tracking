@@ -587,7 +587,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
     // Get fresh data from tracker
     bool retval = false;
     tracking::Tracker::TrackingData data;
-    if (this->tracker->GetData(this->rigidBodyName, this->buttonDeviceName, data)) {
+    if (this->tracker->GetData(this->rigidBodyName.c_str(), this->buttonDeviceName.c_str(), data)) {
         this->curButtonStates = data.buttonState;
         this->curPosition     = data.rigidBody.position;
         this->curOrientation  = data.rigidBody.orientation;

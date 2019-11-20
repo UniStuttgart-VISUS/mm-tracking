@@ -85,20 +85,20 @@ namespace tracking {
         /**
         *  Get current tracking data.
         *
-        * @param buttonDevice The name of the button device getting data for.
-        * @param rigidBody    The name of the rigid body getting data for
-        * @param data         Returns the current tracking raw data.
+        * @param inRigidBody    The name of the rigid body getting data for
+        * @param inButtonDevice The name of the button device getting data for.
+        * @param outData         Returns the current tracking raw data.
         *
         * @return True for success, false otherwise.
         */
-        bool GetData(const std::string& inRigidBody, const std::string& inButtonDevice, tracking::Tracker::TrackingData& outData);
+        bool GetData(const char* inRigidBody, const char* inButtonDevice, tracking::Tracker::TrackingData& outData);
 
         /**
         * Get all available rigid body names.
         *
         * @return All available rigid body names.
         */
-        void GetRigidBodyNames(std::vector<std::string>& inoutNames) const;
+        std::vector<std::string> GetRigidBodyNames(void);
 
     private:
 

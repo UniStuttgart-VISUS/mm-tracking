@@ -172,8 +172,8 @@ namespace tracking {
         *
         * @return The button device name.
         */
-        inline std::string GetButtonDeviceName(void) const {
-            return this->buttonDeviceName;
+        inline const char* GetButtonDeviceName(void) const {
+            return this->buttonDeviceName.c_str();
         }
 
         /**
@@ -181,8 +181,8 @@ namespace tracking {
         *
         * @return The rigid body name.
         */
-        inline std::string GetRigidBodyName(void) const {
-            return this->rigidBodyName;
+        inline const char* GetRigidBodyName(void) const {
+            return this->rigidBodyName.c_str();
         }
 
         /**********************************************************************/
