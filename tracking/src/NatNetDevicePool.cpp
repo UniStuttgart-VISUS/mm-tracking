@@ -27,7 +27,6 @@ tracking::NatNetDevicePool::NatNetDevicePool(void)
 
 bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inParams) {
 
-
     bool check = true;
     this->initialised = false;
     this->natnetClient = nullptr;
@@ -39,7 +38,8 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
         check = false;
     }
     if (client_ip.empty()) {
-        std::cout << std::endl << "[WARNING] [NatNetClient] Parameter \"client_ip\" must not be empty string." << std::endl << std::endl;
+        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"client_ip\" must not be empty string. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
 
@@ -50,7 +50,8 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
         check = false;
     }
     if (server_ip.empty()) {
-        std::cout << std::endl << "[WARNING] [NatNetClient] Parameter \"server_ip\" must not be empty string." << std::endl << std::endl;
+        std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"server_ip\" must not be empty string. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
 

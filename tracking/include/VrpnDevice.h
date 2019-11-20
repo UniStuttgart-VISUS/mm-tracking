@@ -31,12 +31,14 @@ namespace tracking {
             VRPN_UDP = 1
         };
 
-        /** Data structure for setting parameters as batch. */
+        /** Data structure for setting PARAMETERs as batch. */
         struct Params  {
-            std::string                                 deviceName;   /** The VRPN button device name. */
-            std::string                                 serverName;   /** The VRPN server name.        */
-            unsigned int                                port;         /** The VRPN port.               */
-            typename tracking::VrpnDevice<R>::Protocols protocol;     /** The VRPN protocol.           */
+            const char*                                 device_name;     /** The VRPN button device name. */
+            size_t                                      device_name_len; 
+            const char*                                 server_name;     /** The VRPN server name.        */
+            size_t                                      server_name_len; 
+            unsigned int                                port;            /** The VRPN port.               */
+            typename tracking::VrpnDevice<R>::Protocols protocol;        /** The VRPN protocol.           */
         };
 
         ///////////////////////////////////////////////////////////////////////
@@ -46,7 +48,12 @@ namespace tracking {
         */
         VrpnDevice(void);
 
-        VrpnDevice(const typename tracking::VrpnDevice<R>::Params& inParams);
+        /**
+        * Initialisation.
+        *
+        * @return True for success, false otherwise.
+        */
+        bool Initialise(const typename tracking::VrpnDevice<R>::Params& inParams);
 
         /**
         * DTOR
@@ -118,12 +125,14 @@ namespace tracking {
         * variables
         **********************************************************************/
 
+        bool initialised;
+
         /** 
         * Pointer to remoteDevice vrpn device (e.g. button, tracker).
         */
         std::unique_ptr<R> remoteDevice; 
 
-        /** parameters ********************************************************/
+        /** PARAMETERs ********************************************************/
 
         /** 
         * Button device name. 
@@ -132,7 +141,7 @@ namespace tracking {
         std::string deviceName;
 
         /** 
-        * VRPN server name. *
+        * VRPN server name.
         * The sever IP address or server host name running vrpn and hosting the device.
         */
         std::string serverName;
@@ -152,11 +161,8 @@ namespace tracking {
         * functions
         **********************************************************************/
 
-        /** Print used parameter values. */
-        void paramsPrint(void);
-
-        /** Print used parameter values. */
-        bool paramsCheck(void);
+        /** Print used PARAMETER values. */
+        void printParams(void);
 
     };
 
@@ -166,76 +172,80 @@ namespace tracking {
 /// Template classes must be declared AND defined in the header file.
 
 
-/**
-* tracking::VrpnDevice::VrpnDevice
-*/
 template <class R>
-tracking::VrpnDevice<R>::VrpnDevice(void) :
-    remoteDevice(nullptr),
-    deviceName("ControlBox"),
-    serverName("mini"),
-    port(3884),
-    protocol(VrpnDevice<R>::Protocols::VRPN_TCP)
-{
-    this->paramsPrint();
+tracking::VrpnDevice<R>::VrpnDevice(void)
+    : initialised(false)
+    , remoteDevice(nullptr)
+    , deviceName("ControlBox")
+    , serverName("mini")
+    , port(3884)
+    , protocol(VrpnDevice<R>::Protocols::VRPN_TCP) {
+    
+    // intentionally empty...
 }
 
 
 template <class R>
-tracking::VrpnDevice<R>::VrpnDevice(const typename VrpnDevice<R>::Params& inParams) :
-    remoteDevice(nullptr),
-    deviceName(inParams.deviceName),
-    serverName(inParams.serverName),
-    port(inParams.port),
-    protocol(inParams.protocol)
-{
-    this->paramsPrint();
-}
+bool tracking::VrpnDevice<R>::Initialise(const typename VrpnDevice<R>::Params& inParams) {
 
+    bool check = true;
+    this->initialised = false;
 
-/**
-* tracking::VrpnDevice::paramsPrint
-*/
-template <class R>
-void tracking::VrpnDevice<R>::paramsPrint(void) {
-    std::cout << "[parameter] <VrpnDevice> Device Name:                   " << this->deviceName.c_str() << std::endl;
-    std::cout << "[parameter] <VrpnDevice> Server Name:                   " << this->serverName.c_str() << std::endl;
-    std::cout << "[parameter] <VrpnDevice> Port:                          " << this->port << std::endl;
-    std::cout << "[parameter] <VrpnDevice> Protocol:                      " << (int)this->protocol << std::endl;
-}
-
-
-/**
-* tracking::VrpnDevice::paramsCheck
-*/
-template <class R>
-bool tracking::VrpnDevice<R>::paramsCheck(void) {
-
-    bool retval = true;
-
-    if (this->deviceName.empty()) {
-        std::cout << std::endl << "[WARNING] <VrpnDevice> Parameter \"deviceName\" must not be empty." << std::endl << std::endl;
-        retval = false;
+    std::string device_name(inParams.device_name);
+    if (device_name.length() != inParams.device_name_len) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] String \"device_name\" has not expected length. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
-    if (this->serverName.empty()) {
-        std::cout << std::endl << "[WARNING] <VrpnDevice> Parameter \"serverName\" must not be empty." << std::endl << std::endl;
-        retval = false;
+    if (device_name.empty()) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] Parameter \"device_name\" must not be empty string. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
     }
-    if (this->port > 65535) {
-        std::cout << std::endl << "[WARNING] <VrpnDevice> Parameter \"port\" must not be greater than 65535." << std::endl << std::endl;
-        retval = false;
+
+    std::string server_name(inParams.server_name);
+    if (server_name.length() != inParams.server_name_len) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] String \"server_name\" has not expected length. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
+    if (server_name.empty()) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] Parameter \"server_name\" must not be empty string. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
+
+    if (inParams.port >= 65535) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] Parameter \"port\" must be less than 65535. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
     }
 
     /// No check necessary for:
-    // this->protocol
+    /// this->protocol
 
-    return retval;
+    if (check) {
+        this->deviceName = device_name;
+        this->serverName = server_name;
+        this->port = inParams.port;
+        this->protocol = inParams.protocol;
+
+        this->printParams();
+        this->initialised = true;
+    }
+
+    return this->initialised;
 }
 
 
-/**
-* tracking::VrpnDevice::~VrpnDevice
-*/
+template <class R>
+void tracking::VrpnDevice<R>::printParams(void) {
+    std::cout << "[PARAMETER] [VrpnDevice] Device Name:                   " << this->deviceName.c_str() << std::endl;
+    std::cout << "[PARAMETER] [VrpnDevice] Server Name:                   " << this->serverName.c_str() << std::endl;
+    std::cout << "[PARAMETER] [VrpnDevice] Port:                          " << this->port << std::endl;
+    std::cout << "[PARAMETER] [VrpnDevice] Protocol:                      " << (int)this->protocol << std::endl;
+}
+
+
 template <class R>
 tracking::VrpnDevice<R>::~VrpnDevice(void) {
 
@@ -243,18 +253,16 @@ tracking::VrpnDevice<R>::~VrpnDevice(void) {
 }
 
 
-/**
-* tracking::VrpnDevice::connect
-*/
 template <class R>
 bool tracking::VrpnDevice<R>::Connect(void) {
 
-    std::string url;
-
-    // Check for valid parameters
-    if (!this->paramsCheck()) {
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
+
+    std::string url;
 
     // Terminate previous connection.    
     this->Disconnect();
@@ -272,7 +280,7 @@ bool tracking::VrpnDevice<R>::Connect(void) {
     str << this->deviceName.c_str() << "@" << prot.c_str() << "://" << this->serverName.c_str() << ":" << this->port;
     url = str.str();
 
-    std::cout << "[info] <VrpnDevice> Connecting to VRPN server: " << url.c_str() << std::endl;
+    std::cout << "[INFO] [VrpnDevice] Connecting to VRPN server: " << url.c_str() << std::endl;
 
     vrpn_Connection *connection = vrpn_get_connection_by_name(
         url.c_str()
@@ -283,7 +291,8 @@ bool tracking::VrpnDevice<R>::Connect(void) {
         );
 
     if (connection->doing_okay() == vrpn_false) {
-        std::cerr << std::endl << "[ERROR] <VrpnDevice> Failed to connect to VRPN server." << std::endl << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Failed to connect to VRPN server. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         connection->removeReference(); /// Adjust reference count manually.
         return false;
     }
@@ -291,18 +300,15 @@ bool tracking::VrpnDevice<R>::Connect(void) {
     /// Create remoteDevice object calling CTOR with make_unique() for type R (e.g. vrpn_Button_remoteDevice, vrpn_Tracker_remoteDevice)
     this->remoteDevice = std::make_unique<R>(url.c_str(), connection); 
     this->remoteDevice->shutup = true;
-    std::cout << "[info] <VrpnDevice> >>> AVAILABEL BUTTON DEVICE: \"" << this->deviceName.c_str() << "\"" << std::endl;
+    std::cout << "[INFO] [VrpnDevice] >>> AVAILABEL BUTTON DEVICE: \"" << this->deviceName.c_str() << "\"" << std::endl;
 
-    std::cout << "[info] <VrpnDevice> Successfully connected to VRPN server." << std::endl;
+    std::cout << "[INFO] [VrpnDevice] Successfully connected to VRPN server." << std::endl;
 
     connection->removeReference(); /// Adjust reference count manually.
     return true;
 }
 
 
-/**
-* tracking::VrpnDevice::disconnect
-*/
 template <class R>
 bool tracking::VrpnDevice<R>::Disconnect(void) {
 
@@ -317,25 +323,29 @@ bool tracking::VrpnDevice<R>::Disconnect(void) {
     // to nullptr will delete the remoteDevice object and calls the other DTORs recursively.
     this->remoteDevice.reset(nullptr);
 
-    std::cout << "[info] <VrpnDevice> Successfully disconnected from VRPN server." << std::endl;
+    std::cout << "[INFO] [VrpnDevice] Successfully disconnected from VRPN server." << std::endl;
 
     return true;
 }
 
 
-/**
-* tracking::VrpnDevice::Register
-*/
 template <class R> template <typename H>
 bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
     if (!this->remoteDevice) {
-        std::cerr << std::endl << "[ERROR] <VrpnDevice> No remote device present. (Hint: Call [Connect] prior to [Register])" << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] No remote device present. Call 'Connect()' prior to 'Register()'. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
     if (userData == nullptr) {
-        std::cerr << std::endl << "[ERROR] <VrpnDevice> Pointer to userData is NULL. " << __FILE__ << " " << __LINE__ << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] Pointer to userData is NULL. " << __FILE__ << " " << __LINE__ << std::endl << std::endl;
         return false;
     }
 
@@ -343,14 +353,18 @@ bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 }
 
 
-/**
-* tracking::VrpnDevice::MainLoop
-*/
 template <class R>
 bool tracking::VrpnDevice<R>::MainLoop(void) {
 
+    if (!this->initialised) {
+        std::cout << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        return false;
+    }
+
     if (!this->remoteDevice) { 
-        std::cerr << std::endl << "[ERROR] <VrpnDevice> No remote device present. (Hint: Call [Connect] and [Register] prior to [MainLoop])" << std::endl << std::endl;
+        std::cerr << std::endl << "[ERROR] [VrpnDevice] No remote device present. Call 'Connect()' and 'Register()' prior to 'MainLoop()'. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
