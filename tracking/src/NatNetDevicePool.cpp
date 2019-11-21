@@ -294,18 +294,17 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
     // Check for updated data
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[DEBUG]  [NatNetDevicePool] Callback Counter = " << this->callbackCounter << std::endl;
-#endif
     if (this->callbackCounter <= 0) {
         this->callbackCounter--;
         if (this->callbackCounter < -10) {
-        //std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
-        //    ">>> Please check your firewall settings if this warning appears repeatedly! " <<
-        //    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+            std::cout << std::endl << "[DEBUG] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
+                ">>> Please check your firewall settings if this warning appears repeatedly! ." << std::endl;
         }
     }
     else {
         this->callbackCounter = 0;
     }
+#endif
    
     for (auto it : this->rigidBodies) {
         if (rbn == it->name) {
@@ -338,18 +337,17 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rb
     // Check for updated data
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[DEBUG]  [NatNetDevicePool] Callback Counter = " << this->callbackCounter << std::endl;
-#endif
     if (this->callbackCounter <= 0) {
         this->callbackCounter--;
         if (this->callbackCounter < -10) {
-        //std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
-        //    ">>> Please check your firewall settings if this warning appears repeatedly! " <<
-        //    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        std::cout << std::endl << "[DEBUG] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
+            ">>> Please check your firewall settings if this warning appears repeatedly! ." << std::endl;
         }
     }
     else {
         this->callbackCounter = 0;
     }
+#endif
 
     for (auto it : this->rigidBodies) { 
         if (rbn == it->name) {
@@ -372,6 +370,7 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
         return;
     }
 
+#ifdef TRACKING_DEBUG_OUTPUT
     // Simple counter to be able to check if callback has been called
     that->callbackCounter++;
     // Prevent overflow
@@ -379,6 +378,7 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
         (that->callbackCounter < ((std::numeric_limits<int>::min)() + 2))) {
         that->callbackCounter = 0;
     }
+#endif
 
     for (int i = 0; i < pFrameOfData->nRigidBodies; ++i) {
         // All zero seems to be an indicator that the rigid body is not

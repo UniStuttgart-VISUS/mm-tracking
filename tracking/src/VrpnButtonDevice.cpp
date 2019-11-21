@@ -108,7 +108,7 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, c
 
     // Remember the button state.
     tracking::ButtonMask tmpStates = that->states.load();
-    tracking::ButtonMask tmpMask   = 1 << vrpnData.button;
+    tracking::ButtonMask tmpMask   = (1 << vrpnData.button);
     if (vrpnData.state != 0) {
         that->states.store(tmpStates |= tmpMask);
     }

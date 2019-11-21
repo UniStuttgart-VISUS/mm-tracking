@@ -62,9 +62,9 @@ int main() {
     tup.rigid_body_name              = rigid_body_name.c_str(); // (Will be set in line 108 depending on what rigid bodies are available.)
     tup.rigid_body_name_len          = rigid_body_name.length();
     tup.select_btn                   = 0;
-    tup.rotate_btn                   = 3;
-    tup.translate_btn                = 1;
-    tup.zoom_btn                     = 2;
+    tup.rotate_btn                   = 1;
+    tup.translate_btn                = 2;
+    tup.zoom_btn                     = 3;
     tup.invert_rotate                = true;
     tup.invert_translate             = true;
     tup.invert_zoom                  = true;
