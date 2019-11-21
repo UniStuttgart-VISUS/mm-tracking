@@ -375,7 +375,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
 }
 
 
-bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& outBtnState, tracking::Vector3D& outPos, tracking::Quaternion& outOri) {
+bool tracking::TrackingUtilizer::GetRawData(unsigned int& btn_state, float& pos_x, float& pos_y, float& pos_z, float& orient_x, float& orient_y, float& orient_z, float& orient_w) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -387,24 +387,33 @@ bool tracking::TrackingUtilizer::GetRawData(tracking::ButtonMask& outBtnState, t
 
     // Request updated tracking data.
     if (this->updateTrackingData()) {
-
-        outBtnState = this->curButtonStates;
-        outPos      = this->curPosition;
-        outOri      = this->curOrientation;
+        btn_state = this->curButtonStates;
+        pos_x = this->curPosition.X();
+        pos_y = this->curPosition.Y();
+        pos_z = this->curPosition.Z();
+        orient_x = this->curOrientation.X();
+        orient_y = this->curOrientation.Y();
+        orient_z = this->curOrientation.Z();
+        orient_w = this->curOrientation.W();
 
         stateRawData = true;
     }
     else {
-        outBtnState = 0;
-        outPos.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        outOri.Set(0.0f, 0.0f, 0.0f, 1.0f);
+        btn_state = 0;
+        pos_x = (std::numeric_limits<float>::max)();
+        pos_y = (std::numeric_limits<float>::max)();
+        pos_z = (std::numeric_limits<float>::max)();
+        orient_x = 0.0f;
+        orient_y = 0.0f;
+        orient_z = 0.0f;
+        orient_w = 1.0f;
     }
 
     return (stateRawData);
 }
 
 
-bool tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
+bool tracking::TrackingUtilizer::GetSelectionState(bool& select) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -422,17 +431,17 @@ bool tracking::TrackingUtilizer::GetSelectionState(bool& outSelect) {
     }
 
     if (stateBtnChgs) {
-        outSelect = this->curSelecting;
+        select = this->curSelecting;
     }
     else {
-        outSelect = false;
+        select = false;
     }
 
     return (stateBtnChgs);
 }
 
 
-bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& outIntersect) {
+bool tracking::TrackingUtilizer::GetIntersection(float& intersect_x, float& intersect_y) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -450,17 +459,19 @@ bool tracking::TrackingUtilizer::GetIntersection(tracking::Point2D& outIntersect
     }
 
     if (stateSrnIns) {
-        outIntersect = this->curIntersection;
+        intersect_x = this->curIntersection.X();
+        intersect_y = this->curIntersection.Y();
     }
     else {
-        outIntersect.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        intersect_x = (std::numeric_limits<float>::max)();
+        intersect_y = (std::numeric_limits<float>::max)();
     }
 
     return (stateSrnIns);
 }
 
 
-bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& outFov) {
+bool tracking::TrackingUtilizer::GetFieldOfView(float& lt_x, float& lt_y, float& lb_x, float& lb_y, float& rt_x, float& rt_y, float& rb_x, float& rb_y) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -478,21 +489,32 @@ bool tracking::TrackingUtilizer::GetFieldOfView(tracking::Rectangle& outFov) {
     }
 
     if (stateSrnIns) {
-        outFov = this->curFOV;
+        lt_x = this->curFOV.left_top.X();
+        lt_y = this->curFOV.left_top.Y();
+        lb_x = this->curFOV.left_bottom.X();
+        lb_y = this->curFOV.left_bottom.Y();
+        rt_x = this->curFOV.right_top.X();
+        rt_y = this->curFOV.right_top.Y();
+        rb_x = this->curFOV.right_bottom.X();
+        rb_y = this->curFOV.right_bottom.Y();
     }
     else {
-        outFov.left_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        outFov.left_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        outFov.right_top.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        outFov.right_bottom.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        lt_x = (std::numeric_limits<float>::max)();
+        lt_y = (std::numeric_limits<float>::max)();
+        lb_x = (std::numeric_limits<float>::max)();
+        lb_y = (std::numeric_limits<float>::max)();
+        rt_x = (std::numeric_limits<float>::max)();
+        rt_y = (std::numeric_limits<float>::max)();
+        rb_x = (std::numeric_limits<float>::max)();
+        rb_y = (std::numeric_limits<float>::max)();
     }
 
     return (stateSrnIns);
 }
 
 
-bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Dim dim, tracking::Vector3D& outCamPos, 
-    tracking::Vector3D& outCamLookAt, tracking::Vector3D& outCamUp) {
+bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim, float& cam_pos_x, float& cam_pos_y, float& cam_pos_z, 
+    float& cam_lookat_x, float& cam_lookat_y, float& cam_lookat_z, float& cam_up_x, float& cam_up_y, float& cam_up_z) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -518,21 +540,33 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(tracking::TrackingUtilizer::Di
     }
 
     if (stateBtnChgs && stateCamTrs) {
-        outCamPos    = this->curCameraPosition;
-        outCamLookAt = this->curCameraLookAt;
-        outCamUp     = this->curCameraUp;
+        cam_pos_x = this->curCameraPosition.X();
+        cam_pos_y = this->curCameraPosition.Y();
+        cam_pos_z = this->curCameraPosition.Z();
+        cam_lookat_x = this->curCameraLookAt.X();
+        cam_lookat_y = this->curCameraLookAt.Y();
+        cam_lookat_z = this->curCameraLookAt.Z();
+        cam_up_x = this->curCameraUp.X();
+        cam_up_y = this->curCameraUp.Y();
+        cam_up_z = this->curCameraUp.Z();
     }
     else {
-        outCamPos.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        outCamLookAt.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
-        outCamUp.Set((std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)(), (std::numeric_limits<float>::max)());
+        cam_pos_x = (std::numeric_limits<float>::max)();
+        cam_pos_y = (std::numeric_limits<float>::max)();
+        cam_pos_z = (std::numeric_limits<float>::max)();
+        cam_lookat_x = (std::numeric_limits<float>::max)();
+        cam_lookat_y = (std::numeric_limits<float>::max)();
+        cam_lookat_z = (std::numeric_limits<float>::max)();
+        cam_up_x = (std::numeric_limits<float>::max)();
+        cam_up_y = (std::numeric_limits<float>::max)();
+        cam_up_z = (std::numeric_limits<float>::max)();
     }
 
     return (stateBtnChgs && stateCamTrs);
 }
 
 
-bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp) {
+bool tracking::TrackingUtilizer::SetCurrentCamera(float cam_pos_x, float cam_pos_y, float cam_pos_z, float cam_lookat_x, float cam_lookat_y, float cam_lookat_z, float cam_up_x, float cam_up_y, float cam_up_z) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -540,9 +574,9 @@ bool tracking::TrackingUtilizer::SetCurrentCamera(tracking::Vector3D inCamPos, t
         return false;
     }
 
-    this->curCameraPosition = inCamPos;
-    this->curCameraLookAt = inCamLookAt;
-    this->curCameraUp = inCamUp;
+    this->curCameraPosition = tracking::Vector3D(cam_pos_x, cam_pos_y, cam_pos_z);
+    this->curCameraLookAt = tracking::Vector3D(cam_lookat_x, cam_lookat_y, cam_lookat_z);
+    this->curCameraUp = tracking::Vector3D(cam_up_x, cam_up_y, cam_up_z);
 
     return true;
 }
@@ -587,7 +621,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
     // Get fresh data from tracker
     bool retval = false;
     tracking::Tracker::TrackingData data;
-    if (this->tracker->GetData(this->rigidBodyName.c_str(), this->buttonDeviceName.c_str(), data)) {
+    if (this->tracker->GetData(this->rigidBodyName, this->buttonDeviceName, data)) {
         this->curButtonStates = data.buttonState;
         this->curPosition     = data.rigidBody.position;
         this->curOrientation  = data.rigidBody.orientation;

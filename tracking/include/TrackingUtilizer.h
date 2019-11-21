@@ -115,57 +115,60 @@ namespace tracking {
         /**
         *  Get the raw tracking data.
         *
-        * @param outBtnState  The current button state of the given button device.
-        * @param outPos       The current position of the given rigid body.
-        * @param outOri       The current orientation of the given rigid body.
+        * @param btnState          Output the current button state of the given button device.
+        * @param pos_(x,y,z)       Output the current position of the given rigid body.
+        * @param orient_(x,y,z,w)  Output the current orientation of the given rigid body.
         *
         * @return True for success, false otherwise.
         */
-        bool GetRawData(tracking::ButtonMask& outBtnState, tracking::Vector3D& outPos, tracking::Quaternion& outOri);
+        bool GetRawData(unsigned int& btn_state, float& pos_x, float& pos_y, float& pos_z, 
+            float& orient_x, float& orient_y, float& orient_z, float& orient_w);
 
         /**
         *  Get the current state of the select button.
         *
-        * @param outSelect  True if select button is pressed, false otherwise.
+        * @param select  Output the current selection state. True if select button is pressed, false otherwise.
         *
         * @return True for success, false otherwise.
         */
-        bool GetSelectionState(bool& outSelect);
+        bool GetSelectionState(bool& select);
 
         /**
         *  Get the current intersection with the screen.
         *
-        * @param outIntersect  The relative 2D screen intersection coordinates (in range [0,1]).
+        * @param intersect_(x,y)  Output the relative 2D screen intersection coordinates (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetIntersection(tracking::Point2D& outIntersect);
+        bool GetIntersection(float& intersect_x, float& intersect_y);
 
         /**
         *  Get the current field of view.
         *
-        * @param outFov  The relative 2D screen space filed of view vertices (in range [0,1]).
+        * @param (lt,lb,rt,rb)_(x,y)  Output the relative 2D screen space filed of view vertices (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetFieldOfView(tracking::Rectangle& outFov);
+        bool GetFieldOfView(float& lt_x, float& lt_y, float& lb_x, float& lb_y, float& rt_x, float& rt_y, float& rb_x, float& rb_y);
 
         /**
         * Get the updated camera vectors depending on pressed buttons.
         * 
         * Requires previous call of SetCurrentCamera(...).
         * 
+        * @param dim                The current world space dimension.
         * 3D: Transformations are applied in three-dimensional space.
         * 2D: Transformations are applied in two-dimensional screen space.
-        * 
-        * @param dim           The camera position.
-        * @param outCamPos     The camera position.
-        * @param outCamLookAt  The camera loook at position.
-        * @param outCamUp      The up direction of the camera.
+        *
+        * @param cam_pos_(x,y)      Output the camera position.
+        * @param cam_lookat_(x,y)   Output the camera loook at position.
+        * @param cam_up_(x,y)       Output the up direction of the camera.
         *
         * @return True for success, false otherwise.
         */
-        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, tracking::Vector3D& outCamPos, tracking::Vector3D& outCamLookAt, tracking::Vector3D& outCamUp);
+        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, float& cam_pos_x, float& cam_pos_y, float& cam_pos_z, 
+            float& cam_lookat_x, float& cam_lookat_y, float& cam_lookat_z, 
+            float& cam_up_x, float& cam_up_y, float& cam_up_z);
 
         /**
         * Get the button device name.
@@ -197,7 +200,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool SetCurrentCamera(tracking::Vector3D inCamPos, tracking::Vector3D inCamLookAt, tracking::Vector3D inCamUp);
+        bool SetCurrentCamera(float cam_pos_x, float cam_pos_y, float cam_pos_z, float cam_lookat_x, float cam_lookat_y, float cam_lookat_z, float cam_up_x, float cam_up_y, float cam_up_z);
 
         /**
         * Set the calibration orientation of the Pointing device. 

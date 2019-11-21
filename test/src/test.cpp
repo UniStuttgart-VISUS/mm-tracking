@@ -117,12 +117,12 @@ int main() {
 
     // LOOP ///////////////////////////////////////////////////////////////////
 
-    tracking::Point2D ist;
+    float inters_x, inters_y;
     tracking::Rectangle fov;
 
-    tracking::ButtonMask btn_state = -1;
-    tracking::Vector3D position;
-    tracking::Quaternion orientation;
+    unsigned int btn_state;
+    float pos_x, pos_y, pos_z;
+    float orient_x, orient_y, orient_z, orient_w;
 
     bool state;
 
@@ -132,22 +132,8 @@ int main() {
         // Get current tracking data for each rigid body managed by the TrackingUtilizers.
         for (auto& tu : utilizers) {
 
-            // Field of View
-            //state = tu.GetFieldOfView(fov);
-            //std::cout << std::fixed << std::setprecision(4) <<
-            //    "[INFO] [test] RIGID-BODY \"" << tu.GetRigidBodyName().c_str() << "\" - FIELD OF VIEW (valid = "
-            //    << ((state) ? ("TRUE") : ("FALSE")) << ") ";
-            //if (state) {
-            //    std::cout << " - Coordinates: LEFT_TOP (" <<
-            //        fov.left_top.X() << "," << fov.left_top.Y() << ") | LEFT_BOTTOM (" <<
-            //        fov.left_bottom.X() << "," << fov.left_bottom.Y() << ") | RIGHT_TOP (" <<
-            //        fov.right_top.X() << "," << fov.right_top.Y() << ") | RIGHT_BOTTOM (" <<
-            //        fov.right_bottom.X() << "," << fov.right_bottom.Y() << ") ";
-            //}
-            //std::cout << std::endl;
-
             // Button State
-            state = tu.GetRawData(btn_state, position, orientation);
+            state = tu.GetRawData(btn_state, pos_x, pos_y, pos_z, orient_x, orient_y, orient_z, orient_w);
             std::cout << std::fixed << std::setprecision(4) <<
                 "[INFO] [test] BUTTON-DEVICE \"" << tu.GetButtonDeviceName() << "\" - STATE (valid = "
                 << ((state) ? ("TRUE") : ("FALSE")) << ") ";
@@ -157,12 +143,12 @@ int main() {
             std::cout << std::endl;
 
             // Intersection
-            state = tu.GetIntersection(ist);
+            state = tu.GetIntersection(inters_x, inters_y);
             std::cout << std::fixed << std::setprecision(4) <<
                 "[INFO] [test] RIGID-BODY \"" << tu.GetRigidBodyName() << "\" - INTERSECTION (valid = "
                 << ((state) ? ("TRUE") : ("FALSE")) << ") ";
             if (state) {
-                std::cout << " - Coordinates: (" << ist.X() << "," << ist.Y() << ") ";
+                std::cout << " - Coordinates: (" << inters_x << "," << inters_y << ") ";
             }
             std::cout << std::endl;
 

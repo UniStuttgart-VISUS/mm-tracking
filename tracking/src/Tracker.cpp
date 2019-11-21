@@ -155,7 +155,7 @@ bool tracking::Tracker::Disconnect(void) {
 }
 
 
-bool tracking::Tracker::GetData(const char* inRigidBody, const char* inButtonDevice, tracking::Tracker::TrackingData& outData) {
+bool tracking::Tracker::GetData(std::string inRigidBody, std::string inButtonDevice, tracking::Tracker::TrackingData& outData) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
@@ -168,37 +168,18 @@ bool tracking::Tracker::GetData(const char* inRigidBody, const char* inButtonDev
         return false;
     }
 
-    std::string rigidBodyName, buttonDeviceName;
-    try {
-        rigidBodyName = std::string(inRigidBody);
-    }
-    catch (const std::exception& e) {
-        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'inRigidBody': " << e.what() <<
-            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        return false;
-    }
-
-    try {
-        buttonDeviceName = std::string(inButtonDevice);
-    }
-    catch (const std::exception& e) {
-        std::cerr << std::endl << "[ERROR] [Tracker] Error reading string param 'inButtonDevice': " << e.what() <<
-            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        return false;
-    }
-
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[DEBUG] [Tracker] Requested: Button Device \"" << buttonDeviceName.c_str() << "\" and Rigid Body \"" << rigidBodyName.c_str() << "\"." << std::endl;
 #endif
 
     // Set data of requested rigid body
-    outData.rigidBody.orientation = this->motionDevices.GetOrientation(rigidBodyName);
-    outData.rigidBody.position    = this->motionDevices.GetPosition(rigidBodyName);
+    outData.rigidBody.orientation = this->motionDevices.GetOrientation(inRigidBody);
+    outData.rigidBody.position    = this->motionDevices.GetPosition(inRigidBody);
 
     // Set data of requested button device 
     outData.buttonState = 0;
     for (auto& v : this->buttonDevices) {
-        if (buttonDeviceName == v->GetDeviceName()) {
+        if (inButtonDevice == v->GetDeviceName()) {
             outData.buttonState = (v->GetButtonStates());
             break; /// Break if button device is found.
         }
