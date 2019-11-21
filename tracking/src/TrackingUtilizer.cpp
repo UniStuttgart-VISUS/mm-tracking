@@ -640,29 +640,29 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
         this->curSelecting  = false;
 
         // Loop over all buttons 
-        int button = 0;
+        tracking::ButtonMask button = 0;
         bool isPressed = false;
 
         for (int i = 0; i < 4; ++i) { 
 
             switch (i) {
             case(0): button = this->rotateButton;
-                     isPressed = ((this->curButtonStates & (1 << button)) != 0)?(true):(false);
+                     isPressed = ((this->curButtonStates & button) != 0)?(true):(false);
                      this->isRotating = isPressed;
                      std::cout << "[INFO] [TrackingUtilizer] Rotate Button " << button << " is " << ((this->isRotating) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             case(1): button = this->translateButton;
-                     isPressed = ((this->curButtonStates & (1 << button)) != 0) ? (true) : (false);
+                     isPressed = ((this->curButtonStates & button) != 0) ? (true) : (false);
                      this->isTranslating = isPressed;
                      std::cout << "[INFO] [TrackingUtilizer] Translate Button " << button << " is " << ((this->isTranslating) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             case(2): button = this->zoomButton;
-                     isPressed = ((this->curButtonStates & (1 << button)) != 0) ? (true) : (false);
+                     isPressed = ((this->curButtonStates & button) != 0) ? (true) : (false);
                      this->isZooming = isPressed;
                      std::cout << "[INFO] [TrackingUtilizer] Zoom Button " << button << " is " << ((this->isZooming) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;
             case(3): button = this->selectButton;
-                     this->curSelecting = ((this->curButtonStates & (1 << button)) != 0) ? (true) : (false);
+                     this->curSelecting = ((this->curButtonStates & button) != 0) ? (true) : (false);
                      isPressed = false;  // Current configuration has not to be stored ....
                      std::cout << "[INFO] [TrackingUtilizer] Select Button " << button << " is " << ((this->curSelecting) ? ("PRESSED") : ("released")) << "." << std::endl;
                      break;

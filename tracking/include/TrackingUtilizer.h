@@ -72,10 +72,10 @@ namespace tracking {
             size_t                            btn_device_name_len;
             const char*                       rigid_body_name;       /** Name of the rigid body to use.                                                                */
             size_t                            rigid_body_name_len;
-            unsigned int                      select_btn;            /** The button that must be pressed for selection (set to -1 to dissolve link to any button).     */
-            unsigned int                      rotate_btn;            /** The button that must be pressed for rotation (set to -1 to dissolve link to any button).      */
-            unsigned int                      translate_btn;         /** The button that must be pressed for translation (set to -1 to dissolve link to any button).   */
-            unsigned int                      zoom_btn;              /** The button that must be pressed for dolly zoom (set to -1 to dissolve link to any button).    */
+            tracking::ButtonMask              select_btn;            /** The button that must be pressed for selection (set to 0 to dissolve link to any button).      */
+            tracking::ButtonMask              rotate_btn;            /** The button that must be pressed for rotation (set to 0 to dissolve link to any button).       */
+            tracking::ButtonMask              translate_btn;         /** The button that must be pressed for translation (set to 0 to dissolve link to any button).    */
+            tracking::ButtonMask              zoom_btn;              /** The button that must be pressed for dolly zoom (set to 0 to dissolve link to any button).     */
             bool                              invert_rotate;         /** Inverts the rotation direction.                                                               */
             bool                              invert_translate;      /** Inverts the rotation direction.                                                               */
             bool                              invert_zoom;           /** Inverts the zoom direction.                                                                   */
@@ -227,11 +227,11 @@ namespace tracking {
         tracking::Quaternion               curOrientation;
         tracking::Vector3D                 curPosition;
         tracking::ButtonMask               curButtonStates;
+        tracking::ButtonMask               lastButtonStates;
         bool                               curSelecting;
         std::vector<tracking::Vector3D>    positionBuffer;
         unsigned int                       bufferIdx;
         bool                               constPosition;
-        tracking::ButtonMask               lastButtonStates;
         tracking::Vector3D                 startCamLookAt;
         tracking::Vector3D                 startCamPosition;
         tracking::Vector3D                 startCamUp;
@@ -246,10 +246,10 @@ namespace tracking {
 
         std::string                        buttonDeviceName;
         std::string                        rigidBodyName;
-        int                                selectButton; 
-        int                                rotateButton;
-        int                                translateButton;
-        int                                zoomButton;
+        tracking::ButtonMask               selectButton;
+        tracking::ButtonMask               rotateButton;
+        tracking::ButtonMask               translateButton;
+        tracking::ButtonMask               zoomButton;
         bool                               invertRotate;
         bool                               invertTranslate;
         bool                               invertZoom;

@@ -298,9 +298,9 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
     if (this->callbackCounter <= 0) {
         this->callbackCounter--;
         if (this->callbackCounter < -10) {
-        std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
-            ">>> Please check your firewall settings if this warning appears repeatedly! " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        //std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
+        //    ">>> Please check your firewall settings if this warning appears repeatedly! " <<
+        //    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         }
     }
     else {
@@ -342,9 +342,9 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rb
     if (this->callbackCounter <= 0) {
         this->callbackCounter--;
         if (this->callbackCounter < -10) {
-            std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
-                ">>> Please check your firewall settings if this warning appears repeatedly! " <<
-                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        //std::cout << std::endl << "[WARNING] [NatNetDevicePool] Didn't receive updated tracking data yet. " <<
+        //    ">>> Please check your firewall settings if this warning appears repeatedly! " <<
+        //    "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         }
     }
     else {

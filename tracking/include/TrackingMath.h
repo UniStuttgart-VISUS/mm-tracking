@@ -8,6 +8,12 @@
 #ifndef TRACKING_MATH_INCLUDED
 #define TRACKING_MATH_INCLUDED
 
+#ifdef TRACKING_EXPORTS  
+#define TRACKING_API __declspec(dllexport)   
+#else  
+#define TRACKING_API __declspec(dllimport)   
+#endif  
+
 #include <cmath>
 #include <cstdlib>
 #include <limits>
@@ -16,7 +22,7 @@
 namespace tracking
 {
     /** Point2D - 2D ***********************************************************/
-    class Point2D {
+    class TRACKING_API Point2D {
     public:
         Point2D(void) {
             this->x = 0.0f;
@@ -65,7 +71,7 @@ namespace tracking
 
 
     /** Vector3D - 3D **********************************************************/
-    class Vector3D {
+    class TRACKING_API Vector3D {
     public:
         Vector3D(void) {
             this->x = 0.0f;
@@ -209,7 +215,7 @@ namespace tracking
 
 
     /** QUATERNION ************************************************************/
-    class Quaternion {
+    class TRACKING_API Quaternion {
     public:
         Quaternion(void) {
             this->x = 0.0f;

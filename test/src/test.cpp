@@ -61,10 +61,10 @@ int main() {
     std::string rigid_body_name("");
     tup.rigid_body_name              = rigid_body_name.c_str(); // (Will be set in line 108 depending on what rigid bodies are available.)
     tup.rigid_body_name_len          = rigid_body_name.length();
-    tup.select_btn                   = -1;
-    tup.rotate_btn                   = -1;
-    tup.translate_btn                = 0;
-    tup.zoom_btn                     = 1;
+    tup.select_btn                   = 0;
+    tup.rotate_btn                   = 3;
+    tup.translate_btn                = 1;
+    tup.zoom_btn                     = 2;
     tup.invert_rotate                = true;
     tup.invert_translate             = true;
     tup.invert_zoom                  = true;
@@ -119,6 +119,11 @@ int main() {
 
     tracking::Point2D ist;
     tracking::Rectangle fov;
+
+    tracking::ButtonMask btn_state = -1;
+    tracking::Vector3D position;
+    tracking::Quaternion orientation;
+
     bool state;
 
     bool exit = false;
@@ -140,6 +145,16 @@ int main() {
             //        fov.right_bottom.X() << "," << fov.right_bottom.Y() << ") ";
             //}
             //std::cout << std::endl;
+
+            // Button State
+            state = tu.GetRawData(btn_state, position, orientation);
+            std::cout << std::fixed << std::setprecision(4) <<
+                "[INFO] [test] BUTTON-DEVICE \"" << tu.GetButtonDeviceName() << "\" - STATE (valid = "
+                << ((state) ? ("TRUE") : ("FALSE")) << ") ";
+            if (state) {
+                std::cout << " - " << btn_state;
+            }
+            std::cout << std::endl;
 
             // Intersection
             state = tu.GetIntersection(ist);
