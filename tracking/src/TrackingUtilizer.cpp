@@ -722,12 +722,12 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
                 // coordinate system. This is required to align the interaction device 
                 // with the current view later on.
 
-                auto q1 = this->xform(tracking::Vector3D(0, 0, 1), this->startCamPosition - this->startCamLookAt);
-                auto q2 = this->xform(q1 * tracking::Vector3D(0, 1, 0), this->startCamUp);
+                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, 1.0f), this->startCamPosition - this->startCamLookAt);
+                auto q2 = this->xform(q1 * tracking::Vector3D(0.0f, 1.0f, 0.0f), this->startCamUp);
                 this->startRelativeOrientation = q2 * q1;
 
-                this->startOrientation         = this->curOrientation;
-                this->startPosition            = this->curPosition;
+                this->startOrientation = this->curOrientation;
+                this->startPosition    = this->curPosition;
             }
         }
 
