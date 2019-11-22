@@ -1093,9 +1093,6 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
                     default: break;
                 }
 
-                // Fix scaling for aspect ratio of powerwall screen resolution
-                float pRatiof = pWf / pHf;
-
                 // Rigid body up and right Vector3D.
                 Vector3D rbUv, rbRv;
                 float deltaR, deltaU;
@@ -1104,7 +1101,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
 
                 if ((this->fovMode == FovMode::WIDTH_AND_HEIGHT) || (this->fovMode == FovMode::WIDTH_AND_ASPECT_RATIO)) {
                                   
-                    float xDelta = (fov_w * pRatiof / 2.0f);
+                    float xDelta = (fov_w  / 2.0f);
                     float yDelta = (fov_h  / 2.0f);
                     if (this->fovMode == FovMode::WIDTH_AND_ASPECT_RATIO) { /// DIFFERENCE for Width and Aspect Ratio
                         yDelta = (fov_w / fov_r / 2.0f);
