@@ -27,7 +27,7 @@ tracking::NatNetDevicePool::NatNetDevicePool(void)
 }
 
 
-bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inParams) {
+bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & params) {
 
     bool check = true;
     this->initialised = false;
@@ -35,8 +35,8 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
 
     std::string client_ip;
     try {
-        client_ip = std::string(inParams.client_ip);
-        if (client_ip.length() != inParams.client_ip_len) {
+        client_ip = std::string(params.client_ip);
+        if (client_ip.length() != params.client_ip_len) {
             std::cerr << std::endl << "[ERROR] [NatNetClient] String \"client_ip\" has not expected length. " <<
                 "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
             check = false;
@@ -55,8 +55,8 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
 
     std::string server_ip;
     try {
-        server_ip = std::string(inParams.server_ip);
-        if (server_ip.length() != inParams.server_ip_len) {
+        server_ip = std::string(params.server_ip);
+        if (server_ip.length() != params.server_ip_len) {
             std::cerr << std::endl << "[ERROR] [NatNetClient] String \"server_ip\" has not expected length. " <<
                 "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
             check = false;
@@ -73,13 +73,13 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
         check = false;
     }
 
-    if (inParams.cmd_port >= 65535) {
+    if (params.cmd_port >= 65535) {
         std::cerr << std::endl << "[ERROR] [NatNetClient] Parameter \"cmd_port\" must be less than 65535. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
 
-    if (inParams.data_port >= 65535) {
+    if (params.data_port >= 65535) {
         std::cout << std::endl << "[ERROR] [NatNetClient] Parameter \"data_port\" must be less than 65535. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
@@ -90,10 +90,10 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & inP
         this->clientIP = client_ip;
         this->serverIP = server_ip;
 
-        this->cmdPort = inParams.cmd_port;
-        this->dataPort = inParams.data_port;
-        this->conType = inParams.con_type;
-        this->verboseClient = inParams.verbose_client;
+        this->cmdPort = params.cmd_port;
+        this->dataPort = params.data_port;
+        this->conType = params.con_type;
+        this->verboseClient = params.verbose_client;
 
         this->printParams();
         this->initialised = true;
@@ -273,7 +273,7 @@ bool tracking::NatNetDevicePool::Disconnect(void) {
 }
 
 
-tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::string& rbn) {
+tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::string& rigid_body) {
 
     tracking::Quaternion retOr((std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
@@ -307,7 +307,7 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
 #endif
    
     for (auto it : this->rigidBodies) {
-        if (rbn == it->name) {
+        if (rigid_body == it->name) {
             retOr = it->lockFreeData[it->read.load()].orientation;
             break;
         }
@@ -317,7 +317,7 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
 }
 
 
-tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rbn) {
+tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rigid_body) {
 
     tracking::Vector3D retPos((std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
@@ -350,7 +350,7 @@ tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rb
 #endif
 
     for (auto it : this->rigidBodies) { 
-        if (rbn == it->name) {
+        if (rigid_body == it->name) {
             retPos = it->lockFreeData[it->read.load()].position;
             break;
         }

@@ -12,7 +12,7 @@ tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_B
     , initialised(false)
     , connected(false)
     , runThreadLoop(false)
-    , states(0) {
+    , button(0) {
 
     // intentionally empty...
 }
@@ -25,9 +25,9 @@ tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
 }
 
 
-bool tracking::VrpnButtonDevice::Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams) {
+bool tracking::VrpnButtonDevice::Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& params) {
 
-    this->initialised = tracking::VrpnDevice<vrpn_Button_Remote>::Initialise(inParams);
+    this->initialised = tracking::VrpnDevice<vrpn_Button_Remote>::Initialise(params);
 
     return this->initialised;
 }
@@ -80,7 +80,7 @@ bool tracking::VrpnButtonDevice::Disconnect(void) {
 }
 
 
-tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
+tracking::Button tracking::VrpnButtonDevice::GetButton(void) const {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
@@ -93,7 +93,7 @@ tracking::ButtonMask tracking::VrpnButtonDevice::GetButtonStates(void) const {
         return false;
     }
 
-    return this->states.load();
+    return this->button.load();
 }
 
 
@@ -107,15 +107,15 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, c
     }
 
     // Remember the button state.
-    tracking::ButtonMask tmpStates = that->states.load();
-    tracking::ButtonMask tmpMask   = (1 << vrpnData.button);
+    tracking::Button button = that->button.load();
+    tracking::Button mask   = (1 << vrpnData.button);
     if (vrpnData.state != 0) {
-        that->states.store(tmpStates |= tmpMask);
+        that->button.store(button |= mask);
     }
     else {
-        that->states.store(tmpStates &= ~tmpMask);
+        that->button.store(button &= ~mask);
     }
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[DEBUG] [VrpnButtonDevice] Button = " << vrpnData.button << " | State = " << ((that->states.load() & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;
+    std::cout << "[DEBUG] [VrpnButtonDevice] Button = " << vrpnData.button << " | State = " << ((that->mask.load() & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;
 #endif
 }

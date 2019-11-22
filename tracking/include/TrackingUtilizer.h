@@ -24,7 +24,7 @@ namespace tracking {
     *
     * Provides processed tracking data:
     * 
-    * - Raw tracking data (button states, position, orientation).
+    * - Raw tracking data (button, position, orientation).
     * - Manipulated camera parameters depending on pressed button(s).
     * - Screen Intersection as point in relative 2D coordinates.
     * - Field of view as rectangle in relative 2D coordinates.
@@ -72,10 +72,10 @@ namespace tracking {
             size_t                            btn_device_name_len;
             const char*                       rigid_body_name;       /** Name of the rigid body to use.                                                                */
             size_t                            rigid_body_name_len;
-            tracking::ButtonMask              select_btn;            /** The button that must be pressed for selection (set to 0 to dissolve link to any button).      */
-            tracking::ButtonMask              rotate_btn;            /** The button that must be pressed for rotation (set to 0 to dissolve link to any button).       */
-            tracking::ButtonMask              translate_btn;         /** The button that must be pressed for translation (set to 0 to dissolve link to any button).    */
-            tracking::ButtonMask              zoom_btn;              /** The button that must be pressed for dolly zoom (set to 0 to dissolve link to any button).     */
+            tracking::Button                  select_btn;            /** The button that must be pressed for selection (set to 0 to dissolve link to any button).      */
+            tracking::Button                  rotate_btn;            /** The button that must be pressed for rotation (set to 0 to dissolve link to any button).       */
+            tracking::Button                  translate_btn;         /** The button that must be pressed for translation (set to 0 to dissolve link to any button).    */
+            tracking::Button                  zoom_btn;              /** The button that must be pressed for dolly zoom (set to 0 to dissolve link to any button).     */
             bool                              invert_rotate;         /** Inverts the rotation direction.                                                               */
             bool                              invert_translate;      /** Inverts the rotation direction.                                                               */
             bool                              invert_zoom;           /** Inverts the zoom direction.                                                                   */
@@ -107,7 +107,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool Initialise(const tracking::TrackingUtilizer::Params& inParams, std::shared_ptr<tracking::Tracker> inTracker);
+        bool Initialise(const tracking::TrackingUtilizer::Params& params, std::shared_ptr<tracking::Tracker> tracker);
 
         /**********************************************************************/
         // GET
@@ -115,41 +115,45 @@ namespace tracking {
         /**
         *  Get the raw tracking data.
         *
-        * @param btnState          Output the current button state of the given button device.
-        * @param pos_(x,y,z)       Output the current position of the given rigid body.
-        * @param orient_(x,y,z,w)  Output the current orientation of the given rigid body.
+        * @param button                 Output the current button of the given button device.
+        * @param position_(x,y,z)       Output the current position of the given rigid body.
+        * @param orientation_(x,y,z,w)  Output the current orientation of the given rigid body.
         *
         * @return True for success, false otherwise.
         */
-        bool GetRawData(unsigned int& btn_state, float& pos_x, float& pos_y, float& pos_z, 
-            float& orient_x, float& orient_y, float& orient_z, float& orient_w);
+        bool GetRawData(unsigned int& button, 
+            float& position_x, float& position_y, float& position_z, 
+            float& orientation_x, float& orientation_y, float& orientation_z, float& orientation_w);
 
         /**
         *  Get the current state of the select button.
         *
-        * @param select  Output the current selection state. True if select button is pressed, false otherwise.
+        * @param selecttion  Output the current selection state. True if select button is pressed, false otherwise.
         *
         * @return True for success, false otherwise.
         */
-        bool GetSelectionState(bool& select);
+        bool GetSelectionState(bool& selecttion);
 
         /**
         *  Get the current intersection with the screen.
         *
-        * @param intersect_(x,y)  Output the relative 2D screen intersection coordinates (in range [0,1]).
+        * @param intersection_(x,y)  Output the relative 2D screen intersection coordinates (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetIntersection(float& intersect_x, float& intersect_y);
+        bool GetIntersection(float& intersection_x, float& intersection_y);
 
         /**
         *  Get the current field of view.
         *
-        * @param (lt,lb,rt,rb)_(x,y)  Output the relative 2D screen space filed of view vertices (in range [0,1]).
+        * @param (lt,lb,rt,rb)_(x,y)  Output the relative 2D screen space field of view vertices (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetFieldOfView(float& lt_x, float& lt_y, float& lb_x, float& lb_y, float& rt_x, float& rt_y, float& rb_x, float& rb_y);
+        bool GetFieldOfView(float& left_top_x, float& left_top_y, 
+            float& left_bottom_x, float& left_bottom_y, 
+            float& right_top_x, float& right_top_y, 
+            float& right_bottom_x, float& right_bottom_y);
 
         /**
         * Get the updated camera vectors depending on pressed buttons.
@@ -157,16 +161,16 @@ namespace tracking {
         * Requires previous call of SetCurrentCamera(...).
         * 
         * @param dim                The current world space dimension.
-        * 3D: Transformations are applied in three-dimensional space.
-        * 2D: Transformations are applied in two-dimensional screen space.
-        *
-        * @param cam_pos_(x,y)      Output the camera position.
+        *                           3D: Transformations are applied in three-dimensional space.
+        *                           2D: Transformations are applied in two-dimensional screen space.
+        * @param cam_position_(x,y) Output the camera position.
         * @param cam_lookat_(x,y)   Output the camera loook at position.
         * @param cam_up_(x,y)       Output the up direction of the camera.
         *
         * @return True for success, false otherwise.
         */
-        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, float& cam_pos_x, float& cam_pos_y, float& cam_pos_z, 
+        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, 
+            float& cam_position_x, float& cam_position_y, float& cam_position_z, 
             float& cam_lookat_x, float& cam_lookat_y, float& cam_lookat_z, 
             float& cam_up_x, float& cam_up_y, float& cam_up_z);
 
@@ -200,7 +204,9 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool SetCurrentCamera(float cam_pos_x, float cam_pos_y, float cam_pos_z, float cam_lookat_x, float cam_lookat_y, float cam_lookat_z, float cam_up_x, float cam_up_y, float cam_up_z);
+        bool SetCurrentCamera(float cam_position_x, float cam_position_y, float cam_position_z, 
+            float cam_lookat_x, float cam_lookat_y, float cam_lookat_z, 
+            float cam_up_x, float cam_up_y, float cam_up_z);
 
         /**
         * Set the calibration orientation of the Pointing device. 
@@ -219,7 +225,6 @@ namespace tracking {
 
         bool initialised;
 
-        /** The Pointer to the Tracker which provides the tracking data. */
         std::shared_ptr<tracking::Tracker> tracker;
 
         tracking::Vector3D                 curCameraPosition;
@@ -229,8 +234,8 @@ namespace tracking {
         tracking::Rectangle                curFOV;
         tracking::Quaternion               curOrientation;
         tracking::Vector3D                 curPosition;
-        tracking::ButtonMask               curButtonStates;
-        tracking::ButtonMask               lastButtonStates;
+        tracking::Button                   curButton;
+        tracking::Button                   lastButton;
         bool                               curSelecting;
         std::vector<tracking::Vector3D>    positionBuffer;
         unsigned int                       bufferIdx;
@@ -249,10 +254,10 @@ namespace tracking {
 
         std::string                        buttonDeviceName;
         std::string                        rigidBodyName;
-        tracking::ButtonMask               selectButton;
-        tracking::ButtonMask               rotateButton;
-        tracking::ButtonMask               translateButton;
-        tracking::ButtonMask               zoomButton;
+        unsigned int                       selectButton;
+        unsigned int                       rotateButton;
+        unsigned int                       translateButton;
+        unsigned int                       zoomButton;
         bool                               invertRotate;
         bool                               invertTranslate;
         bool                               invertZoom;
@@ -308,7 +313,7 @@ namespace tracking {
         /**
         * Process screen interaction.
         */
-        bool processScreenInteraction(bool processFov);
+        bool processScreenInteraction(bool process_fov);
 
         /**
         * Limit value "val" to range [min, max]

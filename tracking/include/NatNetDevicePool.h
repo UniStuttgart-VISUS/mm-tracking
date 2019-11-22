@@ -68,7 +68,7 @@ namespace tracking{
         *
         * @return True for success, false otherwise.
         */
-        bool Initialise(const NatNetDevicePool::Params& inParams);
+        bool Initialise(const NatNetDevicePool::Params& params);
 
         /**
         * Connect to natnet server.
@@ -91,21 +91,21 @@ namespace tracking{
         * Get orientation of rigid body. 
         * If no name is given, the data of the first rigid body is returned.
         *
-        * @param rbn The rigid body name to get the orientation of
+        * @param rigid_body The rigid body name to get the orientation of
         * 
         * @return The current orientation of the given rigid body.
         */
-        tracking::Quaternion GetOrientation(const std::string& rbn); 
+        tracking::Quaternion GetOrientation(const std::string& rigid_body); 
 
         /**
         * Get position of rigid body.
         * If no name is given, the data of the first rigid body is returned.
         *
-        * @param rbn The rigid body name to get the position of.
+        * @param rigid_body The rigid body name to get the position of.
         * 
         * @return The current position of the given rigid body.
         */
-        tracking::Vector3D GetPosition(const std::string& rbn); 
+        tracking::Vector3D GetPosition(const std::string& rigid_body); 
 
         /**
         * Get all available rigid body names.
@@ -133,9 +133,9 @@ namespace tracking{
         */
         class RigidBody {
         public:
-            RigidBody(int ctor_id, std::string ctor_name) 
-                : id(ctor_id)
-                , name(ctor_name)
+            RigidBody(int id, const std::string& name) 
+                : id(id)
+                , name(name)
                 , read(0)
                 , write(1)
                 , lockFreeData() { 

@@ -38,7 +38,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& inParams);
+        bool Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& params);
 
         /**
         * Connect to vrpn button device.
@@ -62,7 +62,7 @@ namespace tracking {
         *
         * @return The current button states.
         */
-        tracking::ButtonMask GetButtonStates(void) const;
+        tracking::Button GetButton(void) const;
 
     private:
 
@@ -73,15 +73,9 @@ namespace tracking {
         bool initialised;
         bool connected;
 
-        /** 
-        * Determines the running state of the Vrpn thread. 
-        */
         std::atomic<bool> runThreadLoop;
 
-        /** 
-        * The current button states. 
-        */
-        std::atomic<tracking::ButtonMask> states;
+        std::atomic<tracking::Button> button;
 
         /***********************************************************************
         * functions

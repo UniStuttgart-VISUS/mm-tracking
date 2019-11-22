@@ -78,6 +78,8 @@ int main() {
     tup.fov_vert_angle               = 30.0f;
     tup.fov_aspect_ratio             = tracking::TrackingUtilizer::FovAspectRatio::AR_1_77__1; // 16:9
 
+    /// Powerwall Resolution: 10.800 x 4.096 pixel | Aspect Ratio: 2,64
+
     // TRACKING INITIALISATION ////////////////////////////////////////////////
     
     // --- Tracker ---
@@ -117,13 +119,11 @@ int main() {
 
     // LOOP ///////////////////////////////////////////////////////////////////
 
-    float inters_x, inters_y;
-    tracking::Rectangle fov;
-
-    unsigned int btn_state;
+    unsigned int btn;
     float pos_x, pos_y, pos_z;
     float orient_x, orient_y, orient_z, orient_w;
-
+    float inters_x, inters_y;
+    tracking::Rectangle fov;
     bool state;
 
     bool exit = false;
@@ -133,12 +133,12 @@ int main() {
         for (auto& tu : utilizers) {
 
             // Button State
-            state = tu.GetRawData(btn_state, pos_x, pos_y, pos_z, orient_x, orient_y, orient_z, orient_w);
+            state = tu.GetRawData(btn, pos_x, pos_y, pos_z, orient_x, orient_y, orient_z, orient_w);
             std::cout << std::fixed << std::setprecision(4) <<
                 "[INFO] [test] BUTTON-DEVICE \"" << tu.GetButtonDeviceName() << "\" - STATE (valid = "
                 << ((state) ? ("TRUE") : ("FALSE")) << ") ";
             if (state) {
-                std::cout << " - " << btn_state;
+                std::cout << " - " << btn;
             }
             std::cout << std::endl;
 

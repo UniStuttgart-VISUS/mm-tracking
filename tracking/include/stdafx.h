@@ -56,7 +56,7 @@
 
 namespace tracking
 {
-    typedef unsigned int ButtonMask;
+    typedef unsigned int Button;
     
     typedef struct {
         Point2D left_top;

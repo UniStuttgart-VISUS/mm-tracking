@@ -29,15 +29,15 @@ tracking::Tracker::~Tracker(void) {
 }
 
 
-bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
+bool tracking::Tracker::Initialise(const tracking::Tracker::Params& params)
 {
     bool check = true;
     this->initialised = false;
 
     std::string active_node;
     try {
-        active_node = std::string(inParams.active_node);
-        if (active_node.length() != inParams.active_node_len) {
+        active_node = std::string(params.active_node);
+        if (active_node.length() != params.active_node_len) {
             std::cerr << std::endl << "[ERROR] [Tracker] String \"active_node\" has not expected length. " <<
                 "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
             check = false;
@@ -52,8 +52,8 @@ bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
     this->buttonDevices.clear();
     std::vector<tracking::VrpnDevice<vrpn_Button_Remote>::Params> vrpn_params;
     try {
-        for (size_t i = 0; i < inParams.vrpn_params_count; i++) {
-            vrpn_params.emplace_back(inParams.vrpn_params[i]);
+        for (size_t i = 0; i < params.vrpn_params_count; i++) {
+            vrpn_params.emplace_back(params.vrpn_params[i]);
         }
     }
     catch (const std::exception& e) {
@@ -62,7 +62,7 @@ bool tracking::Tracker::Initialise(const tracking::Tracker::Params& inParams)
         check = false;
     }
 
-    if (!this->motionDevices.Initialise(inParams.natnet_params)) {
+    if (!this->motionDevices.Initialise(params.natnet_params)) {
         check = false;
     }
 
@@ -155,7 +155,7 @@ bool tracking::Tracker::Disconnect(void) {
 }
 
 
-bool tracking::Tracker::GetData(std::string inRigidBody, std::string inButtonDevice, tracking::Tracker::TrackingData& outData) {
+bool tracking::Tracker::GetData(const std::string& rigid_body, const std::string& button_device, tracking::Tracker::TrackingData& data) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
@@ -173,14 +173,14 @@ bool tracking::Tracker::GetData(std::string inRigidBody, std::string inButtonDev
 #endif
 
     // Set data of requested rigid body
-    outData.rigidBody.orientation = this->motionDevices.GetOrientation(inRigidBody);
-    outData.rigidBody.position    = this->motionDevices.GetPosition(inRigidBody);
+    data.rigid_body.orientation = this->motionDevices.GetOrientation(rigid_body);
+    data.rigid_body.position    = this->motionDevices.GetPosition(rigid_body);
 
     // Set data of requested button device 
-    outData.buttonState = 0;
+    data.button = 0;
     for (auto& v : this->buttonDevices) {
-        if (inButtonDevice == v->GetDeviceName()) {
-            outData.buttonState = (v->GetButtonStates());
+        if (button_device == v->GetDeviceName()) {
+            data.button = (v->GetButton());
             break; /// Break if button device is found.
         }
     }

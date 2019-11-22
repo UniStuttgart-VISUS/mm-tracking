@@ -42,8 +42,8 @@ namespace tracking {
 
         /** Current tracking raw data. */
         struct TrackingData {
-            tracking::NatNetDevicePool::RigidBodyData rigidBody;
-            tracking::ButtonMask                      buttonState;
+            tracking::NatNetDevicePool::RigidBodyData rigid_body;
+            tracking::Button                          button;
         };
 
         ///////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool Initialise(const tracking::Tracker::Params& inParams);
+        bool Initialise(const tracking::Tracker::Params& params);
 
         /**
         * Callback for connection tracking.
@@ -106,7 +106,7 @@ namespace tracking {
         }
 
         /**********************************************************************/
-        // Only to be called by TrackingUtilizer (function provides no working dll interface)S.
+        // Only to be called by TrackingUtilizer (only use inside dll).
 
         /**
         *  Get current tracking data.
@@ -117,7 +117,7 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetData(std::string inRigidBody, std::string inButtonDevice, tracking::Tracker::TrackingData& outData);
+        bool GetData(const std::string& rigid_body, const std::string& button_device, tracking::Tracker::TrackingData& data);
 
     private:
 
@@ -134,10 +134,8 @@ namespace tracking {
         bool initialised;
         bool connected;
 
-        /** The VRPN devices that handle button presses. */
         VrpnButtonPoolType buttonDevices;
 
-        /** The NatNat motion devices that handle position and orientation of rigid bodies. */
         tracking::NatNetDevicePool motionDevices;
 
         /** parameters ********************************************************/
