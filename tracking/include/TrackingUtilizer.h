@@ -164,14 +164,14 @@ namespace tracking {
         *                           3D: Transformations are applied in three-dimensional space.
         *                           2D: Transformations are applied in two-dimensional screen space.
         * @param cam_position_(x,y) Output the camera position.
-        * @param cam_lookat_(x,y)   Output the camera loook at position.
+        * @param cam_view_(x,y)     Output the camera loook at position.
         * @param cam_up_(x,y)       Output the up direction of the camera.
         *
         * @return True for success, false otherwise.
         */
         bool GetUpdatedCamera(TrackingUtilizer::Dim dim, 
             float& cam_position_x, float& cam_position_y, float& cam_position_z, 
-            float& cam_lookat_x, float& cam_lookat_y, float& cam_lookat_z, 
+            float& cam_view_x, float& cam_view_y, float& cam_view_z, 
             float& cam_up_x, float& cam_up_y, float& cam_up_z);
 
         /**
@@ -198,14 +198,14 @@ namespace tracking {
         /**
         * Set the camera vectors to use for manipulation.
         *
-        * @param inCamPos     The camera position.
-        * @param inCamLookAt  The look at position of the camera.
-        * @param inCamUp      The up direction of the camera.
+        * @param cam_position_(x,y)  The camera position.
+        * @param cam_view_(x,y)      The view position of the camera.
+        * @param cam_up_(x,y)        The up direction of the camera.
         *
         * @return True for success, false otherwise.
         */
         bool SetCurrentCamera(float cam_position_x, float cam_position_y, float cam_position_z, 
-            float cam_lookat_x, float cam_lookat_y, float cam_lookat_z, 
+            float cam_view_x, float cam_view_y, float cam_view_z, 
             float cam_up_x, float cam_up_y, float cam_up_z);
 
         /**
@@ -229,7 +229,7 @@ namespace tracking {
 
         tracking::Vector3D                 curCameraPosition;
         tracking::Vector3D                 curCameraUp;
-        tracking::Vector3D                 curCameraLookAt;
+        tracking::Vector3D                 curCameraView;
         tracking::Point2D                  curIntersection;
         tracking::Rectangle                curFOV;
         tracking::Quaternion               curOrientation;
@@ -240,7 +240,7 @@ namespace tracking {
         std::vector<tracking::Vector3D>    positionBuffer;
         unsigned int                       bufferIdx;
         bool                               constPosition;
-        tracking::Vector3D                 startCamLookAt;
+        tracking::Vector3D                 startCamView;
         tracking::Vector3D                 startCamPosition;
         tracking::Vector3D                 startCamUp;
         tracking::Vector3D                 startPosition;

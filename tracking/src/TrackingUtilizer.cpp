@@ -13,7 +13,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(void)
     , tracker(nullptr)
     , curCameraPosition()
     , curCameraUp()
-    , curCameraLookAt()
+    , curCameraView()
     , curIntersection()
     , curFOV()
     , curOrientation()
@@ -24,7 +24,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(void)
     , bufferIdx(0)
     , constPosition(false)
     , lastButton(0)
-    , startCamLookAt()
+    , startCamView()
     , startCamPosition()
     , startCamUp()
     , startPosition()
@@ -520,7 +520,7 @@ bool tracking::TrackingUtilizer::GetFieldOfView(float& left_top_x, float& left_t
 
 bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
     float& cam_position_x, float& cam_position_y, float& cam_position_z,
-    float& cam_lookat_x, float& cam_lookat_y, float& cam_lookat_z,
+    float& cam_view_x, float& cam_view_y, float& cam_view_z,
     float& cam_up_x, float& cam_up_y, float& cam_up_z) {
 
     if (!this->initialised) {
@@ -550,9 +550,9 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
         cam_position_x = this->curCameraPosition.X();
         cam_position_y = this->curCameraPosition.Y();
         cam_position_z = this->curCameraPosition.Z();
-        cam_lookat_x = this->curCameraLookAt.X();
-        cam_lookat_y = this->curCameraLookAt.Y();
-        cam_lookat_z = this->curCameraLookAt.Z();
+        cam_view_x = this->curCameraView.X();
+        cam_view_y = this->curCameraView.Y();
+        cam_view_z = this->curCameraView.Z();
         cam_up_x = this->curCameraUp.X();
         cam_up_y = this->curCameraUp.Y();
         cam_up_z = this->curCameraUp.Z();
@@ -561,9 +561,9 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
         cam_position_x = (std::numeric_limits<float>::max)();
         cam_position_y = (std::numeric_limits<float>::max)();
         cam_position_z = (std::numeric_limits<float>::max)();
-        cam_lookat_x = (std::numeric_limits<float>::max)();
-        cam_lookat_y = (std::numeric_limits<float>::max)();
-        cam_lookat_z = (std::numeric_limits<float>::max)();
+        cam_view_x = (std::numeric_limits<float>::max)();
+        cam_view_y = (std::numeric_limits<float>::max)();
+        cam_view_z = (std::numeric_limits<float>::max)();
         cam_up_x = (std::numeric_limits<float>::max)();
         cam_up_y = (std::numeric_limits<float>::max)();
         cam_up_z = (std::numeric_limits<float>::max)();
@@ -573,7 +573,7 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
 }
 
 
-bool tracking::TrackingUtilizer::SetCurrentCamera(float cam_position_x, float cam_position_y, float cam_position_z, float cam_lookat_x, float cam_lookat_y, float cam_lookat_z, float cam_up_x, float cam_up_y, float cam_up_z) {
+bool tracking::TrackingUtilizer::SetCurrentCamera(float cam_position_x, float cam_position_y, float cam_position_z, float cam_view_x, float cam_view_y, float cam_view_z, float cam_up_x, float cam_up_y, float cam_up_z) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -582,7 +582,7 @@ bool tracking::TrackingUtilizer::SetCurrentCamera(float cam_position_x, float ca
     }
 
     this->curCameraPosition = tracking::Vector3D(cam_position_x, cam_position_y, cam_position_z);
-    this->curCameraLookAt = tracking::Vector3D(cam_lookat_x, cam_lookat_y, cam_lookat_z);
+    this->curCameraView = tracking::Vector3D(cam_view_x, cam_view_y, cam_view_z);
     this->curCameraUp = tracking::Vector3D(cam_up_x, cam_up_y, cam_up_z);
 
     return true;
@@ -719,7 +719,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
             if (isPressed) {
                 // Preserve the current camera system as we need it later to perform
                 // incremental transformations.
-                this->startCamLookAt   = this->curCameraLookAt;
+                this->startCamView   = this->curCameraView;
                 this->startCamPosition = this->curCameraPosition;
                 this->startCamUp       = this->curCameraUp;
 
@@ -727,7 +727,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
                 // coordinate system. This is required to align the interaction device 
                 // with the current view later on.
 
-                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, 1.0f), this->startCamPosition - this->startCamLookAt);
+                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, 1.0f), this->startCamView);
                 auto q2 = this->xform(q1 * tracking::Vector3D(0.0f, 1.0f, 0.0f), this->startCamUp);
                 this->startRelativeOrientation = q2 * q1;
 
@@ -792,14 +792,13 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             }
 
             // Apply rotation.
-            tracking::Vector3D startView = this->startCamPosition - this->startCamLookAt;
-            tracking::Vector3D up        = quat * this->startCamUp;
-            tracking::Vector3D view      = quat * startView;
+            tracking::Vector3D up   = quat * this->startCamUp;
+            tracking::Vector3D view = quat * this->startCamView;
 
             // Apply new view parameters.
-            //this->curCameraPosition = this->startCamPositio;
-            this->curCameraLookAt   = this->startCamPosition + view;
-            this->curCameraUp       = up;
+            //this->curCameraPosition = this->startCamPosition;
+            this->curCameraView = view;
+            this->curCameraUp   = up;
 
             retval = true;
         }
@@ -823,7 +822,6 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
             // Apply new translated position.
             this->curCameraPosition = this->startCamPosition + delta;
-            this->curCameraLookAt   = this->startCamLookAt + delta;
 
             retval = true;
         }
@@ -838,7 +836,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             // Compute the distance in virtual space that we move the camera.
             auto delta = diff.Z() * this->zoomSpeed;
 
-            auto view = this->startCamPosition - this->startCamLookAt;
+            auto view = this->startCamView;
             view.Normalise();
 
             view *= delta;
@@ -913,14 +911,13 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
             }
 
             // Apply rotation.
-            tracking::Vector3D startView = this->startCamPosition - this->startCamLookAt;
-            tracking::Vector3D up = quat * this->startCamUp;
-            tracking::Vector3D view = quat * startView;
+            tracking::Vector3D up   = quat * this->startCamUp;
+            tracking::Vector3D view = quat * this->startCamView;
 
             // Apply new view parameters.
-            this->curCameraPosition = this->startCamLookAt + view;
-            this->curCameraLookAt = this->startCamLookAt;
-            this->curCameraUp = up;
+            //this->curCameraPosition = this->startCamPosition;
+            this->curCameraView = view;
+            this->curCameraUp   = up;
 
             retval = true;
         }
@@ -930,7 +927,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF TRANSLATION." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
-            auto delta = this->curPosition - this->startPosition;
+            auto delta = this->curPosition -this->startPosition;
 
             // Align interaction with the original camera system.
             delta = this->startRelativeOrientation * delta;
@@ -944,7 +941,6 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
             // Apply new translated position.
             this->curCameraPosition = this->startCamPosition + delta;
-            this->curCameraLookAt = this->startCamLookAt + delta;
 
             retval = true;
         }
@@ -959,7 +955,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
             // Compute the distance in virtual space that we move the camera.
             auto delta = diff.Z() * this->zoomSpeed;
 
-            auto view = this->startCamPosition - this->startCamLookAt;
+            auto view = this->startCamView;
             view.Normalise();
 
             view *= delta;
@@ -1007,7 +1003,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
     // W = width
     // H = height
     // O = origin 
-    // D = look at direction
+    // D = view direction
     // U = up direction
     // R = right direction
 
@@ -1040,7 +1036,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
         auto cOv = this->calibrationOrientation;
         auto cOq  = Quaternion(cOv.X(), cOv.Y(), cOv.Z(), cOv.W());
 
-        // Calculate physical direction (look at) of rigid body 
+        // Calculate physical direction (view) of rigid body 
         // (Physical calibration direction is opposite direction of screen normal)
         auto rbDv = this->curOrientation * cOq.Inverse() * ((-1.0f) * pNv);
         rbDv.Normalise();
@@ -1162,7 +1158,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                         fovVert[i].Normalise();
                         //rbRelPosv didn't change ...
                         delta = pNv.Dot(rbRelPosv) / pNv.Dot((-1.0f * fovVert[i]));  //Using first intercept theorem ...
-                                                                                     //ToFIX: delta switches to negativ values before(?) normal of screen and look at direction are orthogonal ...
+                                                                                     //TOFIX: delta switches to negativ values before(?) normal of screen and view direction are orthogonal ...
                         delta = (delta < 0.0f) ? (500.0f) : (delta); // the 500 is empirical
                         rbIs = this->curPosition + delta * fovVert[i];
                         // Intersection in regard to powerwall origin
