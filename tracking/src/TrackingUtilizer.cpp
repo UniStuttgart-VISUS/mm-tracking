@@ -1102,13 +1102,12 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
                 std::vector<Vector3D> fovVert;
                 fovVert.clear();
 
-                if ((this->fovMode == 0) || (this->fovMode == 1)) { 
-                    // Width and Height - Width and Aspect Ratio
+                if ((this->fovMode == FovMode::WIDTH_AND_HEIGHT) || (this->fovMode == FovMode::WIDTH_AND_ASPECT_RATIO)) {
                                   
-                    float xDelta = (fov_w / 2.0f);
-                    float yDelta = (fov_h * pRatiof / 2.0f);
-                    if (this->fovMode == 1) { /// DIFFERENCE for Width and Aspect Ratio
-                        yDelta = (fov_w / fov_r * pRatiof / 2.0f);
+                    float xDelta = (fov_w * pRatiof / 2.0f);
+                    float yDelta = (fov_h  / 2.0f);
+                    if (this->fovMode == FovMode::WIDTH_AND_ASPECT_RATIO) { /// DIFFERENCE for Width and Aspect Ratio
+                        yDelta = (fov_w / fov_r / 2.0f);
                     }
 
                     fovVert.push_back((pIs - (pWv * xDelta)) + (pHv * yDelta)); // left top
@@ -1133,7 +1132,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
                         }
                     }
                 }
-                else if ((this->fovMode == 2) || (this->fovMode == 3)) { 
+                else if ((this->fovMode == FovMode::HORIZONTAL_ANGLE_AND_VERTICAL_ANGLE) || (this->fovMode == FovMode::HORIZONTAL_ANGLE_AND_ASPECT_RATIO)) {
                     // Horizontal Angle and Vertical Angle - Horizontal Angle and Aspect Ratio
 
                     // Current 'up' Vector3D of rigid body is equal to "heigth Vector3D" of powerwall.
@@ -1147,7 +1146,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool processFov) {
 
                     // Calculate length of 'up' Vector3D for given vertical angle in distance of normalized looak at Vector3D.
                     deltaU = (float)std::tan((double)fov_av / 180.0 * PI); // * 1.0f = Length of rbDv
-                    if (this->fovMode == 3) { /// DIFFERENCE for Horizontal Angle and Aspect Ratio
+                    if (this->fovMode == FovMode::HORIZONTAL_ANGLE_AND_ASPECT_RATIO) { /// DIFFERENCE for Horizontal Angle and Aspect Ratio
                         deltaU = deltaR / fov_r;
                     }
 
