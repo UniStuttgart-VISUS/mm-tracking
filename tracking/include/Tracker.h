@@ -33,11 +33,11 @@ namespace tracking {
 
         /** Data structure for setting parameters as batch. */
         struct Params {
-            const char*                                                   active_node;      /** The name of the active node which should receive the tracking data exclusively. */
-            size_t                                                        active_node_len;
-            tracking::VrpnDevice<vrpn_Button_Remote>::Params*             vrpn_params;
-            size_t                                                        vrpn_params_count;
-            tracking::NatNetDevicePool::Params                            natnet_params;
+            const char*                                       active_node;      /** The name of the active node which should receive the tracking data exclusively. */
+            size_t                                            active_node_len;
+            tracking::VrpnDevice<vrpn_Button_Remote>::Params* vrpn_params;
+            size_t                                            vrpn_params_count;
+            tracking::NatNetDevicePool::Params                natnet_params;
         };
 
         /** Current tracking raw data. */
@@ -111,13 +111,13 @@ namespace tracking {
         /**
         *  Get current tracking data.
         *
-        * @param inRigidBody    The name of the rigid body getting data for
-        * @param inButtonDevice The name of the button device getting data for.
-        * @param outData         Returns the current tracking raw data.
+        * @param i_rigid_body     The name of the rigid body getting data for
+        * @param i_button_device  The name of the button device getting data for.
+        * @param o_data           Returns the current tracking raw data.
         *
         * @return True for success, false otherwise.
         */
-        bool GetData(const std::string& rigid_body, const std::string& button_device, tracking::Tracker::TrackingData& data);
+        bool GetData(const std::string& i_rigid_body, const std::string& i_button_device, tracking::Tracker::TrackingData& o_data);
 
     private:
 
@@ -133,9 +133,7 @@ namespace tracking {
 
         bool initialised;
         bool connected;
-
         VrpnButtonPoolType buttonDevices;
-
         tracking::NatNetDevicePool motionDevices;
 
         /** parameters ********************************************************/

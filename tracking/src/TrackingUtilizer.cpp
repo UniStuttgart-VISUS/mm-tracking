@@ -14,6 +14,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(void)
     , curCameraPosition()
     , curCameraUp()
     , curCameraView()
+    , curCameraCenterDist()
     , curIntersection()
     , curFOV()
     , curOrientation()
@@ -27,6 +28,7 @@ tracking::TrackingUtilizer::TrackingUtilizer(void)
     , startCamView()
     , startCamPosition()
     , startCamUp()
+    , startCamCenterDist()
     , startPosition()
     , startOrientation()
     , startRelativeOrientation()
@@ -358,7 +360,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
 
     // If no calibration orientation is available, use current orientation of rigid body ...
     if (!isCalibrationAvailable) {
-        this->Calibration();
+        this->Calibrate();
         std::ofstream file(filename, std::ifstream::app);
         if (!file.good()) {
             std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Failed to open \"" << filename.c_str() << "\" for writing. " <<
@@ -375,9 +377,9 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
 }
 
 
-bool tracking::TrackingUtilizer::GetRawData(unsigned int& button,
-    float& position_x, float& position_y, float& position_z,
-    float& orientation_x, float& orientation_y, float& orientation_z, float& orientation_w) {
+bool tracking::TrackingUtilizer::GetRawData(unsigned int& o_button,
+    float& o_position_x, float& o_position_y, float& o_position_z,
+    float& o_orientation_x, float& o_orientation_y, float& o_orientation_z, float& o_orientation_w) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -389,33 +391,33 @@ bool tracking::TrackingUtilizer::GetRawData(unsigned int& button,
 
     // Request updated tracking data.
     if (this->updateTrackingData()) {
-        button = this->curButton;
-        position_x = this->curPosition.X();
-        position_y = this->curPosition.Y();
-        position_z = this->curPosition.Z();
-        orientation_x = this->curOrientation.X();
-        orientation_y = this->curOrientation.Y();
-        orientation_z = this->curOrientation.Z();
-        orientation_w = this->curOrientation.W();
+        o_button = this->curButton;
+        o_position_x = this->curPosition.X();
+        o_position_y = this->curPosition.Y();
+        o_position_z = this->curPosition.Z();
+        o_orientation_x = this->curOrientation.X();
+        o_orientation_y = this->curOrientation.Y();
+        o_orientation_z = this->curOrientation.Z();
+        o_orientation_w = this->curOrientation.W();
 
         stateRawData = true;
     }
     else {
-        button = 0;
-        position_x = (std::numeric_limits<float>::max)();
-        position_y = (std::numeric_limits<float>::max)();
-        position_z = (std::numeric_limits<float>::max)();
-        orientation_x = 0.0f;
-        orientation_y = 0.0f;
-        orientation_z = 0.0f;
-        orientation_w = 1.0f;
+        o_button = 0;
+        o_position_x = (std::numeric_limits<float>::max)();
+        o_position_y = (std::numeric_limits<float>::max)();
+        o_position_z = (std::numeric_limits<float>::max)();
+        o_orientation_x = 0.0f;
+        o_orientation_y = 0.0f;
+        o_orientation_z = 0.0f;
+        o_orientation_w = 1.0f;
     }
 
     return (stateRawData);
 }
 
 
-bool tracking::TrackingUtilizer::GetSelectionState(bool& selection) {
+bool tracking::TrackingUtilizer::GetSelectionState(bool& o_selecttion) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -433,17 +435,17 @@ bool tracking::TrackingUtilizer::GetSelectionState(bool& selection) {
     }
 
     if (stateBtnChgs) {
-        selection = this->curSelecting;
+        o_selecttion = this->curSelecting;
     }
     else {
-        selection = false;
+        o_selecttion = false;
     }
 
     return (stateBtnChgs);
 }
 
 
-bool tracking::TrackingUtilizer::GetIntersection(float& intersection_x, float& intersection_y) {
+bool tracking::TrackingUtilizer::GetIntersection(float& o_intersection_x, float& o_intersection_y) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -461,22 +463,22 @@ bool tracking::TrackingUtilizer::GetIntersection(float& intersection_x, float& i
     }
 
     if (stateSrnIns) {
-        intersection_x = this->curIntersection.X();
-        intersection_y = this->curIntersection.Y();
+        o_intersection_x = this->curIntersection.X();
+        o_intersection_y = this->curIntersection.Y();
     }
     else {
-        intersection_x = (std::numeric_limits<float>::max)();
-        intersection_y = (std::numeric_limits<float>::max)();
+        o_intersection_x = (std::numeric_limits<float>::max)();
+        o_intersection_y = (std::numeric_limits<float>::max)();
     }
 
     return (stateSrnIns);
 }
 
 
-bool tracking::TrackingUtilizer::GetFieldOfView(float& left_top_x, float& left_top_y,
-    float& left_bottom_x, float& left_bottom_y,
-    float& right_top_x, float& right_top_y,
-    float& right_bottom_x, float& right_bottom_y) {
+bool tracking::TrackingUtilizer::GetFieldOfView(float& o_left_top_x, float& o_left_top_y,
+    float& o_left_bottom_x, float& o_left_bottom_y,
+    float& o_right_top_x, float& o_right_top_y,
+    float& o_right_bottom_x, float& o_right_bottom_y) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -494,34 +496,35 @@ bool tracking::TrackingUtilizer::GetFieldOfView(float& left_top_x, float& left_t
     }
 
     if (stateSrnIns) {
-        left_top_x = this->curFOV.left_top.X();
-        left_top_y = this->curFOV.left_top.Y();
-        left_bottom_x = this->curFOV.left_bottom.X();
-        left_bottom_y = this->curFOV.left_bottom.Y();
-        right_top_x = this->curFOV.right_top.X();
-        right_top_y = this->curFOV.right_top.Y();
-        right_bottom_x = this->curFOV.right_bottom.X();
-        right_bottom_y = this->curFOV.right_bottom.Y();
+        o_left_top_x = this->curFOV.left_top.X();
+        o_left_top_y = this->curFOV.left_top.Y();
+        o_left_bottom_x = this->curFOV.left_bottom.X();
+        o_left_bottom_y = this->curFOV.left_bottom.Y();
+        o_right_top_x = this->curFOV.right_top.X();
+        o_right_top_y = this->curFOV.right_top.Y();
+        o_right_bottom_x = this->curFOV.right_bottom.X();
+        o_right_bottom_y = this->curFOV.right_bottom.Y();
     }
     else {
-        left_top_x = (std::numeric_limits<float>::max)();
-        left_top_y = (std::numeric_limits<float>::max)();
-        left_bottom_x = (std::numeric_limits<float>::max)();
-        left_bottom_y = (std::numeric_limits<float>::max)();
-        right_top_x = (std::numeric_limits<float>::max)();
-        right_top_y = (std::numeric_limits<float>::max)();
-        right_bottom_x = (std::numeric_limits<float>::max)();
-        right_bottom_y = (std::numeric_limits<float>::max)();
+        o_left_top_x = (std::numeric_limits<float>::max)();
+        o_left_top_y = (std::numeric_limits<float>::max)();
+        o_left_bottom_x = (std::numeric_limits<float>::max)();
+        o_left_bottom_y = (std::numeric_limits<float>::max)();
+        o_right_top_x = (std::numeric_limits<float>::max)();
+        o_right_top_y = (std::numeric_limits<float>::max)();
+        o_right_bottom_x = (std::numeric_limits<float>::max)();
+        o_right_bottom_y = (std::numeric_limits<float>::max)();
     }
 
     return (stateSrnIns);
 }
 
 
-bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
-    float& cam_position_x, float& cam_position_y, float& cam_position_z,
-    float& cam_view_x, float& cam_view_y, float& cam_view_z,
-    float& cam_up_x, float& cam_up_y, float& cam_up_z) {
+bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim i_dim,
+    float i_distance_center,
+    float& io_cam_position_x, float& io_cam_position_y, float& io_cam_position_z,
+    float& io_cam_view_x, float& io_cam_view_y, float& io_cam_view_z,
+    float& io_cam_up_x, float& io_cam_up_y, float& io_cam_up_z) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -535,11 +538,17 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
     // Request updated tracking data.
     if (this->updateTrackingData()) {
 
+        // Set current camera for start values if camera manipulation button is pressed
+        this->curCameraPosition = tracking::Vector3D(io_cam_position_x, io_cam_position_y, io_cam_position_z);
+        this->curCameraView = tracking::Vector3D(io_cam_view_x, io_cam_view_y, io_cam_view_z);
+        this->curCameraUp = tracking::Vector3D(io_cam_up_x, io_cam_up_y, io_cam_up_z);
+        this->curCameraCenterDist = i_distance_center;
+
         // Check for current button interaction.
         stateBtnChgs = this->processButtonChanges();
 
         // Apply camera transformations enabled by pressed buttons.
-        switch (dim) {
+        switch (i_dim) {
             case(TrackingUtilizer::Dim::DIM_2D): stateCamTrs = this->processCameraTransformations2D(); break;
             case(TrackingUtilizer::Dim::DIM_3D): stateCamTrs = this->processCameraTransformations3D(); break;
             default: break;
@@ -547,49 +556,33 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim dim,
     }
 
     if (stateBtnChgs && stateCamTrs) {
-        cam_position_x = this->curCameraPosition.X();
-        cam_position_y = this->curCameraPosition.Y();
-        cam_position_z = this->curCameraPosition.Z();
-        cam_view_x = this->curCameraView.X();
-        cam_view_y = this->curCameraView.Y();
-        cam_view_z = this->curCameraView.Z();
-        cam_up_x = this->curCameraUp.X();
-        cam_up_y = this->curCameraUp.Y();
-        cam_up_z = this->curCameraUp.Z();
+        io_cam_position_x = this->curCameraPosition.X();
+        io_cam_position_y = this->curCameraPosition.Y();
+        io_cam_position_z = this->curCameraPosition.Z();
+        io_cam_view_x = this->curCameraView.X();
+        io_cam_view_y = this->curCameraView.Y();
+        io_cam_view_z = this->curCameraView.Z();
+        io_cam_up_x = this->curCameraUp.X();
+        io_cam_up_y = this->curCameraUp.Y();
+        io_cam_up_z = this->curCameraUp.Z();
     }
     else {
-        cam_position_x = (std::numeric_limits<float>::max)();
-        cam_position_y = (std::numeric_limits<float>::max)();
-        cam_position_z = (std::numeric_limits<float>::max)();
-        cam_view_x = (std::numeric_limits<float>::max)();
-        cam_view_y = (std::numeric_limits<float>::max)();
-        cam_view_z = (std::numeric_limits<float>::max)();
-        cam_up_x = (std::numeric_limits<float>::max)();
-        cam_up_y = (std::numeric_limits<float>::max)();
-        cam_up_z = (std::numeric_limits<float>::max)();
+        io_cam_position_x = (std::numeric_limits<float>::max)();
+        io_cam_position_y = (std::numeric_limits<float>::max)();
+        io_cam_position_z = (std::numeric_limits<float>::max)();
+        io_cam_view_x = (std::numeric_limits<float>::max)();
+        io_cam_view_y = (std::numeric_limits<float>::max)();
+        io_cam_view_z = (std::numeric_limits<float>::max)();
+        io_cam_up_x = (std::numeric_limits<float>::max)();
+        io_cam_up_y = (std::numeric_limits<float>::max)();
+        io_cam_up_z = (std::numeric_limits<float>::max)();
     }
 
     return (stateBtnChgs && stateCamTrs);
 }
 
 
-bool tracking::TrackingUtilizer::SetCurrentCamera(float cam_position_x, float cam_position_y, float cam_position_z, float cam_view_x, float cam_view_y, float cam_view_z, float cam_up_x, float cam_up_y, float cam_up_z) {
-
-    if (!this->initialised) {
-        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-        return false;
-    }
-
-    this->curCameraPosition = tracking::Vector3D(cam_position_x, cam_position_y, cam_position_z);
-    this->curCameraView = tracking::Vector3D(cam_view_x, cam_view_y, cam_view_z);
-    this->curCameraUp = tracking::Vector3D(cam_up_x, cam_up_y, cam_up_z);
-
-    return true;
-}
-
-
-bool tracking::TrackingUtilizer::Calibration(void) {
+bool tracking::TrackingUtilizer::Calibrate(void) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Not initialised. " <<
@@ -686,32 +679,40 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
 
             switch (i) {
             case(0): {
-                isPressed = (this->curButton == this->rotateButton);
-                this->isRotating = isPressed;
+                if (this->rotateButton != 0) {
+                    isPressed = (this->curButton == this->rotateButton);
+                    this->isRotating = isPressed;
 #ifdef TRACKING_DEBUG_OUTPUT
-                std::cout << "[DEBUG] [TrackingUtilizer] Rotate Button is " << ((this->isRotating) ? ("PRESSED") : ("released")) << "." << std::endl;
+                    std::cout << "[DEBUG] [TrackingUtilizer] Rotate Button is " << ((this->isRotating) ? ("PRESSED") : ("released")) << "." << std::endl;
 #endif
+                }
             } break;
             case(1): {
-                isPressed = (this->curButton == this->translateButton);
-                this->isTranslating = isPressed;
+                if (this->translateButton != 0) {
+                    isPressed = (this->curButton == this->translateButton);
+                    this->isTranslating = isPressed;
 #ifdef TRACKING_DEBUG_OUTPUT
-                std::cout << "[DEBUG] [TrackingUtilizer] Translate Button is " << ((this->isTranslating) ? ("PRESSED") : ("released")) << "." << std::endl;
+                    std::cout << "[DEBUG] [TrackingUtilizer] Translate Button is " << ((this->isTranslating) ? ("PRESSED") : ("released")) << "." << std::endl;
 #endif
+                }
             } break;
             case(2): {
-                isPressed = (this->curButton == this->zoomButton);
-                this->isZooming = isPressed;
+                if (this->zoomButton != 0) {
+                    isPressed = (this->curButton == this->zoomButton);
+                    this->isZooming = isPressed;
 #ifdef TRACKING_DEBUG_OUTPUT
-                std::cout << "[DEBUG] [TrackingUtilizer] Zoom Button is " << ((this->isZooming) ? ("PRESSED") : ("released")) << "." << std::endl;
+                    std::cout << "[DEBUG] [TrackingUtilizer] Zoom Button is " << ((this->isZooming) ? ("PRESSED") : ("released")) << "." << std::endl;
 #endif
+                }
             } break;
             case(3): {
-                this->curSelecting = (this->curButton == this->selectButton);
-                isPressed = false;  // Current configuration has not to be stored ....
+                if (this->selectButton != 0) {
+                    this->curSelecting = (this->curButton == this->selectButton);
+                    isPressed = false;  // Current configuration has not to be stored ....
 #ifdef TRACKING_DEBUG_OUTPUT
-                std::cout << "[DEBUG] [TrackingUtilizer] Select Button is " << ((this->curSelecting) ? ("PRESSED") : ("released")) << "." << std::endl;
+                    std::cout << "[DEBUG] [TrackingUtilizer] Select Button is " << ((this->curSelecting) ? ("PRESSED") : ("released")) << "." << std::endl;
 #endif
+                }
             } break;
             }
 
@@ -719,20 +720,20 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
             if (isPressed) {
                 // Preserve the current camera system as we need it later to perform
                 // incremental transformations.
-                this->startCamView   = this->curCameraView;
-                this->startCamPosition = this->curCameraPosition;
-                this->startCamUp       = this->curCameraUp;
+                this->startCamView          = this->curCameraView;
+                this->startCamPosition      = this->curCameraPosition;
+                this->startCamUp            = this->curCameraUp;
+                this->startCamCenterDist = this->curCameraCenterDist;
 
                 // Relative orientation of the stick with respect to the current camera 
                 // coordinate system. This is required to align the interaction device 
                 // with the current view later on.
-
                 auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, 1.0f), this->startCamView);
                 auto q2 = this->xform(q1 * tracking::Vector3D(0.0f, 1.0f, 0.0f), this->startCamUp);
-                this->startRelativeOrientation = q2 * q1;
 
-                this->startOrientation = this->curOrientation;
-                this->startPosition    = this->curPosition;
+                this->startRelativeOrientation = q2 * q1;
+                this->startOrientation         = this->curOrientation;
+                this->startPosition            = this->curPosition;
             }
         }
 
@@ -779,26 +780,22 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             quat.Normalise();
 
             // Align interaction with the original camera system.
-            auto relConj = this->startRelativeOrientation;
-            relConj.Conjugate();
-            quat = this->startRelativeOrientation * quat * relConj;
-
-            // Optionally, apply the Reina factor.
+            auto startRelativeOrientation_Conj = this->startRelativeOrientation;
+            startRelativeOrientation_Conj.Conjugate();
+            quat = this->startRelativeOrientation * quat * startRelativeOrientation_Conj;
+            quat.Normalise();
             if (this->invertRotate) {
                 quat.Invert();
             }
-            else {
-                quat.Normalise();
-            }
-
-            // Apply rotation.
-            tracking::Vector3D up   = quat * this->startCamUp;
-            tracking::Vector3D view = quat * this->startCamView;
 
             // Apply new view parameters.
-            //this->curCameraPosition = this->startCamPosition;
-            this->curCameraView = view;
-            this->curCameraUp   = up;
+            this->startCamView.Normalise();
+            this->startCamUp.Normalise();
+            auto rotationCenter = this->startCamPosition + this->startCamView * this->startCamCenterDist;
+
+            this->curCameraView     = quat * this->startCamView;
+            this->curCameraUp       = quat * this->startCamUp;
+            this->curCameraPosition = rotationCenter - (this->curCameraView * this->startCamCenterDist);
 
             retval = true;
         }
@@ -808,20 +805,18 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF TRANSLATION." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
-            auto delta = this->curPosition -this->startPosition;
+            auto pos_delta = this->curPosition - this->startPosition;
+            //pos_delta = this->startRelativeOrientation * pos_delta;
 
-            // Align interaction with the original camera system.
-            delta = this->startRelativeOrientation * delta;
-
-            // Scale into virtual space.
-            delta *= this->translateSpeed;
-
+            pos_delta *= this->translateSpeed;
             if (this->invertTranslate) {
-                delta *= (-1.0f);
+                pos_delta *= (-1.0f);
             }
 
             // Apply new translated position.
-            this->curCameraPosition = this->startCamPosition + delta;
+            this->curCameraPosition = this->startCamPosition + pos_delta;
+            this->curCameraView     = this->startCamView;
+            this->curCameraUp       = this->startCamUp;
 
             retval = true;
         }
@@ -831,22 +826,20 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ZOOM." << std::endl;
 #endif
             // Compute relative movement of tracker in physical space.
-            auto diff = this->curPosition - this->startPosition;
+            auto pos_diff = this->curPosition - this->startPosition;
 
-            // Compute the distance in virtual space that we move the camera.
-            auto delta = diff.Z() * this->zoomSpeed;
-
-            auto view = this->startCamView;
-            view.Normalise();
-
-            view *= delta;
-
+            auto delta = pos_diff.Z() * this->zoomSpeed;
+            auto pos_delta = this->startCamView;
+            pos_delta.Normalise();
+            pos_delta *= delta;
             if (this->invertZoom) {
-                view *= (-1.0f);
+                pos_delta *= (-1.0f);
             }
 
             // Apply new zoomed position.
-            this->curCameraPosition = this->startCamPosition + view;
+            this->curCameraPosition = this->startCamPosition + pos_delta;
+            this->curCameraView     = this->startCamView;
+            this->curCameraUp       = this->startCamUp;
 
             retval = true;
         }

@@ -155,7 +155,7 @@ bool tracking::Tracker::Disconnect(void) {
 }
 
 
-bool tracking::Tracker::GetData(const std::string& rigid_body, const std::string& button_device, tracking::Tracker::TrackingData& data) {
+bool tracking::Tracker::GetData(const std::string& i_rigid_body, const std::string& i_button_device, tracking::Tracker::TrackingData& o_data) {
 
     if (!this->initialised) {
         std::cerr << std::endl << "[ERROR] [Tracker] Not initialised. " <<
@@ -173,14 +173,14 @@ bool tracking::Tracker::GetData(const std::string& rigid_body, const std::string
 #endif
 
     // Set data of requested rigid body
-    data.rigid_body.orientation = this->motionDevices.GetOrientation(rigid_body);
-    data.rigid_body.position    = this->motionDevices.GetPosition(rigid_body);
+    o_data.rigid_body.orientation = this->motionDevices.GetOrientation(i_rigid_body);
+    o_data.rigid_body.position    = this->motionDevices.GetPosition(i_rigid_body);
 
     // Set data of requested button device 
-    data.button = 0;
+    o_data.button = 0;
     for (auto& v : this->buttonDevices) {
-        if (button_device == v->GetDeviceName()) {
-            data.button = (v->GetButton());
+        if (i_button_device == v->GetDeviceName()) {
+            o_data.button = (v->GetButton());
             break; /// Break if button device is found.
         }
     }

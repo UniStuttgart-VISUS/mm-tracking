@@ -115,33 +115,33 @@ namespace tracking {
         /**
         *  Get the raw tracking data.
         *
-        * @param button                 Output the current button of the given button device.
-        * @param position_(x,y,z)       Output the current position of the given rigid body.
-        * @param orientation_(x,y,z,w)  Output the current orientation of the given rigid body.
+        * @param o_button                 Output the current button of the given button device.
+        * @param o_position_(x,y,z)       Output the current position of the given rigid body.
+        * @param o_orientation_(x,y,z,w)  Output the current orientation of the given rigid body.
         *
         * @return True for success, false otherwise.
         */
-        bool GetRawData(unsigned int& button, 
-            float& position_x, float& position_y, float& position_z, 
-            float& orientation_x, float& orientation_y, float& orientation_z, float& orientation_w);
+        bool GetRawData(unsigned int& o_button,
+            float& o_position_x, float& o_position_y, float& o_position_z,
+            float& o_orientation_x, float& o_orientation_y, float& o_orientation_z, float& o_orientation_w);
 
         /**
         *  Get the current state of the select button.
         *
-        * @param selecttion  Output the current selection state. True if select button is pressed, false otherwise.
+        * @param o_selecttion  Output the current selection state. True if select button is pressed, false otherwise.
         *
         * @return True for success, false otherwise.
         */
-        bool GetSelectionState(bool& selecttion);
+        bool GetSelectionState(bool& o_selecttion);
 
         /**
         *  Get the current intersection with the screen.
         *
-        * @param intersection_(x,y)  Output the relative 2D screen intersection coordinates (in range [0,1]).
+        * @param o_intersection_(x,y)  Output the relative 2D screen intersection coordinates (in range [0,1]).
         *
         * @return True for success, false otherwise.
         */
-        bool GetIntersection(float& intersection_x, float& intersection_y);
+        bool GetIntersection(float& o_intersection_x, float& o_intersection_y);
 
         /**
         *  Get the current field of view.
@@ -150,29 +150,31 @@ namespace tracking {
         *
         * @return True for success, false otherwise.
         */
-        bool GetFieldOfView(float& left_top_x, float& left_top_y, 
-            float& left_bottom_x, float& left_bottom_y, 
-            float& right_top_x, float& right_top_y, 
-            float& right_bottom_x, float& right_bottom_y);
+        bool GetFieldOfView(float& o_left_top_x, float& o_left_top_y, 
+            float& o_left_bottom_x, float& o_left_bottom_y, 
+            float& o_right_top_x, float& o_right_top_y, 
+            float& o_right_bottom_x, float& o_right_bottom_y);
 
         /**
         * Get the updated camera vectors depending on pressed buttons.
         * 
         * Requires previous call of SetCurrentCamera(...).
         * 
-        * @param dim                The current world space dimension.
-        *                           3D: Transformations are applied in three-dimensional space.
-        *                           2D: Transformations are applied in two-dimensional screen space.
-        * @param cam_position_(x,y) Output the camera position.
-        * @param cam_view_(x,y)     Output the camera loook at position.
-        * @param cam_up_(x,y)       Output the up direction of the camera.
+        * @param _idim                 The current world space dimension.
+        *                              3D: Transformations are applied in three-dimensional space.
+        *                              2D: Transformations are applied in two-dimensional screen space.
+        * @param i_distance_center     The distance along the view vector to the rotation center of the camera.
+        * @param io_cam_position_(x,y) Input current camera position. Output of the updated camera position.
+        * @param io_cam_view_(x,y)     Input current camera view direction. Output of the updated camera view direction.
+        * @param io_cam_up_(x,y)       Input current camera up direction. Output of the updated camera up direction.
         *
         * @return True for success, false otherwise.
         */
-        bool GetUpdatedCamera(TrackingUtilizer::Dim dim, 
-            float& cam_position_x, float& cam_position_y, float& cam_position_z, 
-            float& cam_view_x, float& cam_view_y, float& cam_view_z, 
-            float& cam_up_x, float& cam_up_y, float& cam_up_z);
+        bool GetUpdatedCamera(TrackingUtilizer::Dim i_dim, 
+            float i_distance_center,
+            float& io_cam_position_x, float& io_cam_position_y, float& io_cam_position_z, 
+            float& io_cam_view_x, float& io_cam_view_y, float& io_cam_view_z, 
+            float& io_cam_up_x, float& io_cam_up_y, float& io_cam_up_z);
 
         /**
         * Get the button device name.
@@ -192,30 +194,14 @@ namespace tracking {
             return this->rigidBodyName.c_str();
         }
 
-        /**********************************************************************/
-        // SET
-
         /**
-        * Set the camera vectors to use for manipulation.
-        *
-        * @param cam_position_(x,y)  The camera position.
-        * @param cam_view_(x,y)      The view position of the camera.
-        * @param cam_up_(x,y)        The up direction of the camera.
-        *
-        * @return True for success, false otherwise.
-        */
-        bool SetCurrentCamera(float cam_position_x, float cam_position_y, float cam_position_z, 
-            float cam_view_x, float cam_view_y, float cam_view_z, 
-            float cam_up_x, float cam_up_y, float cam_up_z);
-
-        /**
-        * Set the calibration orientation of the Pointing device. 
-        * >>> Put rigid body somewhere Pointing vertically towards the powerwall screen and
+        * Detect the calibration orientation of the pointing device. 
+        * >>> Put rigid body somewhere pointing vertically towards the powerwall screen and
         * >>> right- and up-Vector3D of rigid body must be parallel to x- and y-axis of powerwall screen.
         *
         * @return True for success, false otherwise.
         */
-        bool Calibration(void);
+        bool Calibrate(void);
 
     private:
 
@@ -223,13 +209,12 @@ namespace tracking {
         * variables
         **********************************************************************/
 
-        bool initialised;
-
+        bool                               initialised;
         std::shared_ptr<tracking::Tracker> tracker;
-
         tracking::Vector3D                 curCameraPosition;
         tracking::Vector3D                 curCameraUp;
         tracking::Vector3D                 curCameraView;
+        float                              curCameraCenterDist;
         tracking::Point2D                  curIntersection;
         tracking::Rectangle                curFOV;
         tracking::Quaternion               curOrientation;
@@ -243,6 +228,7 @@ namespace tracking {
         tracking::Vector3D                 startCamView;
         tracking::Vector3D                 startCamPosition;
         tracking::Vector3D                 startCamUp;
+        float                              startCamCenterDist;
         tracking::Vector3D                 startPosition;
         tracking::Quaternion               startOrientation;
         tracking::Quaternion               startRelativeOrientation;
