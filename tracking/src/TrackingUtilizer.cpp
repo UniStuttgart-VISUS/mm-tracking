@@ -1097,7 +1097,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                                   
                     float xDelta = (fov_w  / 2.0f);
                     float yDelta = (fov_h  / 2.0f);
-                    if (this->fovMode == FovMode::WIDTH_AND_ASPECT_RATIO) { /// DIFFERENCE for Width and Aspect Ratio
+                    if (this->fovMode == FovMode::WIDTH_AND_ASPECT_RATIO) {
                         yDelta = (fov_w / fov_r / 2.0f);
                     }
 
@@ -1150,9 +1150,9 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     for (int i = 0; i < fovVert.size(); ++i) {
                         fovVert[i].Normalise();
                         //rbRelPosv didn't change ...
-                        delta = pNv.Dot(rbRelPosv) / pNv.Dot((-1.0f * fovVert[i]));  //Using first intercept theorem ...
-                                                                                     //TOFIX: delta switches to negativ values before(?) normal of screen and view direction are orthogonal ...
-                        delta = (delta < 0.0f) ? (500.0f) : (delta); // the 500 is empirical
+                        delta = pNv.Dot(rbRelPosv) / pNv.Dot(((-1.0f) * fovVert[i]));  //Using first intercept theorem ...
+                        ///XXX: delta switches to negativ values before(?) normal of screen and view direction are orthogonal ...
+                        delta = (delta < 0.0f) ? (delta * (-1.0f)) : (delta); // the 500 is empirical
                         rbIs = this->curPosition + delta * fovVert[i];
                         // Intersection in regard to powerwall origin
                         pIs = rbIs - pOv;
