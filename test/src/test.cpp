@@ -78,7 +78,7 @@ int main() {
     tup.fov_vert_angle               = 30.0f;
     tup.fov_aspect_ratio             = tracking::TrackingUtilizer::FovAspectRatio::AR_1_77__1; // 16:9
 
-    /// Powerwall Resolution: 10.800 x 4.096 pixel | Aspect Ratio: 2,64
+    /// Info: Powerwall Resolution: 10.800 x 4.096 pixel | Aspect Ratio: 2,64
 
     // TRACKING INITIALISATION ////////////////////////////////////////////////
     
@@ -106,7 +106,7 @@ int main() {
     }
     std::vector<tracking::TrackingUtilizer> utilizers;
     utilizers.clear();
-    for (auto rb : rigidBodies) {
+    for (auto& rb : rigidBodies) {
         tup.rigid_body_name = rb.c_str();
         tup.rigid_body_name_len = rb.length();
         utilizers.emplace_back(tracking::TrackingUtilizer());

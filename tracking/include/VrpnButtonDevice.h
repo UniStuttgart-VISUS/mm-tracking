@@ -70,12 +70,10 @@ namespace tracking {
         * variables
         **********************************************************************/
 
-        bool initialised;
-        bool connected;
-
-        std::atomic<bool> runThreadLoop;
-
-        std::atomic<tracking::Button> button;
+        bool m_initialised;
+        bool m_connected;
+        std::atomic<bool> m_run_thread_loop;
+        std::atomic<tracking::Button> m_button;
 
         /***********************************************************************
         * functions

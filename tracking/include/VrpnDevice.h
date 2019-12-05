@@ -106,10 +106,9 @@ namespace tracking {
         * variables
         **********************************************************************/
 
-        bool initialised;
-        bool connected;
-
-        std::unique_ptr<R> remoteDevice; 
+        bool m_initialised;
+        bool m_connected;
+        std::unique_ptr<R> m_remote_device; 
 
         /** PARAMETERs ********************************************************/
 
@@ -153,9 +152,9 @@ namespace tracking {
 
 template <class R>
 tracking::VrpnDevice<R>::VrpnDevice(void)
-    : initialised(false)
-    , connected(false)
-    , remoteDevice(nullptr)
+    : m_initialised(false)
+    , m_connected(false)
+    , m_remote_device(nullptr)
     , deviceName("ControlBox")
     , serverName("mini")
     , port(3884)
@@ -169,7 +168,7 @@ template <class R>
 bool tracking::VrpnDevice<R>::Initialise(const typename VrpnDevice<R>::Params& params) {
 
     bool check = true;
-    this->initialised = false;
+    this->m_initialised = false;
 
     std::string device_name;
     try {
@@ -223,10 +222,10 @@ bool tracking::VrpnDevice<R>::Initialise(const typename VrpnDevice<R>::Params& p
         this->protocol = params.protocol;
 
         this->printParams();
-        this->initialised = true;
+        this->m_initialised = true;
     }
 
-    return this->initialised;
+    return this->m_initialised;
 }
 
 
@@ -249,7 +248,7 @@ tracking::VrpnDevice<R>::~VrpnDevice(void) {
 template <class R>
 bool tracking::VrpnDevice<R>::Connect(void) {
 
-    if (!this->initialised) {
+    if (!this->m_initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
@@ -279,7 +278,7 @@ bool tracking::VrpnDevice<R>::Connect(void) {
         url.c_str()
 #ifdef TRACKING_VRPN_DEVICE_WRITE_PLAYBACKLOG
         ,(this->deviceName +  "_local_in.log").c_str(), (this->deviceName +  "_local_out.log").c_str(),
-        (this->deviceName + "_remoteDevice_in.log").c_str(), (this->deviceName + "_remoteDevice_out.log").c_str()
+        (this->deviceName + "_remote_device_in.log").c_str(), (this->deviceName + "_remote_device_out.log").c_str()
 #endif
         );
 
@@ -290,16 +289,16 @@ bool tracking::VrpnDevice<R>::Connect(void) {
         return false;
     }
     
-    /// Create remoteDevice object calling CTOR with make_unique() for type R (e.g. vrpn_Button_remoteDevice, vrpn_Tracker_remoteDevice)
-    this->remoteDevice = std::make_unique<R>(url.c_str(), connection); 
-    this->remoteDevice->shutup = true;
+    /// Create remote_device object calling CTOR with make_unique() for type R (e.g. vrpn_Button_remote_device, vrpn_Tracker_remote_device)
+    this->m_remote_device = std::make_unique<R>(url.c_str(), connection); 
+    this->m_remote_device->shutup = true;
     std::cout << "[INFO] [VrpnDevice] >>> AVAILABEL BUTTON DEVICE: \"" << this->deviceName.c_str() << "\"" << std::endl;
 
     std::cout << "[INFO] [VrpnDevice] Successfully connected to VRPN server." << std::endl;
 
     connection->removeReference(); /// Adjust reference count manually.
 
-    this->connected = true;
+    this->m_connected = true;
 
     return true;
 }
@@ -308,7 +307,7 @@ bool tracking::VrpnDevice<R>::Connect(void) {
 template <class R>
 bool tracking::VrpnDevice<R>::Disconnect(void) {
 
-    if (!this->remoteDevice) {
+    if (!this->m_remote_device) {
         return false;
     }
 
@@ -316,12 +315,12 @@ bool tracking::VrpnDevice<R>::Disconnect(void) {
     // is called in DTOR of vrpn_Connection. Deleting the remote device object will 
     // also delete the connection object and this is the way to disconnect.
     // The callbacks are unregistered in this way, too. Resetting unique_ptr 
-    // to nullptr will delete the remoteDevice object and calls the other DTORs recursively.
-    this->remoteDevice.reset(nullptr);
+    // to nullptr will delete the m_remote_device object and calls the other DTORs recursively.
+    this->m_remote_device.reset(nullptr);
 
     std::cout << "[INFO] [VrpnDevice] Successfully disconnected from VRPN server." << std::endl;
 
-    this->connected = false;
+    this->m_connected = false;
 
     return true;
 }
@@ -330,18 +329,18 @@ bool tracking::VrpnDevice<R>::Disconnect(void) {
 template <class R> template <typename H>
 bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
 
-    if (!this->initialised) {
+    if (!this->m_initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
-    if (!this->connected) {
+    if (!this->m_connected) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
-    if (!this->remoteDevice) {
+    if (!this->m_remote_device) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] No remote device present. Call 'Connect()' prior to 'Register()'. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
@@ -352,31 +351,31 @@ bool tracking::VrpnDevice<R>::Register(H handler, void *userData) {
         return false;
     }
 
-    return (this->remoteDevice->register_change_handler(userData, handler) == 0);
+    return (this->m_remote_device->register_change_handler(userData, handler) == 0);
 }
 
 
 template <class R>
 bool tracking::VrpnDevice<R>::MainLoop(void) {
 
-    if (!this->initialised) {
+    if (!this->m_initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
-    if (!this->connected) {
+    if (!this->m_connected) {
         std::cerr << std::endl << "[ERROR] [VrpnDevice] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
-    if (!this->remoteDevice) { 
+    if (!this->m_remote_device) { 
         std::cerr << std::endl << "[ERROR] [VrpnDevice] No remote device present. Call 'Connect()' and 'Register()' prior to 'MainLoop()'. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
-    this->remoteDevice->mainloop();
+    this->m_remote_device->mainloop();
 
     return true;
 }

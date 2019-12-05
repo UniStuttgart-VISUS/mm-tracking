@@ -113,7 +113,7 @@ namespace tracking{
         * @return All available rigid body names.
         */
         inline std::vector<std::string>& GetRigidBodyNames(void) {
-            return this->rigidBodyNames;
+            return this->m_rigid_body_names;
         }
 
     private:
@@ -152,48 +152,44 @@ namespace tracking{
         * variables
         **********************************************************************/
 
-        bool initialised;
-        bool connected;
-
-        std::unique_ptr<NatNetClient> natnetClient;
-
-        std::vector<std::shared_ptr<RigidBody>> rigidBodies;
-
-        int callbackCounter;
-
-        std::vector<std::string> rigidBodyNames;
+        bool m_initialised;
+        bool m_connected;
+        std::unique_ptr<NatNetClient> m_natnet_client;
+        std::vector<std::shared_ptr<RigidBody>> m_rigid_bodies;
+        int m_callback_counter;
+        std::vector<std::string> m_rigid_body_names;
 
         /** parameters ********************************************************/
 
         /** 
         * Specifies the localnatnetClient IP address used for NatNet.
         */
-        std::string clientIP;
+        std::string m_client_ip;
 
         /**
         * Specifies the server IP address used for NatNet.
         */
-        std::string serverIP;
+        std::string m_server_ip;
 
         /**
         * Specifies the port used for NatNet commands.
         */
-        unsigned int cmdPort;
+        unsigned int m_cmd_port;
 
         /**
         * Specifies the port used for NatNet data.
         */
-        unsigned int dataPort;
+        unsigned int m_data_port;
 
         /** *
         * Specifies the type of NatNet connection.
         */
-        NatNetDevicePool::ConnectionType conType;
+        NatNetDevicePool::ConnectionType m_con_type;
 
         /**
         * If 'true' message NatNet log callback is set.
         */
-        bool verboseClient;
+        bool m_verbose_client;
 
         /**********************************************************************
         * functions

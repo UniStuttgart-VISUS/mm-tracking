@@ -88,7 +88,7 @@ namespace tracking {
         * @return All available rigid body names.
         */
         inline size_t GetRigidBodyCount(void) {
-            return this->motionDevices.GetRigidBodyNames().size();
+            return this->m_motion_devices.GetRigidBodyNames().size();
         }
 
         /**
@@ -97,8 +97,8 @@ namespace tracking {
         * @return All available rigid body names.
         */
         const char* GetRigidBodyName(size_t index) {
-            if (index < this->motionDevices.GetRigidBodyNames().size()) {
-                return this->motionDevices.GetRigidBodyNames()[index].c_str();
+            if (index < this->m_motion_devices.GetRigidBodyNames().size()) {
+                return this->m_motion_devices.GetRigidBodyNames()[index].c_str();
             }
             else {
                 return nullptr;
@@ -131,15 +131,15 @@ namespace tracking {
         * variables
         **********************************************************************/
 
-        bool initialised;
-        bool connected;
-        VrpnButtonPoolType buttonDevices;
-        tracking::NatNetDevicePool motionDevices;
+        bool m_initialised;
+        bool m_connected;
+        VrpnButtonPoolType m_button_devices;
+        tracking::NatNetDevicePool m_motion_devices;
 
         /** parameters ********************************************************/
 
         /** Enables the tracker only on the node with the specified name. */
-        std::string activeNode;
+        std::string m_active_node;
 
         /**********************************************************************
         * functions

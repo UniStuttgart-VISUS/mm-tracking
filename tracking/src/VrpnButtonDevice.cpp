@@ -9,10 +9,10 @@
 
 
 tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_Button_Remote>()
-    , initialised(false)
-    , connected(false)
-    , runThreadLoop(false)
-    , button(0) {
+    , m_initialised(false)
+    , m_connected(false)
+    , m_run_thread_loop(false)
+    , m_button(0) {
 
     // intentionally empty...
 }
@@ -27,15 +27,15 @@ tracking::VrpnButtonDevice::~VrpnButtonDevice(void) {
 
 bool tracking::VrpnButtonDevice::Initialise(const tracking::VrpnDevice<vrpn_Button_Remote>::Params& params) {
 
-    this->initialised = tracking::VrpnDevice<vrpn_Button_Remote>::Initialise(params);
+    this->m_initialised = tracking::VrpnDevice<vrpn_Button_Remote>::Initialise(params);
 
-    return this->initialised;
+    return this->m_initialised;
 }
 
 
 bool tracking::VrpnButtonDevice::Connect(void) {
 
-    if (!this->initialised) {
+    if (!this->m_initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
@@ -51,9 +51,9 @@ bool tracking::VrpnButtonDevice::Connect(void) {
 
     // Start vrpn main loop thread.
     std::cout << "[INFO] [VrpnButtonDevice] Starting VRPN main loop thread for \"" << this->GetDeviceName().c_str() << "\"" << std::endl;
-    this->runThreadLoop.store(true);
+    this->m_run_thread_loop.store(true);
     std::thread thread([this]() {
-        while (this->runThreadLoop.load()) {
+        while (this->m_run_thread_loop.load()) {
 #ifdef TRACKING_DEBUG_OUTPUT
             //std::cout << "[DEBUG] [VrpnButtonDevice] Inside VRPN main loop ..." << std::endl;
 #endif
@@ -63,7 +63,7 @@ bool tracking::VrpnButtonDevice::Connect(void) {
     });
     thread.detach();
 
-    this->connected = true;
+    this->m_connected = true;
 
     return true;
 }
@@ -72,9 +72,9 @@ bool tracking::VrpnButtonDevice::Connect(void) {
 bool tracking::VrpnButtonDevice::Disconnect(void) {
 
     // End main loop thread
-    this->runThreadLoop.store(false);
+    this->m_run_thread_loop.store(false);
 
-    this->connected = false;
+    this->m_connected = false;
 
     return tracking::VrpnDevice<vrpn_Button_Remote>::Disconnect();
 }
@@ -82,18 +82,18 @@ bool tracking::VrpnButtonDevice::Disconnect(void) {
 
 tracking::Button tracking::VrpnButtonDevice::GetButton(void) const {
 
-    if (!this->initialised) {
+    if (!this->m_initialised) {
         std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not initialised. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
-    if (!this->connected) {
+    if (!this->m_connected) {
         std::cerr << std::endl << "[ERROR] [VrpnButtonDevice] Not connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
 
-    return this->button.load();
+    return this->m_button.load();
 }
 
 
@@ -107,13 +107,13 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, c
     }
 
     // Remember the button state.
-    tracking::Button button = that->button.load();
+    tracking::Button m_button = that->m_button.load();
     tracking::Button mask   = (1 << vrpnData.button);
     if (vrpnData.state != 0) {
-        that->button.store(button |= mask);
+        that->m_button.store(m_button |= mask);
     }
     else {
-        that->button.store(button &= ~mask);
+        that->m_button.store(m_button &= ~mask);
     }
 #ifdef TRACKING_DEBUG_OUTPUT
     std::cout << "[DEBUG] [VrpnButtonDevice] Button = " << vrpnData.button << " | State = " << ((that->mask.load() & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;

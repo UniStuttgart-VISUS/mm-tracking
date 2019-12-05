@@ -182,7 +182,7 @@ namespace tracking {
         * @return The button device name.
         */
         inline const char* GetButtonDeviceName(void) const {
-            return this->buttonDeviceName.c_str();
+            return this->m_button_device_name.c_str();
         }
 
         /**
@@ -191,7 +191,7 @@ namespace tracking {
         * @return The rigid body name.
         */
         inline const char* GetRigidBodyName(void) const {
-            return this->rigidBodyName.c_str();
+            return this->m_rigid_body_name.c_str();
         }
 
         /**
@@ -209,60 +209,60 @@ namespace tracking {
         * variables
         **********************************************************************/
 
-        bool                               initialised;
-        std::shared_ptr<tracking::Tracker> tracker;
-        tracking::Vector3D                 curCameraPosition;
-        tracking::Vector3D                 curCameraUp;
-        tracking::Vector3D                 curCameraView;
-        float                              curCameraCenterDist;
-        tracking::Point2D                  curIntersection;
-        tracking::Rectangle                curFOV;
-        tracking::Quaternion               curOrientation;
-        tracking::Vector3D                 curPosition;
-        tracking::Button                   curButton;
-        tracking::Button                   lastButton;
-        bool                               curSelecting;
-        std::vector<tracking::Vector3D>    positionBuffer;
-        unsigned int                       bufferIdx;
-        bool                               constPosition;
-        tracking::Vector3D                 startCamView;
-        tracking::Vector3D                 startCamPosition;
-        tracking::Vector3D                 startCamUp;
-        float                              startCamCenterDist;
-        tracking::Vector3D                 startPosition;
-        tracking::Quaternion               startOrientation;
-        tracking::Quaternion               startRelativeOrientation;
-        bool                               isRotating;
-        bool                               isTranslating;
-        bool                               isZooming;
+        bool                               m_initialised;
+        std::shared_ptr<tracking::Tracker> m_tracker;
+        tracking::Vector3D                 m_current_cam_position;
+        tracking::Vector3D                 m_current_cam_up;
+        tracking::Vector3D                 m_current_cam_view;
+        float                              m_current_cam_center_dist;
+        tracking::Point2D                  m_current_intersection;
+        tracking::Rectangle                m_current_fov;
+        tracking::Quaternion               m_current_orientation;
+        tracking::Vector3D                 m_current_position;
+        tracking::Button                   m_current_button;
+        bool                               m_current_selecting;
+        tracking::Button                   m_last_button;
+        std::vector<tracking::Vector3D>    m_buffer_positions;
+        unsigned int                       m_buffer_idx;
+        bool                               m_const_position;
+        tracking::Vector3D                 m_start_cam_view;
+        tracking::Vector3D                 m_start_cam_position;
+        tracking::Vector3D                 m_start_cam_up;
+        float                              m_start_cam_center_dist;
+        tracking::Vector3D                 m_start_position;
+        tracking::Quaternion               m_start_orientation;
+        tracking::Quaternion               m_start_relative_orientation;
+        bool                               m_is_rotating;
+        bool                               m_is_translating;
+        bool                               m_is_zooming;
 
         /** parameters ********************************************************/
 
-        std::string                        buttonDeviceName;
-        std::string                        rigidBodyName;
-        unsigned int                       selectButton;
-        unsigned int                       rotateButton;
-        unsigned int                       translateButton;
-        unsigned int                       zoomButton;
-        bool                               invertRotate;
-        bool                               invertTranslate;
-        bool                               invertZoom;
-        float                              translateSpeed;
-        float                              zoomSpeed;
-        bool                               singleInteraction;
-        TrackingUtilizer::FovMode          fovMode;
-        float                              fovHeight;
-        float                              fovWidth;
-        float                              fovHoriAngle;
-        float                              fovVertAngle;
-        TrackingUtilizer::FovAspectRatio   fovAspectRatio;
+        std::string                        m_button_device_name;
+        std::string                        m_rigid_body_name;
+        unsigned int                       m_select_button;
+        unsigned int                       m_rotate_button;
+        unsigned int                       m_translate_button;
+        unsigned int                       m_zoom_button;
+        bool                               m_invert_rotate;
+        bool                               m_invert_translate;
+        bool                               m_invert_zoom;
+        float                              m_translate_speed;
+        float                              m_zoom_speed;
+        bool                               m_single_interaction;
+        TrackingUtilizer::FovMode          m_fov_mode;
+        float                              m_fov_height;
+        float                              m_fov_width;
+        float                              m_fov_hori_angle;
+        float                              m_fov_vert_angle;
+        TrackingUtilizer::FovAspectRatio   m_fov_aspect_ratio;
 
-        float                              physicalHeight;
-        float                              physicalWidth;
-        tracking::Quaternion               calibrationOrientation;
-        tracking::Vector3D                 physicalOrigin;
-        tracking::Vector3D                 physicalXDir;
-        tracking::Vector3D                 physicalYDir;
+        float                              m_physical_height;
+        float                              m_physical_width;
+        tracking::Quaternion               m_calibration_orientation;
+        tracking::Vector3D                 m_physical_origin;
+        tracking::Vector3D                 m_physical_x_dir;
+        tracking::Vector3D                 m_physical_y_dir;
 
         /***********************************************************************
         * functions
