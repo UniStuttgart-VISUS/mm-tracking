@@ -301,6 +301,8 @@ namespace tracking {
         */
         bool processScreenInteraction(bool process_fov);
 
+        tracking::Point2D clipRect(tracking::Point2D intersection, tracking::Point2D vertex);
+
         /**
         * Limit value "val" to range [min, max]
         */

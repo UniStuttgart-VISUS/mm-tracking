@@ -796,7 +796,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             this->m_start_cam_up.Normalise();
             auto rotationCenter = this->m_start_cam_position + this->m_start_cam_view * this->m_start_cam_center_dist;
 
-            this->m_current_cam_view     = quat * this->m_start_cam_view;
+            this->m_current_cam_view     = quat.Inverse() * this->m_start_cam_view;
             this->m_current_cam_up       = quat * this->m_start_cam_up;
             this->m_current_cam_position = rotationCenter - (this->m_current_cam_view * this->m_start_cam_center_dist);
 
@@ -807,18 +807,18 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF TRANSLATION." << std::endl;
 #endif
-            // Compute relative movement of m_tracker in physical space.
-            auto pos_delta = this->m_current_position - this->m_start_position;
+            auto pos_diff = this->m_current_position - this->m_start_position;
 
-            this->m_start_cam_up.Normalise();
+            auto delta_x = pos_diff.X() * this->m_translate_speed;
             auto right_vector = this->m_start_cam_view.Cross(this->m_start_cam_up);
             right_vector.Normalise();
+            auto pos_delta_x = right_vector * delta_x;
 
-            float right_component = right_vector.Dot(pos_delta);
-            float up_component = this->m_start_cam_up.Dot(pos_delta);
-            pos_delta = right_vector * right_component + this->m_start_cam_up * up_component;
+            auto delta_y = pos_diff.Y() * this->m_translate_speed;
+            this->m_start_cam_up.Normalise();
+            auto pos_delta_y = this->m_start_cam_up * delta_y;
 
-            pos_delta *= this->m_translate_speed;
+            auto pos_delta = pos_delta_x + pos_delta_y;
             if (this->m_invert_translate) {
                 pos_delta *= (-1.0f);
             }
@@ -834,13 +834,12 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ZOOM." << std::endl;
 #endif
-            // Compute relative movement of m_tracker in physical space.
             auto pos_diff = this->m_current_position - this->m_start_position;
 
-            auto delta = pos_diff.Z() * this->m_zoom_speed;
+            auto delta_z = pos_diff.Z() * this->m_zoom_speed;
             auto pos_delta = this->m_start_cam_view;
             pos_delta.Normalise();
-            pos_delta *= delta;
+            pos_delta *= delta_z;
             if (this->m_invert_zoom) {
                 pos_delta *= (-1.0f);
             }
@@ -866,6 +865,10 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
         return false;
     }
 
+    std::cerr << std::endl << "[ERROR] [TrackingUtilizer] 2D camera transformation is not yet implemented.  " <<
+        "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+    return false;
+
     bool retval = false;
     int  xact = 0;
 
@@ -884,15 +887,12 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 
     if (xact > 0) {
 
-        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] 2D camera transformation is not yet implemented.  " <<
-            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-
-// TODO implementation for 2D ...
-/*
         if (this->m_is_rotating) {
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ROTATION." << std::endl;
 #endif
+
+ /// TODO 
 
             retval = true;
         }
@@ -902,6 +902,8 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF TRANSLATION." << std::endl;
 #endif
 
+/// TODO 
+
             retval = true;
         }
 
@@ -909,9 +911,11 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ZOOM." << std::endl;
 #endif
+
+/// TODO 
+
             retval = true;
         }
-*/
 
     }
     return retval;
@@ -926,8 +930,6 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
 #endif
         return false;
     }
-
-    const double PI = 3.1415926535897;
 
     bool retval = false;
     this->m_current_intersection.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
@@ -950,7 +952,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
     // R = right direction
 
     // Variable POSTFIX naming convention:
-    // v = Vector3D
+    // v = vector
     // c = calibration
     // f = float 
     // q = quaternion
@@ -970,10 +972,10 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
         pNv.Normalise();
 
         // Absolut offset between origin of tracking coordinate system (= Vector3D<float,3>(0,0,0)) and lower left corner of screen.
-        // (= distance Vector3D from tracking origin to lower left corner of screen).
+        // (= distance vector from tracking origin to lower left corner of screen).
         auto pOv = this->m_physical_origin; // In meters
 
-        // Get calibration orientation of Pointing device.
+        // Get calibration orientation of pointing device.
         // This orientation corresponds to physical calibration direction.
         auto cOv = this->m_calibration_orientation;
         auto cOq  = Quaternion(cOv.X(), cOv.Y(), cOv.Z(), cOv.W());
@@ -1007,6 +1009,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
             // Scaling to relative coordinates in [0,1].
             float x = (pWv.Dot(pIs)) / pWf;
             float y = (pHv.Dot(pIs)) / pHf;
+            auto intersection = tracking::Point2D(x, y);
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Relative intersection at (" << x << "," << y << ")" << std::endl;
 #endif
@@ -1015,7 +1018,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
             // (not recommanded because field of view disappears suddenly when intersection center lies outside of screen)
             if ((x >= 0.0f) && (y >= 0.0f) && (x <= 1.0f) && (y <= 1.0f)) {
                 //VLTRACE(vislib::Trace::LEVEL_INFO, "Intersection inside of screen. \n");
-                this->m_current_intersection.Set(x, y);
+                this->m_current_intersection = intersection;
                 retval = true;
             }
 
@@ -1023,8 +1026,6 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
             if (process_fov) {
                 float fov_w  = this->m_fov_width;
                 float fov_h  = this->m_fov_height;
-                float fov_ah = this->m_fov_hori_angle / 2.0f; // already using half angle!
-                float fov_av = this->m_fov_vert_angle / 2.0f; // already using half angle!
                 float fov_r  = 1.0f;
                 switch ((int)this->m_fov_aspect_ratio) {
                     case (0): fov_r = 2.35f;         break;
@@ -1036,7 +1037,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     default: break;
                 }
 
-                // Rigid body up and right Vector3D.
+                // Rigid body up and right vector.
                 Vector3D rbUv, rbRv;
                 float deltaR, deltaU;
                 std::vector<Vector3D> fovVert;
@@ -1049,7 +1050,6 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     if (this->m_fov_mode == FovMode::WIDTH_AND_ASPECT_RATIO) {
                         yDelta = (fov_w / fov_r / 2.0f);
                     }
-
                     fovVert.push_back((pIs - (pWv * xDelta)) + (pHv * yDelta)); // left top
                     fovVert.push_back((pIs - (pWv * xDelta)) - (pHv * yDelta)); // left bottom
                     fovVert.push_back((pIs + (pWv * xDelta)) + (pHv * yDelta)); // right top
@@ -1075,21 +1075,23 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                 else if ((this->m_fov_mode == FovMode::HORIZONTAL_ANGLE_AND_VERTICAL_ANGLE) || (this->m_fov_mode == FovMode::HORIZONTAL_ANGLE_AND_ASPECT_RATIO)) {
                     // Horizontal Angle and Vertical Angle - Horizontal Angle and Aspect Ratio
 
-                    // Current 'up' Vector3D of rigid body is equal to "heigth Vector3D" of powerwall.
+                    // Current 'up' vector of rigid body is equal to "heigth vector" of powerwall.
                     rbUv = this->m_current_orientation * cOq.Inverse() * pHv;
                     rbUv.Normalise();
-                    // Current 'right' Vector3D of rigid body is equal to "width Vector3D" of powerwall.
+                    // Current 'right' vector of rigid body is equal to "width vector" of powerwall.
                     rbRv = this->m_current_orientation * cOq.Inverse() * pWv;
                     rbRv.Normalise();
-                    // Calculate length of right Vector3D for given horizontal angle in distance of normalized looak at Vector3D.
-                    deltaR = (float)std::tan((double)fov_ah / 180.0 * PI); // * 1.0f = Length of rbDv
 
-                    // Calculate length of 'up' Vector3D for given vertical angle in distance of normalized looak at Vector3D.
-                    deltaU = (float)std::tan((double)fov_av / 180.0 * PI); // * 1.0f = Length of rbDv
+                    const double __PI__ = 3.1415926535897;
+                    float fov_ah = this->m_fov_hori_angle / 2.0f;
+                    float fov_av = this->m_fov_vert_angle / 2.0f;
+                    // Calculate length of right vector for given horizontal angle in distance of normalized looak-at vector.
+                    deltaR = (float)std::tan((double)fov_ah / 180.0 * __PI__); // * 1.0f = Length of rbDv
+                    // Calculate length of 'up' vector for given vertical angle in distance of normalized looak-at vector.
+                    deltaU = (float)std::tan((double)fov_av / 180.0 * __PI__); // * 1.0f = Length of rbDv
                     if (this->m_fov_mode == FovMode::HORIZONTAL_ANGLE_AND_ASPECT_RATIO) { /// DIFFERENCE for Horizontal Angle and Aspect Ratio
                         deltaU = deltaR / fov_r;
                     }
-
                     fovVert.push_back((rbDv - (rbRv * deltaR)) + (rbUv * deltaU)); // left top
                     fovVert.push_back((rbDv - (rbRv * deltaR)) - (rbUv * deltaU)); // left bottom
                     fovVert.push_back((rbDv + (rbRv * deltaR)) + (rbUv * deltaU)); // right top
@@ -1098,10 +1100,9 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     // Calculate intersection of fov vertices with screen
                     for (int i = 0; i < fovVert.size(); ++i) {
                         fovVert[i].Normalise();
-                        //rbRelPosv didn't change ...
-                        delta = pNv.Dot(rbRelPosv) / pNv.Dot(((-1.0f) * fovVert[i]));  //Using first intercept theorem ...
+                        delta = pNv.Dot(rbRelPosv) / pNv.Dot(((-1.0f) * fovVert[i]));  // Using first intercept theorem (rbRelPosv didn't change)
                         ///XXX: delta switches to negativ values before(?) normal of screen and view direction are orthogonal ...
-                        delta = (delta < 0.0f) ? (delta * (-1.0f)) : (delta); // the 500 is empirical
+                        delta = (delta < 0.0f) ? (500.0f) : (delta); /// The 500 is empirical 
                         rbIs = this->m_current_position + delta * fovVert[i];
                         // Intersection in regard to powerwall origin
                         pIs = rbIs - pOv;
@@ -1121,19 +1122,15 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     }
                 }
 
-                // Limit fov coords to dimensions of screen
-                float min = 0.0f;
-                float max = 1.0f;
-                this->m_current_fov.left_top.SetX(this->limit<float>(this->m_current_fov.left_top.X(), min, max));
-                this->m_current_fov.left_top.SetY(this->limit<float>(this->m_current_fov.left_top.Y(), min, max));
-                this->m_current_fov.left_bottom.SetX(this->limit<float>(this->m_current_fov.left_bottom.X(), min, max));
-                this->m_current_fov.left_bottom.SetY(this->limit<float>(this->m_current_fov.left_bottom.Y(), min, max));
-                this->m_current_fov.right_top.SetX(this->limit<float>(this->m_current_fov.right_top.X(), min, max));
-                this->m_current_fov.right_top.SetY(this->limit<float>(this->m_current_fov.right_top.Y(), min, max));
-                this->m_current_fov.right_bottom.SetX(this->limit<float>(this->m_current_fov.right_bottom.X(), min, max));
-                this->m_current_fov.right_bottom.SetY(this->limit<float>(this->m_current_fov.right_bottom.Y(), min, max));
+                // Clip fov vertices on screen bounrdies
+                this->m_current_fov.left_top = this->clipRect(intersection, this->m_current_fov.left_top);
+                this->m_current_fov.left_bottom = this->clipRect(intersection, this->m_current_fov.left_bottom);
+                this->m_current_fov.right_top = this->clipRect(intersection, this->m_current_fov.right_top);
+                this->m_current_fov.right_bottom = this->clipRect(intersection, this->m_current_fov.right_bottom);
 
                 // Check if fov lies completely outside of screen
+                float min = 0.0f;
+                float max = 1.0f;
                 retval = true;
                 if (((this->m_current_fov.right_top.X() <= min) && (this->m_current_fov.right_bottom.X() <= min) && (this->m_current_fov.left_top.X() <= min) && (this->m_current_fov.left_bottom.X() <= min)) ||
                     ((this->m_current_fov.right_top.X() >= max) && (this->m_current_fov.right_bottom.X() >= max) && (this->m_current_fov.left_top.X() >= max) && (this->m_current_fov.left_bottom.X() >= max)) ||
@@ -1159,6 +1156,17 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
     }
 
     return retval;
+}
+
+
+tracking::Point2D tracking::TrackingUtilizer::clipRect(tracking::Point2D intersection, tracking::Point2D vertex) {
+
+    tracking::Point2D clipped_point = vertex;
+    //auto direction = clipped_point - intersection;
+
+/// TODO
+
+    return clipped_point;
 }
 
 

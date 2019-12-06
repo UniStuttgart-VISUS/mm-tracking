@@ -36,6 +36,20 @@ namespace tracking
             return *this;
         }
 
+        inline Point2D operator -(const Point2D& rhs) const {
+            Point2D retval;
+            retval.SetX(this->x - rhs.X());
+            retval.SetY(this->y - rhs.Y());
+            return retval;
+        }
+
+        inline Point2D operator +(const Point2D& rhs) const {
+            Point2D retval;
+            retval.SetX(this->x + rhs.X());
+            retval.SetY(this->y + rhs.Y());
+            return retval;
+        }
+
         inline void SetX(float xp) {
             this->x = xp;
         }
