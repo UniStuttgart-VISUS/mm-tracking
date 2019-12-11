@@ -732,7 +732,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
                 // with the current view later on.
                 /// NB: z-Value of view vector depends on right- or left-handed camera system!
                 /// Assuming right-handed here.
-                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, -1.0f), this->m_start_cam_view);
+                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, 1.0f), this->m_start_cam_view);
                 auto q2 = this->xform(q1 * tracking::Vector3D(0.0f, 1.0f, 0.0f), this->m_start_cam_up);
 
                 this->m_start_relative_orientation = q2 * q1;
@@ -809,7 +809,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 #endif
             auto pos_diff = this->m_current_position - this->m_start_position;
 
-            float speed = this->m_start_cam_center_dist / 10.0f * this->m_translate_speed;
+            float speed = this->m_start_cam_center_dist * this->m_translate_speed;
 
             auto delta_x = pos_diff.X() * speed;
             auto right_vector = this->m_start_cam_view.Cross(this->m_start_cam_up);
@@ -838,7 +838,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 #endif
             auto pos_diff = this->m_current_position - this->m_start_position;
 
-            float speed = this->m_start_cam_center_dist / 10.0f * this->m_zoom_speed;
+            float speed = this->m_start_cam_center_dist * this->m_zoom_speed;
 
             auto delta_z = pos_diff.Z() * speed;
             auto pos_delta = this->m_start_cam_view;
