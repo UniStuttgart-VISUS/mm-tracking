@@ -796,7 +796,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             this->m_start_cam_up.Normalise();
             auto rotationCenter = this->m_start_cam_position + this->m_start_cam_view * this->m_start_cam_center_dist;
 
-            this->m_current_cam_view     = quat.Inverse() * this->m_start_cam_view;
+            this->m_current_cam_view     = quat * this->m_start_cam_view;
             this->m_current_cam_up       = quat * this->m_start_cam_up;
             this->m_current_cam_position = rotationCenter - (this->m_current_cam_view * this->m_start_cam_center_dist);
 
@@ -809,12 +809,14 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 #endif
             auto pos_diff = this->m_current_position - this->m_start_position;
 
-            auto delta_x = pos_diff.X() * this->m_translate_speed;
+            float speed = this->m_start_cam_center_dist / 10.0f * this->m_translate_speed;
+
+            auto delta_x = pos_diff.X() * speed;
             auto right_vector = this->m_start_cam_view.Cross(this->m_start_cam_up);
             right_vector.Normalise();
             auto pos_delta_x = right_vector * delta_x;
 
-            auto delta_y = pos_diff.Y() * this->m_translate_speed;
+            auto delta_y = pos_diff.Y() * speed;
             this->m_start_cam_up.Normalise();
             auto pos_delta_y = this->m_start_cam_up * delta_y;
 
@@ -836,7 +838,9 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 #endif
             auto pos_diff = this->m_current_position - this->m_start_position;
 
-            auto delta_z = pos_diff.Z() * this->m_zoom_speed;
+            float speed = this->m_start_cam_center_dist / 10.0f * this->m_zoom_speed;
+
+            auto delta_z = pos_diff.Z() * speed;
             auto pos_delta = this->m_start_cam_view;
             pos_delta.Normalise();
             pos_delta *= delta_z;

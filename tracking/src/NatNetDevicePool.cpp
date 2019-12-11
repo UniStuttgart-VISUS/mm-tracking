@@ -185,7 +185,7 @@ bool tracking::NatNetDevicePool::Connect(void) {
             (int)server_desc.NatNetVersion[3] << std::endl;
     }
     else {
-        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Failed to connect to NatNet server. - NETNET ERROR CODE: " << (int)error_code  << " (see NatNetTypes.h, line 115). " <<
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Failed to connect to NatNet server. - NATNET ERROR CODE: " << (int)error_code  << " (see NatNetTypes.h, line 115). " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         this->m_natnet_client.reset(nullptr);
         return false;
@@ -207,7 +207,7 @@ bool tracking::NatNetDevicePool::Connect(void) {
         std::cout << "[INFO] [NatNetDevicePool] NatNet remote command test PASSED. Current framerate: " << (*frResponse) << std::endl;
     }
     else {
-        std::cerr << std::endl << "[WARNING] [NatNetDevicePool] Unable to process NatNet framerate request. - NETNET ERROR CODE: " << (int)error_code << " (see NatNetTypes.h, line 115). " <<
+        std::cerr << std::endl << "[WARNING] [NatNetDevicePool] Unable to process NatNet framerate request. - NATNET ERROR CODE: " << (int)error_code << " (see NatNetTypes.h, line 115). " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         this->m_natnet_client.reset(nullptr);
         return false;
@@ -235,7 +235,7 @@ bool tracking::NatNetDevicePool::Connect(void) {
         }
     }
     else {
-        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Unable to retrieve rigid body data descriptions. - NETNET ERROR CODE: " << (int)error_code << " (see NatNetTypes.h, line 115). " <<
+        std::cerr << std::endl << "[ERROR] [NatNetDevicePool] Unable to retrieve rigid body data descriptions. - NATNET ERROR CODE: " << (int)error_code << " (see NatNetTypes.h, line 115). " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         this->Disconnect();
         return false;

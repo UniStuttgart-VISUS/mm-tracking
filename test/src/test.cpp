@@ -68,8 +68,8 @@ int main() {
     tup.invert_rotate                = true;
     tup.invert_translate             = true;
     tup.invert_zoom                  = true;
-    tup.translate_speed              = 10.0f;
-    tup.zoom_speed                   = 20.0f;
+    tup.translate_speed              = 1.0f;
+    tup.zoom_speed                   = 1.0f;
     tup.single_interaction           = false;
     tup.fov_mode                     = tracking::TrackingUtilizer::FovMode::WIDTH_AND_ASPECT_RATIO;
     tup.fov_height                   = 0.2f;
