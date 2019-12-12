@@ -7,9 +7,7 @@
 
 #include "TrackingUtilizer.h"
 
-
 using namespace std;
-
 
 /**** HOWTO: ******************************************************************
 *

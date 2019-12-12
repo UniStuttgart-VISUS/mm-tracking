@@ -92,7 +92,7 @@ if(WIN32)
     add_dependencies(${PROJECT_NAME} "vrpn")
     set(TRACKING_LIBS ${NATNET_LIBRARIES} ${VRPN_LIBRARY} ${QUAT_LIBRARY})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${TRACKING_LIBS})
-    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/natnet/include>)
+    target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/natnet/include> ${GLM_INCLUDE_DIR})
     target_compile_definitions(${PROJECT_NAME} PRIVATE "${EXPORT_NAME}_EXPORTS")
   
     # INSTALLATION
