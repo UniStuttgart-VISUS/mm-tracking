@@ -226,12 +226,12 @@ bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Pa
         this->m_fov_vert_angle = params.fov_vert_angle;
         this->m_fov_aspect_ratio = params.fov_aspect_ratio;
 
-        this->m_current_position.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-        this->m_current_intersection.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-        this->m_current_fov.left_top.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-        this->m_current_fov.left_bottom.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-        this->m_current_fov.right_top.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-        this->m_current_fov.right_bottom.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
+        this->m_current_position = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+        this->m_current_intersection = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+        this->m_current_fov[0] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+        this->m_current_fov[1] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+        this->m_current_fov[2] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+        this->m_current_fov[3] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
 
         this->printParams();
         this->m_initialised = true;
@@ -266,11 +266,11 @@ void tracking::TrackingUtilizer::printParams(void) {
     std::cout << "[PARAMETER] [TrackingUtilizer] FOV Aspect Ratio:        " << (int)this->m_fov_aspect_ratio << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Physical Height:         " << this->m_physical_height << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Physical Width:          " << this->m_physical_width << std::endl;
-    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Origin:         (" << this->m_physical_origin.X() << "," << this->m_physical_origin.Y() << "," << this->m_physical_origin.Z() << ")" << std::endl;
-    std::cout << "[PARAMETER] [TrackingUtilizer] Physical X Dir:          (" << this->m_physical_x_dir.X() << "," << this->m_physical_x_dir.Y() << "," << this->m_physical_x_dir.Z() << ")" << std::endl;
-    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Y Dir:          (" << this->m_physical_y_dir.X() << "," << this->m_physical_y_dir.Y() << "," << this->m_physical_y_dir.Z() << ")" << std::endl;
-    std::cout << "[PARAMETER] [TrackingUtilizer] Calibration Orientation: (" << this->m_calibration_orientation.X() << "," << this->m_calibration_orientation.Y() << 
-        "," << this->m_calibration_orientation.Z() << "," << this->m_calibration_orientation.W() << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Origin:         (" << this->m_physical_origin.x << "," << this->m_physical_origin.y << "," << this->m_physical_origin.z << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical X Dir:          (" << this->m_physical_x_dir.x << "," << this->m_physical_x_dir.y << "," << this->m_physical_x_dir.z << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Physical Y Dir:          (" << this->m_physical_y_dir.x << "," << this->m_physical_y_dir.y << "," << this->m_physical_y_dir.z << ")" << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Calibration Orientation: (" << this->m_calibration_orientation.x << "," << this->m_calibration_orientation.y << 
+        "," << this->m_calibration_orientation.z << "," << this->m_calibration_orientation.w << ")" << std::endl;
 }
 
 
@@ -324,7 +324,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
                 file.close();
                 break;
             }
-            this->m_physical_origin.Set(x, y, z);
+            this->m_physical_origin = { x, y, z };
         }
         else if (tag == "PHYSICAL_SCREEN_X_DIR") {
             if (!(istream >> x >> y >> z)) {
@@ -333,7 +333,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
                 file.close();
                 break;
             }
-            this->m_physical_x_dir.Set(x, y, z);
+            this->m_physical_x_dir = { x, y, z };
         }
         else if (tag == "PHYSICAL_SCREEN_Y_DIR") {
             if (!(istream >> x >> y >> z)) {
@@ -342,7 +342,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
                 file.close();
                 break;
             }
-            this->m_physical_y_dir.Set(x, y, z);
+            this->m_physical_y_dir = { x, y, z };
         }
         else if (tag == "PHYSICAL_CALIBRATION") {
             if (!(istream >> name >> x >> y >> z >> w)) {
@@ -352,7 +352,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
                 break;
             }
             if (name == this->m_rigid_body_name) {
-                this->m_calibration_orientation.Set(x, y, z, w);
+                this->m_calibration_orientation = { x, y, z, w };
                 is_calibration_available = true;
             }
         }
@@ -373,8 +373,8 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
             std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Failed to open \"" << filename.c_str() << "\" for writing. " <<
                 "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         }
-        file << "PHYSICAL_CALIBRATION " << this->m_rigid_body_name.c_str() << " " << this->m_calibration_orientation.X() << " " <<
-            this->m_calibration_orientation.Y() << " " << this->m_calibration_orientation.Z() << " " << this->m_calibration_orientation.W() << std::endl;
+        file << "PHYSICAL_CALIBRATION " << this->m_rigid_body_name.c_str() << " " << this->m_calibration_orientation.x << " " <<
+            this->m_calibration_orientation.y << " " << this->m_calibration_orientation.z << " " << this->m_calibration_orientation.w << std::endl;
         std::cout << "[INFO] [TrackingUtilizer] Wrote current calibration orientation to \"" << filename.c_str() << "\"" << std::endl;
     }
 
@@ -399,13 +399,13 @@ bool tracking::TrackingUtilizer::GetRawData(unsigned int& o_button,
     // Request updated tracking data.
     if (this->updateTrackingData()) {
         o_button = this->m_current_button;
-        o_position_x = this->m_current_position.X();
-        o_position_y = this->m_current_position.Y();
-        o_position_z = this->m_current_position.Z();
-        o_orientation_x = this->m_current_orientation.X();
-        o_orientation_y = this->m_current_orientation.Y();
-        o_orientation_z = this->m_current_orientation.Z();
-        o_orientation_w = this->m_current_orientation.W();
+        o_position_x = this->m_current_position.x;
+        o_position_y = this->m_current_position.y;
+        o_position_z = this->m_current_position.z;
+        o_orientation_x = this->m_current_orientation.x;
+        o_orientation_y = this->m_current_orientation.y;
+        o_orientation_z = this->m_current_orientation.z;
+        o_orientation_w = this->m_current_orientation.w;
 
         state_rawdata = true;
     }
@@ -470,8 +470,8 @@ bool tracking::TrackingUtilizer::GetIntersection(float& o_intersection_x, float&
     }
 
     if (state_intersection) {
-        o_intersection_x = this->m_current_intersection.X();
-        o_intersection_y = this->m_current_intersection.Y();
+        o_intersection_x = this->m_current_intersection.x;
+        o_intersection_y = this->m_current_intersection.y;
     }
     else {
         o_intersection_x = TRACKING_FLOAT_MAX;
@@ -503,14 +503,14 @@ bool tracking::TrackingUtilizer::GetFieldOfView(float& o_left_top_x, float& o_le
     }
 
     if (state_fov) {
-        o_left_top_x = this->m_current_fov.left_top.X();
-        o_left_top_y = this->m_current_fov.left_top.Y();
-        o_left_bottom_x = this->m_current_fov.left_bottom.X();
-        o_left_bottom_y = this->m_current_fov.left_bottom.Y();
-        o_right_top_x = this->m_current_fov.right_top.X();
-        o_right_top_y = this->m_current_fov.right_top.Y();
-        o_right_bottom_x = this->m_current_fov.right_bottom.X();
-        o_right_bottom_y = this->m_current_fov.right_bottom.Y();
+        o_left_top_x = this->m_current_fov[0].x;
+        o_left_top_y = this->m_current_fov[0].y;
+        o_left_bottom_x = this->m_current_fov[1].x;
+        o_left_bottom_y = this->m_current_fov[1].y;
+        o_right_top_x = this->m_current_fov[2].x;
+        o_right_top_y = this->m_current_fov[2].y;
+        o_right_bottom_x = this->m_current_fov[3].x;
+        o_right_bottom_y = this->m_current_fov[3].y;
     }
     else {
         o_left_top_x = TRACKING_FLOAT_MAX;
@@ -546,9 +546,9 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim i_dim,
     if (this->updateTrackingData()) {
 
         // Set current camera for start values if camera manipulation button is pressed
-        this->m_current_cam_position = tracking::Vector3D(io_cam_position_x, io_cam_position_y, io_cam_position_z);
-        this->m_current_cam_view = tracking::Vector3D(io_cam_view_x, io_cam_view_y, io_cam_view_z);
-        this->m_current_cam_up = tracking::Vector3D(io_cam_up_x, io_cam_up_y, io_cam_up_z);
+        this->m_current_cam_position = glm::vec3(io_cam_position_x, io_cam_position_y, io_cam_position_z);
+        this->m_current_cam_view = glm::vec3(io_cam_view_x, io_cam_view_y, io_cam_view_z);
+        this->m_current_cam_up = glm::vec3(io_cam_up_x, io_cam_up_y, io_cam_up_z);
         this->m_current_cam_center_dist = i_distance_center;
 
         // Check for current button interaction.
@@ -563,15 +563,15 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim i_dim,
     }
 
     if (state_button && state_cam_transform) {
-        io_cam_position_x = this->m_current_cam_position.X();
-        io_cam_position_y = this->m_current_cam_position.Y();
-        io_cam_position_z = this->m_current_cam_position.Z();
-        io_cam_view_x = this->m_current_cam_view.X();
-        io_cam_view_y = this->m_current_cam_view.Y();
-        io_cam_view_z = this->m_current_cam_view.Z();
-        io_cam_up_x = this->m_current_cam_up.X();
-        io_cam_up_y = this->m_current_cam_up.Y();
-        io_cam_up_z = this->m_current_cam_up.Z();
+        io_cam_position_x = this->m_current_cam_position.x;
+        io_cam_position_y = this->m_current_cam_position.y;
+        io_cam_position_z = this->m_current_cam_position.z;
+        io_cam_view_x = this->m_current_cam_view.x;
+        io_cam_view_y = this->m_current_cam_view.y;
+        io_cam_view_z = this->m_current_cam_view.z;
+        io_cam_up_x = this->m_current_cam_up.x;
+        io_cam_up_y = this->m_current_cam_up.y;
+        io_cam_up_z = this->m_current_cam_up.z;
     }
     else {
         io_cam_position_x = TRACKING_FLOAT_MAX;
@@ -606,12 +606,12 @@ bool tracking::TrackingUtilizer::Calibrate(void) {
         state_calibration = true;
     }
     else {
-        this->m_calibration_orientation.Set(0.0f, 0.0f, 0.0f, 1.0f);
+        this->m_calibration_orientation = { 0.0f, 0.0f, 0.0f, 1.0f };
     }
 
     std::cout << "[INFO] [TrackingUtilizer] >>> RIGID BODY \"" << this->m_rigid_body_name.c_str() << "\" CALIBRATION ORIENTATION " <<
-        this->m_calibration_orientation.X() << ";" << this->m_calibration_orientation.Y() << ";" <<
-        this->m_calibration_orientation.Z() << ";" << this->m_calibration_orientation.W() << std::endl;
+        this->m_calibration_orientation.x << ";" << this->m_calibration_orientation.y << ";" <<
+        this->m_calibration_orientation.z << ";" << this->m_calibration_orientation.w << std::endl;
 
     return state_calibration;
 }
@@ -654,8 +654,8 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
     }
 
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[DEBUG] [TrackingUtilizer] Position = (" << this->m_current_position.X() << ", " << this->m_current_position.Y() << ", " << this->m_current_position.Z() << "), Orientation = (" <<
-        this->m_current_orientation.X() << ", " << this->m_current_orientation.Y() << ", " << this->m_current_orientation.Z() << ", " << this->m_current_orientation.W() << ")." << std::endl;
+    std::cout << "[DEBUG] [TrackingUtilizer] Position = (" << this->m_current_position.x << ", " << this->m_current_position.y << ", " << this->m_current_position.z << "), Orientation = (" <<
+        this->m_current_orientation.x << ", " << this->m_current_orientation.y << ", " << this->m_current_orientation.z << ", " << this->m_current_orientation.w << ")." << std::endl;
 #endif
       
     return retval;
@@ -737,8 +737,8 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
                 // with the current view later on.
                 /// NB: z-Value of view vector depends on right- or left-handed camera system!
                 /// Assuming right-handed here.
-                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, -1.0f), this->m_start_cam_view);
-                auto q2 = this->xform(q1 * tracking::Vector3D(0.0f, 1.0f, 0.0f), this->m_start_cam_up);
+                auto q1 = this->xform(glm::vec3(0.0f, 0.0f, -1.0f), this->m_start_cam_view);
+                auto q2 = this->xform(q1 * glm::vec3(0.0f, 1.0f, 0.0f), this->m_start_cam_up);
 
                 this->m_start_relative_orientation = q2 * q1;
                 this->m_start_orientation          = this->m_current_orientation;
@@ -785,76 +785,24 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             std::cout << "[DEBUG] [TrackingUtilizer] Apply 6DOF ROTATION." << std::endl;
 #endif
             // Compute relative rotation since button was pressed.
-            auto quat = this->m_current_orientation * this->m_start_orientation.Inverse();
-            quat.Normalise();
+            auto q = this->m_current_orientation * glm::inverse(this->m_start_orientation);
+            q = glm::normalize(q);
 
             // Align interaction with the original camera system.
-            auto m_start_relative_orientation_Conj = this->m_start_relative_orientation;
-            m_start_relative_orientation_Conj.Conjugate();
-            quat = this->m_start_relative_orientation * quat * m_start_relative_orientation_Conj;
-            quat.Normalise();
+            q = this->m_start_relative_orientation * q * glm::conjugate(this->m_start_relative_orientation);
+            q = glm::normalize(q);
             if (this->m_invert_rotate) {
-                quat.Invert();
+                q = glm::inverse(q);
             }
 
-            /*
-            slerp(identity_quat, quat, this->m_rotate_speed)
+            q = glm::slerp(glm::quat(), q, this->m_rotate_speed);
 
-            glm::quat KeyframeKeeper::quaternion_interpolation(float u, glm::quat q0, glm::quat q1) {
-
-                /// Slerp - spherical linear interpolation
-                // SOURCE: https://en.wikipedia.org/wiki/Slerp and https://web.mit.edu/2.998/www/QuaternionReport1.pdf
-
-                return glm::normalize(glm::slerp(q0, q1, u));
-            }
-
-            Quaternion slerp(Quaternion v0, Quaternion v1, double t) {
-                // Only unit quaternions are valid rotations.
-                // Normalize to avoid undefined behavior.
-                v0.normalize();
-                v1.normalize();
-
-                // Compute the cosine of the angle between the two vectors.
-                double dot = dot_product(v0, v1);
-
-                // If the dot product is negative, slerp won't take
-                // the shorter path. Note that v1 and -v1 are equivalent when
-                // the negation is applied to all four components. Fix by 
-                // reversing one quaternion.
-                if (dot < 0.0f) {
-                    v1 = -v1;
-                    dot = -dot;
-                }
-
-                const double DOT_THRESHOLD = 0.9995;
-                if (dot > DOT_THRESHOLD) {
-                    // If the inputs are too close for comfort, linearly interpolate
-                    // and normalize the result.
-
-                    Quaternion result = v0 + t * (v1 - v0);
-                    result.normalize();
-                    return result;
-                }
-
-                // Since dot is in range [0, DOT_THRESHOLD], acos is safe
-                double theta_0 = acos(dot);        // theta_0 = angle between input vectors
-                double theta = theta_0 * t;          // theta = angle between v0 and result
-                double sin_theta = sin(theta);     // compute this value only once
-                double sin_theta_0 = sin(theta_0); // compute this value only once
-
-                double s0 = cos(theta) - dot * sin_theta / sin_theta_0;  // == sin(theta_0 - theta) / sin(theta_0)
-                double s1 = sin_theta / sin_theta_0;
-
-                return (s0 * v0) + (s1 * v1);
-            }
-            */
-
-            this->m_start_cam_view.Normalise();
-            this->m_start_cam_up.Normalise();
+            this->m_start_cam_view = glm::normalize(this->m_start_cam_view);
+            this->m_start_cam_up = glm::normalize(this->m_start_cam_up);
             auto rotationCenter = this->m_start_cam_position + this->m_start_cam_view * this->m_start_cam_center_dist;
 
-            this->m_current_cam_view     = quat * this->m_start_cam_view;
-            this->m_current_cam_up       = quat * this->m_start_cam_up;
+            this->m_current_cam_view     = q * this->m_start_cam_view;
+            this->m_current_cam_up       = q * this->m_start_cam_up;
             this->m_current_cam_position = rotationCenter - (this->m_current_cam_view * this->m_start_cam_center_dist);
 
             retval = true;
@@ -868,13 +816,13 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
             float speed = this->m_start_cam_center_dist * this->m_translate_speed;
 
-            auto delta_x = pos_diff.X() * speed;
-            auto right_vector = this->m_start_cam_view.Cross(this->m_start_cam_up);
-            right_vector.Normalise();
+            auto delta_x = pos_diff.x * speed;
+            auto right_vector = glm::cross(this->m_start_cam_view, this->m_start_cam_up);
+            right_vector = glm::normalize(right_vector);
             auto pos_delta_x = right_vector * delta_x;
 
-            auto delta_y = pos_diff.Y() * speed;
-            this->m_start_cam_up.Normalise();
+            auto delta_y = pos_diff.y * speed;
+            this->m_start_cam_up = glm::normalize(this->m_start_cam_up);
             auto pos_delta_y = this->m_start_cam_up * delta_y;
 
             auto pos_delta = pos_delta_x + pos_delta_y;
@@ -897,9 +845,9 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 
             float speed = this->m_start_cam_center_dist * this->m_zoom_speed;
 
-            auto delta_z = pos_diff.Z() * speed;
+            auto delta_z = pos_diff.z * speed;
             auto pos_delta = this->m_start_cam_view;
-            pos_delta.Normalise();
+            pos_delta = glm::normalize(pos_delta);
             pos_delta *= delta_z;
             if (this->m_invert_zoom) {
                 pos_delta *= (-1.0f);
@@ -993,11 +941,11 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
     }
 
     bool retval = false;
-    this->m_current_intersection.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-    this->m_current_fov.left_top.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-    this->m_current_fov.left_bottom.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-    this->m_current_fov.right_top.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-    this->m_current_fov.right_bottom.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
+    this->m_current_intersection = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+    this->m_current_fov[0] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+    this->m_current_fov[1] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+    this->m_current_fov[2] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+    this->m_current_fov[3] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
 
     // Variable PREFIX naming convention:
     // p  = powerwall
@@ -1026,11 +974,11 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
 
         // Get normal Pointing out of the screen
         auto pWv = this->m_physical_x_dir;
-        pWv.Normalise();
+        pWv = glm::normalize(pWv);
         auto pHv = this->m_physical_y_dir;
-        pHv.Normalise();
-        auto pNv = pWv.Cross(pHv); // Physical screen normal of screen
-        pNv.Normalise();
+        pHv = glm::normalize(pHv);
+        auto pNv = glm::cross(pWv, pHv); // Physical screen normal of screen
+        pNv = glm::normalize(pNv);
 
         // Absolut offset between origin of tracking coordinate system (= Vector3D<float,3>(0,0,0)) and lower left corner of screen.
         // (= distance vector from tracking origin to lower left corner of screen).
@@ -1038,39 +986,38 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
 
         // Get calibration orientation of pointing device.
         // This orientation corresponds to physical calibration direction.
-        auto cOv = this->m_calibration_orientation;
-        auto cOq  = Quaternion(cOv.X(), cOv.Y(), cOv.Z(), cOv.W());
+        auto cOq  = this->m_calibration_orientation;
 
         // Calculate physical direction (view) of rigid body 
         // (Physical calibration direction is opposite direction of screen normal)
-        auto rbDv = this->m_current_orientation * cOq.Inverse() * ((-1.0f) * pNv);
-        rbDv.Normalise();
+        auto rbDv = this->m_current_orientation * glm::inverse(cOq) * ((-1.0f) * pNv);
+        rbDv = glm::normalize(rbDv);
        
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body position (" <<  this->m_current_position.X() << "," << this->m_current_position.Y() << "," << this->m_current_position.Z() << 
-            ", orientation (" << this->m_current_orientation.X() << "," << this->m_current_orientation.Y() << "," << this->m_current_orientation.Z() << "," << this->m_current_orientation.W() << ")" << std::endl;
-        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body Pointing direction (" << rbDv.X() << "," << rbDv.Y() << "," << rbDv.Z() << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body position (" <<  this->m_current_position.x << "," << this->m_current_position.y << "," << this->m_current_position.z << 
+            ", orientation (" << this->m_current_orientation.x << "," << this->m_current_orientation.y << "," << this->m_current_orientation.z << "," << this->m_current_orientation.w << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Rigid body Pointing direction (" << rbDv.x << "," << rbDv.y << "," << rbDv.z << ")" << std::endl;
         auto urC = pOv + (pWv * pWf) + (pHv * pHf); // upper right corner
-        std::cout << "[DEBUG] [TrackingUtilizer] Screen spans from (" << pOv.X() << "," << pOv.Y() << "," << pOv.Z()<< " to " << urC.X() << "," << urC.Y() << "," << urC.Z() << ")" << std::endl;
-        std::cout << "[DEBUG] [TrackingUtilizer] Screen normal (" << pNv.X() << "," << pNv.Y() << "," << pNv.Z() << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Screen spans from (" << pOv.x << "," << pOv.y << "," << pOv.z<< " to " << urC.x << "," << urC.y << "," << urC.z << ")" << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Screen normal (" << pNv.x << "," << pNv.y << "," << pNv.z << ")" << std::endl;
 #endif
         // Intersection is only possible if screen normal and the Pointing direction are in opposite direction.
-        if (pNv.Dot(rbDv) < 0.0f) { // pN.Dot(pDir) must be != 0 anyway ...
+        if (glm::dot(pNv, rbDv) < 0.0f) { // pN.Dot(pDir) must be != 0 anyway ...
 
             // --- Calculate screen intersection ------------------------------
 
             auto rbRelPosv = this->m_current_position - pOv; // Realtive position to origin of screen (lower left corner)
-            auto delta = pNv.Dot(rbRelPosv) / pNv.Dot(((-1.0f) * rbDv));  //Using first intercept theorem ...
+            auto delta = glm::dot(pNv, rbRelPosv) / glm::dot(pNv, ((-1.0f) * rbDv));  //Using first intercept theorem ...
             auto rbIs = this->m_current_position + delta * rbDv;
 #ifdef TRACKING_DEBUG_OUTPUT
-            std::cout << "[DEBUG] [TrackingUtilizer] Intersects at (" << rbIs.X() << "," << rbIs.Y() << "," << rbIs.Z() << ")" << std::endl;
+            std::cout << "[DEBUG] [TrackingUtilizer] Intersects at (" << rbIs.x << "," << rbIs.y << "," << rbIs.z << ")" << std::endl;
 #endif
             // Intersection in regard to powerwall origin
             auto pIs = rbIs - pOv;
             // Scaling to relative coordinates in [0,1].
-            float x = (pWv.Dot(pIs)) / pWf;
-            float y = (pHv.Dot(pIs)) / pHf;
-            auto intersection = tracking::Point2D(x, y);
+            float x = glm::dot(pWv, pIs) / pWf;
+            float y = glm::dot(pHv, pIs) / pHf;
+            auto intersection = glm::vec2(x, y);
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Relative intersection at (" << x << "," << y << ")" << std::endl;
 #endif
@@ -1099,9 +1046,9 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                 }
 
                 // Rigid body up and right vector.
-                Vector3D rbUv, rbRv;
+                glm::vec3 rbUv, rbRv;
                 float deltaR, deltaU;
-                std::vector<Vector3D> fovVert;
+                std::vector<glm::vec3> fovVert;
                 fovVert.clear();
 
                 if ((this->m_fov_mode == FovMode::WIDTH_AND_HEIGHT) || (this->m_fov_mode == FovMode::WIDTH_AND_ASPECT_RATIO)) {
@@ -1119,17 +1066,17 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     // Calculate intersection of fov vertices with screen
                     for (int i = 0; i < fovVert.size(); ++i) {
                         // Scaling to relative coordinate in [0,1].
-                        x = (pWv.Dot(fovVert[i])) / pWf;
-                        y = (pHv.Dot(fovVert[i])) / pHf;
+                        x = glm::dot(pWv, fovVert[i]) / pWf;
+                        y = glm::dot(pHv, fovVert[i]) / pHf;
                         switch (i) {
                         case(0): // left top
-                            this->m_current_fov.left_top.Set(x, y); break;
+                            this->m_current_fov[0] = { x, y }; break;
                         case(1): // left bottom
-                            this->m_current_fov.left_bottom.Set(x, y); break;
+                            this->m_current_fov[1] = { x, y }; break;
                         case(2): // right top
-                            this->m_current_fov.right_top.Set(x, y); break;
+                            this->m_current_fov[2] = { x, y }; break;
                         case(3): // right bottom
-                            this->m_current_fov.right_bottom.Set(x, y); break;
+                            this->m_current_fov[3] = { x, y }; break;
                         }
                     }
                 }
@@ -1137,11 +1084,11 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                     // Horizontal Angle and Vertical Angle - Horizontal Angle and Aspect Ratio
 
                     // Current 'up' vector of rigid body is equal to "heigth vector" of powerwall.
-                    rbUv = this->m_current_orientation * cOq.Inverse() * pHv;
-                    rbUv.Normalise();
+                    rbUv = this->m_current_orientation * glm::inverse(cOq) * pHv;
+                    rbUv = glm::normalize(rbUv);
                     // Current 'right' vector of rigid body is equal to "width vector" of powerwall.
-                    rbRv = this->m_current_orientation * cOq.Inverse() * pWv;
-                    rbRv.Normalise();
+                    rbRv = this->m_current_orientation * glm::inverse(cOq) * pWv;
+                    rbRv = glm::normalize(rbRv);
 
                     const double __PI__ = 3.1415926535897;
                     float fov_ah = this->m_fov_hori_angle / 2.0f;
@@ -1160,57 +1107,57 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
 
                     // Calculate intersection of fov vertices with screen
                     for (int i = 0; i < fovVert.size(); ++i) {
-                        fovVert[i].Normalise();
-                        delta = pNv.Dot(rbRelPosv) / pNv.Dot(((-1.0f) * fovVert[i]));  // Using first intercept theorem (rbRelPosv didn't change)
+                        fovVert[i] = glm::normalize(fovVert[i]);
+                        delta = glm::dot(pNv, rbRelPosv) / glm::dot(pNv, ((-1.0f) * fovVert[i]));  // Using first intercept theorem (rbRelPosv didn't change)
                         ///XXX: delta switches to negativ values before(?) normal of screen and view direction are orthogonal ...
                         delta = (delta < 0.0f) ? (500.0f) : (delta); /// The 500 is empirical 
                         rbIs = this->m_current_position + delta * fovVert[i];
                         // Intersection in regard to powerwall origin
                         pIs = rbIs - pOv;
                         // Scaling to relative coordinate in [0,1].
-                        x = (pWv.Dot(pIs)) / pWf;
-                        y = (pHv.Dot(pIs)) / pHf;
+                        x = glm::dot(pWv, pIs) / pWf;
+                        y = glm::dot(pHv, pIs) / pHf;
                         switch (i) {
                         case(0): // left top
-                            this->m_current_fov.left_top.Set(x, y); break;
+                            this->m_current_fov[0] = { x, y }; break;
                         case(1): // left bottom
-                            this->m_current_fov.left_bottom.Set(x, y); break;
+                            this->m_current_fov[1] = { x, y }; break;
                         case(2): // right top
-                            this->m_current_fov.right_top.Set(x, y); break;
+                            this->m_current_fov[2] = { x, y }; break;
                         case(3): // right bottom
-                            this->m_current_fov.right_bottom.Set(x, y); break;
+                            this->m_current_fov[3] = { x, y }; break;
                         }
                     }
                 }
 
                 // Clip fov vertices on screen bounrdies
-                this->m_current_fov.left_top = this->clipRect(intersection, this->m_current_fov.left_top);
-                this->m_current_fov.left_bottom = this->clipRect(intersection, this->m_current_fov.left_bottom);
-                this->m_current_fov.right_top = this->clipRect(intersection, this->m_current_fov.right_top);
-                this->m_current_fov.right_bottom = this->clipRect(intersection, this->m_current_fov.right_bottom);
+                this->m_current_fov[0] = this->clipRect(intersection, this->m_current_fov[0]);
+                this->m_current_fov[1] = this->clipRect(intersection, this->m_current_fov[1]);
+                this->m_current_fov[2] = this->clipRect(intersection, this->m_current_fov[2]);
+                this->m_current_fov[3] = this->clipRect(intersection, this->m_current_fov[3]);
 
                 // Check if fov lies completely outside of screen
                 float min = 0.0f;
                 float max = 1.0f;
                 retval = true;
-                if (((this->m_current_fov.right_top.X() <= min) && (this->m_current_fov.right_bottom.X() <= min) && (this->m_current_fov.left_top.X() <= min) && (this->m_current_fov.left_bottom.X() <= min)) ||
-                    ((this->m_current_fov.right_top.X() >= max) && (this->m_current_fov.right_bottom.X() >= max) && (this->m_current_fov.left_top.X() >= max) && (this->m_current_fov.left_bottom.X() >= max)) ||
-                    ((this->m_current_fov.right_top.Y() <= min) && (this->m_current_fov.right_bottom.Y() <= min) && (this->m_current_fov.left_top.Y() <= min) && (this->m_current_fov.left_bottom.Y() <= min)) ||
-                    ((this->m_current_fov.right_top.Y() >= max) && (this->m_current_fov.right_bottom.Y() >= max) && (this->m_current_fov.left_top.Y() >= max) && (this->m_current_fov.left_bottom.Y() >= max)))
+                if (((this->m_current_fov[2].x <= min) && (this->m_current_fov[3].x <= min) && (this->m_current_fov[0].x <= min) && (this->m_current_fov[1].x <= min)) ||
+                    ((this->m_current_fov[2].x >= max) && (this->m_current_fov[3].x >= max) && (this->m_current_fov[0].x >= max) && (this->m_current_fov[1].x >= max)) ||
+                    ((this->m_current_fov[2].y <= min) && (this->m_current_fov[3].y <= min) && (this->m_current_fov[0].y <= min) && (this->m_current_fov[1].y <= min)) ||
+                    ((this->m_current_fov[2].y >= max) && (this->m_current_fov[3].y >= max) && (this->m_current_fov[0].y >= max) && (this->m_current_fov[1].y >= max)))
                 {
                     retval = false;
-                    this->m_current_fov.left_top.Set(    TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-                    this->m_current_fov.left_bottom.Set( TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-                    this->m_current_fov.right_top.Set(   TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
-                    this->m_current_fov.right_bottom.Set(TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX);
+                    this->m_current_fov[0] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+                    this->m_current_fov[1] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+                    this->m_current_fov[2] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
+                    this->m_current_fov[3] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
                 }
 
 #ifdef TRACKING_DEBUG_OUTPUT
                 std::cout << "[DEBUG] [TrackingUtilizer] Relative FIELD OF VIEW coordinates: LEFT_TOP (" <<
-                    this->m_current_fov.left_top.X() << "," << this->m_current_fov.left_top.Y() << ") | LEFT_BOTTOM (" <<
-                    this->m_current_fov.left_bottom.X() << "," << this->m_current_fov.left_bottom.Y() << ") | RIGHT_TOP (" <<
-                    this->m_current_fov.right_top.X() << "," << this->m_current_fov.right_top.Y() << ") | RIGHT_BOTTOM (" <<
-                    this->m_current_fov.right_bottom.X() << "," << this->m_current_fov.right_bottom.Y() << ")" << std::endl;
+                    this->m_current_fov[0].x << "," << this->m_current_fov[0].y << ") | LEFT_BOTTOM (" <<
+                    this->m_current_fov[1].x << "," << this->m_current_fov[1].y << ") | RIGHT_TOP (" <<
+                    this->m_current_fov[2].x << "," << this->m_current_fov[2].y << ") | RIGHT_BOTTOM (" <<
+                    this->m_current_fov[3].x << "," << this->m_current_fov[3].y << ")" << std::endl;
 #endif
             }
         }
@@ -1220,9 +1167,9 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
 }
 
 
-tracking::Point2D tracking::TrackingUtilizer::clipRect(tracking::Point2D intersection, tracking::Point2D vertex) {
+glm::vec2 tracking::TrackingUtilizer::clipRect(glm::vec2 intersection, glm::vec2 vertex) {
 
-    tracking::Point2D clipped_point = vertex;
+    glm::vec2 clipped_point = vertex;
     //auto direction = clipped_point - intersection;
 
 /// TODO
@@ -1253,16 +1200,12 @@ T tracking::TrackingUtilizer::limit(T val, T min, T max, bool& changed) {
 }
 
 
-tracking::Quaternion tracking::TrackingUtilizer::xform(const tracking::Vector3D& u, const tracking::Vector3D& v) {
-
-    tracking::Quaternion retQuat;
+glm::quat tracking::TrackingUtilizer::xform(const glm::vec3& u, const glm::vec3& v) {
 
     /// http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
-    auto w = u.Cross(v);
-    auto q = tracking::Quaternion(w.X(), w.Y(), w.Z(), u.Dot(v));
-    q.SetW(q.W() + q.Norm());
-    q.Normalise();
+    auto w = glm::cross(u, v);
+    auto q = glm::quat(w.x, w.y, w.z, glm::dot(u, v));
+    q.w = (q.w + glm::length(q));
+    q = glm::normalize(q);
     return q;
-
-    return retQuat;
 }

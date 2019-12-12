@@ -15,8 +15,8 @@
 #endif  
 
 #include "stdafx.h"
-#include "Tracker.h"
 
+#include "Tracker.h"
 
 namespace tracking {
 
@@ -210,61 +210,61 @@ namespace tracking {
         * variables
         **********************************************************************/
 
-        bool                               m_initialised;
-        std::shared_ptr<tracking::Tracker> m_tracker;
-        tracking::Vector3D                 m_current_cam_position;
-        tracking::Vector3D                 m_current_cam_up;
-        tracking::Vector3D                 m_current_cam_view;
-        float                              m_current_cam_center_dist;
-        tracking::Point2D                  m_current_intersection;
-        tracking::Rectangle                m_current_fov;
-        tracking::Quaternion               m_current_orientation;
-        tracking::Vector3D                 m_current_position;
-        tracking::Button                   m_current_button;
-        bool                               m_current_selecting;
-        tracking::Button                   m_last_button;
-        std::vector<tracking::Vector3D>    m_buffer_positions;
-        unsigned int                       m_buffer_idx;
-        bool                               m_const_position;
-        tracking::Vector3D                 m_start_cam_view;
-        tracking::Vector3D                 m_start_cam_position;
-        tracking::Vector3D                 m_start_cam_up;
-        float                              m_start_cam_center_dist;
-        tracking::Vector3D                 m_start_position;
-        tracking::Quaternion               m_start_orientation;
-        tracking::Quaternion               m_start_relative_orientation;
-        bool                               m_is_rotating;
-        bool                               m_is_translating;
-        bool                               m_is_zooming;
+        bool                                m_initialised;
+        std::shared_ptr<tracking::Tracker>  m_tracker;
+        glm::vec3                           m_current_cam_position;
+        glm::vec3                           m_current_cam_up;
+        glm::vec3                           m_current_cam_view;
+        float                               m_current_cam_center_dist;
+        glm::vec2                           m_current_intersection;
+        tracking::Rectangle                 m_current_fov;
+        glm::quat                           m_current_orientation;
+        glm::vec3                           m_current_position;
+        tracking::Button                    m_current_button;
+        bool                                m_current_selecting;
+        tracking::Button                    m_last_button;
+        std::vector<glm::vec3>              m_buffer_positions;
+        unsigned int                        m_buffer_idx;
+        bool                                m_const_position;
+        glm::vec3                           m_start_cam_view;
+        glm::vec3                           m_start_cam_position;
+        glm::vec3                           m_start_cam_up;
+        float                               m_start_cam_center_dist;
+        glm::vec3                           m_start_position;
+        glm::quat                           m_start_orientation;
+        glm::quat                           m_start_relative_orientation;
+        bool                                m_is_rotating;
+        bool                                m_is_translating;
+        bool                                m_is_zooming;
 
         /** parameters ********************************************************/
 
-        std::string                        m_button_device_name;
-        std::string                        m_rigid_body_name;
-        unsigned int                       m_select_button;
-        unsigned int                       m_rotate_button;
-        unsigned int                       m_translate_button;
-        unsigned int                       m_zoom_button;
-        bool                               m_invert_rotate;
-        bool                               m_invert_translate;
-        bool                               m_invert_zoom;
-        float                              m_rotate_speed;
-        float                              m_translate_speed;
-        float                              m_zoom_speed;
-        bool                               m_single_interaction;
-        TrackingUtilizer::FovMode          m_fov_mode;
-        float                              m_fov_height;
-        float                              m_fov_width;
-        float                              m_fov_hori_angle;
-        float                              m_fov_vert_angle;
-        TrackingUtilizer::FovAspectRatio   m_fov_aspect_ratio;
+        std::string                         m_button_device_name;
+        std::string                         m_rigid_body_name;
+        unsigned int                        m_select_button;
+        unsigned int                        m_rotate_button;
+        unsigned int                        m_translate_button;
+        unsigned int                        m_zoom_button;
+        bool                                m_invert_rotate;
+        bool                                m_invert_translate;
+        bool                                m_invert_zoom;
+        float                               m_rotate_speed;
+        float                               m_translate_speed;
+        float                               m_zoom_speed;
+        bool                                m_single_interaction;
+        TrackingUtilizer::FovMode           m_fov_mode;
+        float                               m_fov_height;
+        float                               m_fov_width;
+        float                               m_fov_hori_angle;
+        float                               m_fov_vert_angle;
+        TrackingUtilizer::FovAspectRatio    m_fov_aspect_ratio;
 
-        float                              m_physical_height;
-        float                              m_physical_width;
-        tracking::Quaternion               m_calibration_orientation;
-        tracking::Vector3D                 m_physical_origin;
-        tracking::Vector3D                 m_physical_x_dir;
-        tracking::Vector3D                 m_physical_y_dir;
+        float                               m_physical_height;
+        float                               m_physical_width;
+        glm::quat                           m_calibration_orientation;
+        glm::vec3                           m_physical_origin;
+        glm::vec3                           m_physical_x_dir;
+        glm::vec3                           m_physical_y_dir;
 
         /***********************************************************************
         * functions
@@ -303,7 +303,7 @@ namespace tracking {
         */
         bool processScreenInteraction(bool process_fov);
 
-        tracking::Point2D clipRect(tracking::Point2D intersection, tracking::Point2D vertex);
+        glm::vec2 clipRect(glm::vec2 intersection, glm::vec2 vertex);
 
         /**
         * Limit value "val" to range [min, max]
@@ -319,7 +319,7 @@ namespace tracking {
         *
         * @return Answer the (normalised) rotation for matching 'u' on 'v'.
         */
-        tracking::Quaternion xform(const tracking::Vector3D& u, const tracking::Vector3D& v);
+        glm::quat xform(const glm::vec3& u, const glm::vec3& v);
 
     };
 

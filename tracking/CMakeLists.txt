@@ -5,7 +5,9 @@
 
 # Stop if the user tries to build this plugin with Linux.
 if(WIN32)
-  
+
+    include(ExternalProject)
+
     project(tracking)
     message(STATUS "[${PROJECT_NAME}] configuring ...")
 
@@ -19,11 +21,21 @@ if(WIN32)
     set(TRACKING_INSTALL_HEADER "include/TrackingUtilizer.h" "include/Tracker.h")
     set(TRACKING_INSTALL_CONF "conf/tracking.conf" )
 
+    ##### GLM #####
+    set(GLM_TARGET glm)
+    ExternalProject_Add(
+      ${GLM_TARGET}
+      GIT_REPOSITORY https://github.com/g-truc/glm.git
+      GIT_TAG "0.9.8"
+      UPDATE_COMMAND "" 
+      BUILD_COMMAND "" 
+      INSTALL_COMMAND ""
+    )
+    ExternalProject_Get_Property(${GLM_TARGET} SOURCE_DIR)
+    set(GLM_INCLUDE_DIR ${SOURCE_DIR})
     
     ##### VRPN #####
-    # Get the external vrpn project from GitHub.
-    include(ExternalProject)
-    
+    # Get the external vrpn project from GitHub.    
     set(VRPN_VER "v07.34")
     set(VRPN_INSTALL_LOCATION "${PROJECT_SOURCE_DIR}" CACHE INTERNAL '')
 
@@ -73,7 +85,7 @@ if(WIN32)
     endif(USE_NATNET)
 
     ##### TRACKING #####
-    include_directories(${VRPN_INCLUDE_DIR} ${NATNET_INCLUDE_DIR} "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/src")
+    include_directories(${VRPN_INCLUDE_DIR} ${NATNET_INCLUDE_DIR} ${GLM_INCLUDE_DIR} "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/src")
   
     # TARGET DEFINITION
     add_library(${PROJECT_NAME} SHARED ${TRACKING_HEADERS} ${TRACKING_SOURCES})

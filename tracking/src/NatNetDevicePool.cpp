@@ -273,9 +273,9 @@ bool tracking::NatNetDevicePool::Disconnect(void) {
 }
 
 
-tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::string& rigid_body) {
+glm::quat tracking::NatNetDevicePool::GetOrientation(const std::string& rigid_body) {
 
-    tracking::Quaternion ret_orientation((std::numeric_limits<float>::max)(),
+    glm::quat ret_orientation((std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)());
@@ -317,9 +317,9 @@ tracking::Quaternion tracking::NatNetDevicePool::GetOrientation(const std::strin
 }
 
 
-tracking::Vector3D tracking::NatNetDevicePool::GetPosition(const std::string& rigid_body) {
+glm::vec3 tracking::NatNetDevicePool::GetPosition(const std::string& rigid_body) {
 
-    tracking::Vector3D ret_position((std::numeric_limits<float>::max)(),
+    glm::vec3 ret_position((std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)(),
         (std::numeric_limits<float>::max)());
 
@@ -407,14 +407,14 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
                 if (data.ID == it->id) {
 
                     // Write new data to object with index denoted as 'write'
-                    it->lockFreeData[it->write.load()].orientation.SetX(data.qx);
-                    it->lockFreeData[it->write.load()].orientation.SetY(data.qy);
-                    it->lockFreeData[it->write.load()].orientation.SetZ(data.qz);
-                    it->lockFreeData[it->write.load()].orientation.SetW(data.qw);
+                    it->lockFreeData[it->write.load()].orientation.x = data.qx;
+                    it->lockFreeData[it->write.load()].orientation.y = data.qy;
+                    it->lockFreeData[it->write.load()].orientation.z = data.qz;
+                    it->lockFreeData[it->write.load()].orientation.w = data.qw;
 
-                    it->lockFreeData[it->write.load()].position.SetX(data.x);
-                    it->lockFreeData[it->write.load()].position.SetY(data.y);
-                    it->lockFreeData[it->write.load()].position.SetZ(data.z);
+                    it->lockFreeData[it->write.load()].position.x = data.x;
+                    it->lockFreeData[it->write.load()].position.y = data.y;
+                    it->lockFreeData[it->write.load()].position.z = data.z;
 
                     // Determine index of currently unused free object
                     unsigned int free = (it->read.load() + 1) % 3;

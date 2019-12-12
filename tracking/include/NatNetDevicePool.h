@@ -14,7 +14,6 @@
 #include "NatNetClient.h"
 #include "NatNetCAPI.h"
 
-
 namespace tracking{
 
     /***************************************************************************
@@ -47,8 +46,8 @@ namespace tracking{
 
         /** Data of one rigid body. */
         struct RigidBodyData {
-            tracking::Quaternion orientation;               /** The current orientation of the motion device. */
-            tracking::Vector3D   position;                  /** The current position of the motion device. */
+            glm::quat                        orientation;    /** The current orientation of the motion device. */
+            glm::vec3                        position;       /** The current position of the motion device. */
         };
 
         ///////////////////////////////////////////////////////////////////////
@@ -95,7 +94,7 @@ namespace tracking{
         * 
         * @return The current orientation of the given rigid body.
         */
-        tracking::Quaternion GetOrientation(const std::string& rigid_body); 
+        glm::quat GetOrientation(const std::string& rigid_body); 
 
         /**
         * Get position of rigid body.
@@ -105,7 +104,7 @@ namespace tracking{
         * 
         * @return The current position of the given rigid body.
         */
-        tracking::Vector3D GetPosition(const std::string& rigid_body); 
+        glm::vec3 GetPosition(const std::string& rigid_body); 
 
         /**
         * Get all available rigid body names.

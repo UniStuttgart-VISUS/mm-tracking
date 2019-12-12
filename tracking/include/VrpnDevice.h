@@ -10,9 +10,9 @@
 #define TRACKING_VRPNDEVICE_H_INCLUDED
 
 #include "stdafx.h"
+
 #include "vrpn_Tracker.h"
 #include "vrpn_Button.h"
-
 
 namespace tracking {
 

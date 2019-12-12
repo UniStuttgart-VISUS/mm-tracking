@@ -42,29 +42,29 @@
 #include <limits>
 #include <array>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+
 /// DEFINES ///////////////////////////////////////////////////////////////////
 
 // If defined, additional ouput for debugging ist written.
-//#define TRACKING_DEBUG_OUTPUT
+///  #define TRACKING_DEBUG_OUTPUT
 
 // If defined, playback logs of vrpn device are written (see VrpnDevice.h line 222).
-//#define TRACKING_VRPN_DEVICE_WRITE_PLAYBACKLOG 
+///  #define TRACKING_VRPN_DEVICE_WRITE_PLAYBACKLOG 
 
 /// TYPES /////////////////////////////////////////////////////////////////////
-
-#include "TrackingMath.h"
 
 namespace tracking
 {
     typedef unsigned int Button;
-    
-    typedef struct {
-        Point2D left_top;
-        Point2D left_bottom;
-        Point2D right_top;
-        Point2D right_bottom;
-    } Rectangle;
 
+    typedef std::array<glm::vec2, 4> Rectangle;
+    /// [0] = left_top
+    /// [1] = left_bottom 
+    /// [2] = right_top
+    /// [3] = right_bottom
 }
 
 #endif /** TRACKING_STDAFX_INCLUDED */
