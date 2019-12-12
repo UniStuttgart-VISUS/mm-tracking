@@ -351,7 +351,7 @@ bool tracking::TrackingUtilizer::readParamsFromFile(void) {
                 break;
             }
             if (name == this->m_rigid_body_name) {
-                this->m_calibration_orientation = { x, y, z, w };
+                this->m_calibration_orientation = { w, x, y, z };
                 is_calibration_available = true;
             }
         }
@@ -605,7 +605,7 @@ bool tracking::TrackingUtilizer::Calibrate(void) {
         state_calibration = true;
     }
     else {
-        this->m_calibration_orientation = { 0.0f, 0.0f, 0.0f, 1.0f };
+        this->m_calibration_orientation = { 1.0f, 0.0f, 0.0f, 0.0f };
     }
 
     std::cout << "[INFO] [TrackingUtilizer] >>> RIGID BODY \"" << this->m_rigid_body_name.c_str() << "\" CALIBRATION ORIENTATION " <<
@@ -1203,7 +1203,7 @@ glm::quat tracking::TrackingUtilizer::xform(const glm::vec3& u, const glm::vec3&
 
     /// http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
     auto w = glm::cross(u, v);
-    auto q = glm::quat(w.x, w.y, w.z, glm::dot(u, v));
+    auto q = glm::quat(glm::dot(u, v), w.x, w.y, w.z);
     q.w = (q.w + glm::length(q));
     q = glm::normalize(q);
     return q;
