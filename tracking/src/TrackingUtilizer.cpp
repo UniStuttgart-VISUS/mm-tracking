@@ -9,7 +9,6 @@
 
 #define TRACKING_FLOAT_MAX ((std::numeric_limits<float>::max)())
 
-
 tracking::TrackingUtilizer::TrackingUtilizer(void) 
     : m_initialised(false)
     , m_tracker(nullptr)

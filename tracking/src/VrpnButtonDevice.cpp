@@ -7,7 +7,6 @@
 
 #include "VrpnButtonDevice.h"
 
-
 tracking::VrpnButtonDevice::VrpnButtonDevice(void) : tracking::VrpnDevice<vrpn_Button_Remote>()
     , m_initialised(false)
     , m_connected(false)

@@ -15,7 +15,6 @@
 #endif  
 
 #include "stdafx.h"
-
 #include "Tracker.h"
 
 namespace tracking {

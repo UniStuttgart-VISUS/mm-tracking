@@ -7,7 +7,6 @@
 
 #include "Tracker.h"
 
-
 tracking::Tracker::Tracker(void)
     : m_initialised(false)
     , m_connected(false)

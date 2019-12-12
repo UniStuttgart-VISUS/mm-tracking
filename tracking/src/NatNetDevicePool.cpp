@@ -7,7 +7,6 @@
 
 #include "NatNetDevicePool.h"
 
-
 tracking::NatNetDevicePool::NatNetDevicePool(void)
     : m_initialised(false)
     , m_connected(false)

@@ -18,7 +18,6 @@
 #include "VrpnButtonDevice.h"
 #include "NatNetDevicePool.h"
 
-
 namespace tracking {
 
     /***************************************************************************

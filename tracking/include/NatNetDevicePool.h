@@ -9,7 +9,6 @@
 #define TRACKING_NATNETDEVICEPOOL_H_INCLUDED
 
 #include "stdafx.h"
-
 #include "NatNetTypes.h"
 #include "NatNetClient.h"
 #include "NatNetCAPI.h"
