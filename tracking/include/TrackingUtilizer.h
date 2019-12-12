@@ -79,6 +79,7 @@ namespace tracking {
             bool                              invert_rotate;         /** Inverts the rotation direction.                                                               */
             bool                              invert_translate;      /** Inverts the rotation direction.                                                               */
             bool                              invert_zoom;           /** Inverts the zoom direction.                                                                   */
+            float                             rotate_speed;          /** The rotation speed.                                                                           */
             float                             translate_speed;       /** The translation speed.                                                                        */
             float                             zoom_speed;            /** Transformation of distance to zoom speed.                                                     */
             bool                              single_interaction;    /** Disables multiple interactions at the same time.                                              */
@@ -247,6 +248,7 @@ namespace tracking {
         bool                               m_invert_rotate;
         bool                               m_invert_translate;
         bool                               m_invert_zoom;
+        float                              m_rotate_speed;
         float                              m_translate_speed;
         float                              m_zoom_speed;
         bool                               m_single_interaction;

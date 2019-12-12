@@ -43,11 +43,12 @@ tracking::TrackingUtilizer::TrackingUtilizer(void)
     , m_rotate_button(0)
     , m_translate_button(0)
     , m_zoom_button(0)
-    , m_invert_rotate(true)
+    , m_invert_rotate(false)
     , m_invert_translate(true)
-    , m_invert_zoom(true)
-    , m_translate_speed(10.0f)
-    , m_zoom_speed(20.0f)
+    , m_invert_zoom(false)
+    , m_rotate_speed(1.0f)
+    , m_translate_speed(1.0f)
+    , m_zoom_speed(1.0f)
     , m_single_interaction(false)
     , m_fov_mode(TrackingUtilizer::FovMode::WIDTH_AND_HEIGHT)
     , m_fov_height(0.2f)
@@ -89,11 +90,6 @@ bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Pa
         btn_device_name = std::string(params.btn_device_name);
         if (btn_device_name.length() != params.btn_device_name_len) {
             std::cerr << std::endl << "[ERROR] [TrackingUtilizer] String \"btn_device_name\" has not expected length. " <<
-                "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
-            check = false;
-        }
-        if (btn_device_name.empty()) {
-            std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"btn_device_name\" must not be empty string. " <<
                 "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
             check = false;
         }
@@ -158,6 +154,13 @@ bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Pa
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         check = false;
     }
+    this->limit<float>(params.rotate_speed, 0.0f, TRACKING_FLOAT_MAX, changed);
+    if (changed) {
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"rotate_speed\" must be in range [" << 0.0f << "," << TRACKING_FLOAT_MAX << "]. " <<
+            "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        check = false;
+    }
+
     this->limit<float>(params.zoom_speed, 0.0f, TRACKING_FLOAT_MAX, changed);
     if (changed) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] Parameter \"zoom_speed\" must be in range [" << 0.0f << "," << TRACKING_FLOAT_MAX << "]. " <<
@@ -212,6 +215,7 @@ bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Pa
         this->m_invert_rotate = params.invert_rotate;
         this->m_invert_translate = params.invert_translate;
         this->m_invert_zoom = params.invert_zoom;
+        this->m_rotate_speed = params.rotate_speed;
         this->m_translate_speed = params.translate_speed;
         this->m_zoom_speed = params.zoom_speed;
         this->m_single_interaction = params.single_interaction;
@@ -250,7 +254,8 @@ void tracking::TrackingUtilizer::printParams(void) {
     std::cout << "[PARAMETER] [TrackingUtilizer] Invert Rotate:           " << ((this->m_invert_rotate)?("true"):("false")) << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Invert Translate:        " << ((this->m_invert_translate) ? ("true") : ("false")) << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Invert Zoom:             " << ((this->m_invert_zoom) ? ("true") : ("false")) << std::endl;
-    std::cout << "[PARAMETER] [TrackingUtilizer] Translate Speed:         " << this->m_translate_speed << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Rotatation Speed:        " << this->m_rotate_speed << std::endl;
+    std::cout << "[PARAMETER] [TrackingUtilizer] Translation Speed:       " << this->m_translate_speed << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Zoom Speed:              " << this->m_zoom_speed << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Single Interaction:      " << ((this->m_single_interaction) ? ("true") : ("false")) << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] FOV Mode:                " << (int)this->m_fov_mode << std::endl;
@@ -732,7 +737,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
                 // with the current view later on.
                 /// NB: z-Value of view vector depends on right- or left-handed camera system!
                 /// Assuming right-handed here.
-                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, 1.0f), this->m_start_cam_view);
+                auto q1 = this->xform(tracking::Vector3D(0.0f, 0.0f, -1.0f), this->m_start_cam_view);
                 auto q2 = this->xform(q1 * tracking::Vector3D(0.0f, 1.0f, 0.0f), this->m_start_cam_up);
 
                 this->m_start_relative_orientation = q2 * q1;
@@ -791,6 +796,58 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             if (this->m_invert_rotate) {
                 quat.Invert();
             }
+
+            /*
+            slerp(identity_quat, quat, this->m_rotate_speed)
+
+            glm::quat KeyframeKeeper::quaternion_interpolation(float u, glm::quat q0, glm::quat q1) {
+
+                /// Slerp - spherical linear interpolation
+                // SOURCE: https://en.wikipedia.org/wiki/Slerp and https://web.mit.edu/2.998/www/QuaternionReport1.pdf
+
+                return glm::normalize(glm::slerp(q0, q1, u));
+            }
+
+            Quaternion slerp(Quaternion v0, Quaternion v1, double t) {
+                // Only unit quaternions are valid rotations.
+                // Normalize to avoid undefined behavior.
+                v0.normalize();
+                v1.normalize();
+
+                // Compute the cosine of the angle between the two vectors.
+                double dot = dot_product(v0, v1);
+
+                // If the dot product is negative, slerp won't take
+                // the shorter path. Note that v1 and -v1 are equivalent when
+                // the negation is applied to all four components. Fix by 
+                // reversing one quaternion.
+                if (dot < 0.0f) {
+                    v1 = -v1;
+                    dot = -dot;
+                }
+
+                const double DOT_THRESHOLD = 0.9995;
+                if (dot > DOT_THRESHOLD) {
+                    // If the inputs are too close for comfort, linearly interpolate
+                    // and normalize the result.
+
+                    Quaternion result = v0 + t * (v1 - v0);
+                    result.normalize();
+                    return result;
+                }
+
+                // Since dot is in range [0, DOT_THRESHOLD], acos is safe
+                double theta_0 = acos(dot);        // theta_0 = angle between input vectors
+                double theta = theta_0 * t;          // theta = angle between v0 and result
+                double sin_theta = sin(theta);     // compute this value only once
+                double sin_theta_0 = sin(theta_0); // compute this value only once
+
+                double s0 = cos(theta) - dot * sin_theta / sin_theta_0;  // == sin(theta_0 - theta) / sin(theta_0)
+                double s1 = sin_theta / sin_theta_0;
+
+                return (s0 * v0) + (s1 * v1);
+            }
+            */
 
             this->m_start_cam_view.Normalise();
             this->m_start_cam_up.Normalise();
