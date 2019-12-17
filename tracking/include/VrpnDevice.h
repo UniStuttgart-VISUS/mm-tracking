@@ -374,7 +374,21 @@ bool tracking::VrpnDevice<R>::MainLoop(void) {
         return false;
     }
 
-    this->m_remote_device->mainloop();
+    try {
+        this->m_remote_device->mainloop();
+    }
+    catch (const std::exception& e) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Error executing remote device main loop: " << e.what() <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;    
+        this->Disconnect();
+        return false;
+    }
+    catch (...) {
+        std::cerr << std::endl << "[ERROR] [Tracker] Unknown error executing remote device main loop. " <<
+            " [" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
+        this->Disconnect();
+        return false;
+    }
 
     return true;
 }
