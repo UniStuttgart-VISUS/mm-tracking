@@ -790,11 +790,11 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             // Align interaction with the original camera system.
             q = this->m_start_relative_orientation * q * glm::conjugate(this->m_start_relative_orientation);
             q = glm::normalize(q);
+            // Apply rotation speed factor using spherical linear interpolation
+            q = glm::slerp(glm::quat(1.0f, 0.0f, 0.0f, 0.0f), q, this->m_rotate_speed);
             if (this->m_invert_rotate) {
                 q = glm::inverse(q);
             }
-
-            q = glm::slerp(glm::quat(), q, this->m_rotate_speed);
 
             this->m_start_cam_view = glm::normalize(this->m_start_cam_view);
             this->m_start_cam_up = glm::normalize(this->m_start_cam_up);
@@ -814,22 +814,22 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             auto pos_diff = this->m_current_position - this->m_start_position;
 
             float speed = this->m_start_cam_center_dist * this->m_translate_speed;
-
             auto delta_x = pos_diff.x * speed;
-            auto right_vector = glm::cross(this->m_start_cam_view, this->m_start_cam_up);
-            right_vector = glm::normalize(right_vector);
-            auto pos_delta_x = right_vector * delta_x;
-
             auto delta_y = pos_diff.y * speed;
-            this->m_start_cam_up = glm::normalize(this->m_start_cam_up);
-            auto pos_delta_y = this->m_start_cam_up * delta_y;
 
-            auto pos_delta = pos_delta_x + pos_delta_y;
+            auto pos_delta_x = glm::cross(this->m_start_cam_view, this->m_start_cam_up);
+            pos_delta_x = glm::normalize(pos_delta_x);
+            pos_delta_x *= delta_x;
+
+            auto pos_delta_y = glm::normalize(this->m_start_cam_up);
+            pos_delta_y *= delta_y;
+
+            auto pos_delta_xy = pos_delta_x + pos_delta_y;
             if (this->m_invert_translate) {
-                pos_delta *= (-1.0f);
+                pos_delta_xy *= (-1.0f);
             }
 
-            this->m_current_cam_position = this->m_start_cam_position + pos_delta;
+            this->m_current_cam_position = this->m_start_cam_position + pos_delta_xy;
             this->m_current_cam_view     = this->m_start_cam_view;
             this->m_current_cam_up       = this->m_start_cam_up;
 
@@ -845,14 +845,13 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
             float speed = this->m_start_cam_center_dist * this->m_zoom_speed;
 
             auto delta_z = pos_diff.z * speed;
-            auto pos_delta = this->m_start_cam_view;
-            pos_delta = glm::normalize(pos_delta);
-            pos_delta *= delta_z;
+            auto pos_delta_z = glm::normalize(this->m_start_cam_view);
+            pos_delta_z *= delta_z;
             if (this->m_invert_zoom) {
-                pos_delta *= (-1.0f);
+                pos_delta_z *= (-1.0f);
             }
 
-            this->m_current_cam_position = this->m_start_cam_position + pos_delta;
+            this->m_current_cam_position = this->m_start_cam_position + pos_delta_z;
             this->m_current_cam_view     = this->m_start_cam_view;
             this->m_current_cam_up       = this->m_start_cam_up;
 
