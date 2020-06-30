@@ -1,7 +1,7 @@
 # Tracking Library `mm-tracking`
 
 The `mm-tracking` library provides the interface that allows to communicate with the tracking system in front of the Powerwall at the Visualization Research Center (VISUS) of the University of Stuttgart. 
-This library can be used for interaction with tracking and button devices (stick, glasses).
+This library can be used for interaction with tracking devices (rigid-bodies) and button devices (stick, glasses).
 
 ---
 
@@ -22,7 +22,7 @@ Only one `Tracker` class should be declared at a time.
 The `TrackingUtilizer` manipulates the raw data from the `Tracker`. By changing the orientation of a pointing device while pressing the associated button, camera parameters can be manipulated. Further the intersection of the pointing device with the powerwall as well as the field of view is provided (in relative screen space coordinates). The class also allows to acccess the raw tracking data.
 Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously. Each `TrackingUtilizer` utilizes only one rigid body (motion or pointing device) and and button device. They are defined by their names in the corresponding parameters.
 
-## Test
+## Test Program
 
 * Configure and generate projects with `cmake`.
 * Adjust client IP parameter in `test/src/test.cpp` in line 35.
@@ -34,11 +34,16 @@ Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously. E
 
 ### Troubleshooting
 
-If Windows doesn't ask to add a Firewall exception for the test program, rules to allow incoming traffic for TCP port 3884 and UDP ports 1510 and 1511 have to be added manually.
+#### Workaround for using non default compiler of Visual Studio with external project VRPN
+If you want to use a compiler version other than the default provided with the chosen Visual Studio version, you have to explicitly add this information to the build command of VRPN. E.g. if you want to use Visual Studio 2017 and the Visual Studio 2015 compiler, you have to replace line 65 in `\tracking\CMakeLists.txt` as follows:
+`CONFIGURE_COMMAND ${CMAKE_COMMAND} -G "Visual Studio 15 2017" -T v140 -DCMAKE_GENERATOR_PLATFORM=x64 -DVRPN_BUILD_CLIENTS:BOOL=OFF -DVRPN_BUILD_SERVERS:BOOL=OFF ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn{code}`
+
+#### Missing firewall rule
+If Windows doesn't ask to add a firewall exception for the test program, rules to allow incoming traffic for TCP port 3884 and UDP ports 1510 and 1511 have to be added manually.
 
 ## Documentation
 
-Some documentation diagrams are provided in the `documentation` folder.
+See `documentation` folder.
 
 ## Parameters
 

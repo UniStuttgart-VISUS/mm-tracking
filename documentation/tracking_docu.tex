@@ -1,0 +1,253 @@
+\documentclass[]{article}
+
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{german}
+\usepackage{xcolor}
+\usepackage{geometry}
+
+\geometry{a4paper, top=25mm, left=25mm, right=25mm, bottom=25mm, headsep=10mm, footskip=10mm}
+\setlength{\parindent}{0em} 
+
+\newcommand{\TODO}[1]{\textcolor{blue}{#1}}
+\newcommand{\POW}{Powerwall} 
+\newcommand{\FOV}{Field of View} 
+
+%%% opening %%%
+%\title{Tracking und Berechnung des \FOV}
+%\author{Matthias Braun}
+
+\begin{document}
+
+%\maketitle
+
+%-------------------------------------------------------------------------------
+%%% German Version
+% https://svn.visus.uni-stuttgart.de/playgrounds/braunms/tracking/
+
+%-------------------------------------------------------------------------------
+\section{Berechnung des \FOV{}}
+%-------------------------------------------------------------------------------
+
+Die Anwendung ermöglicht die gleichzeitige Erfassung des \FOV{} von beliebig vielen Benutzern.
+
+%-------------------------------------------------------------------------------
+\subsection{Tracking-System}
+%-------------------------------------------------------------------------------
+
+Für das Tracking der Blickrichtung der Benutzer werden Brillen verwendet, an denen eindeutig unterscheidbare und Infrarotlicht reflektierende Marker angebracht sind.
+Jede Brille wird vom Tracking-System als separater Rigid-Body erfasst.
+Die getrackten Bewegungsdaten jedes Rigid-Bodys werden von der Tracking-Software Motive (OptiTrack) über das Netzwerk per UDP an die Anwendung gestreamt.
+Für die Netzwerk-Kommunikation wird das von OptiTrack zur Verfügung gestellte Client/Server SDK (Software Development Kit) \glqq{}NatNet\grqq{} verwendet.
+Als Grundlage für die Berechnung des \FOV{} eines Rigid-Body stehen dessen Position (als Vektor in $\mathbb{R}^{3}$) und seine Orientierung (als Quaternion) zur Verfügung.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Kalibrierung}
+%\vspace{\baselineskip}
+%-------------------------------------------------------------------------------
+Die Daten eines Rigid-Bodys werden in Bezug auf einen im Tracking-System festgelegten Ursprung in metrischen Koordinaten angegeben.
+Für die korrekte Berechnung des \FOV{} ist es notwendig, die Orientierung eines Rigid-Body in Bezug auf die \POW{} zu kalibrieren.
+Der Ursprung der \POW{} liegt dabei in einer Ecke, hier wurde die linke untere Ecke verwendet. Zudem müssen die Richtungsvektoren, welche die \POW{} aufspannen und die physikalische Höhe und Breite der \POW{} bekannt sein.
+Für die Kalibrierung eines neuen Rigid-Bodys muss dieser vor dem Starten der Anwendung (mit beliebiger Position innerhalb des Tracking-Bereichs) mit der Blickrichtung senkrecht zur \POW{} ausgerichtet werden.
+Zusätzlich müssen die Richtungen des \glqq{}Up\grqq{}- und des \glqq{}Right\grqq{}-Vektors des Rigid-Bodys entlang der Richtungen ausgerichtet werden, welche die \POW{} aufspannen.
+Diese anfänglich erfasste Orientierung wird dann automatisch für die Kalibrierung verwendet und für eine zukünftige Verwendung (in einer Textdatei) hinterlegt, sodass jeder Rigid-Body nur einmal kalibriert werden muss.
+
+
+%-------------------------------------------------------------------------------
+\subsection{Schnitt"-punkt der Blickrichtung mit \POW{}}
+%\vspace{\baselineskip}
+%-------------------------------------------------------------------------------
+Für die Berechnung des Schnitt"-punktes  $\overrightarrow{s}_{0}$ der Blickrichtung eines Rigid-Bodies mit der \POW{}, wird im ersten Schritt dessen aktuelle Blickrichtung $\overrightarrow{d}_{0}$ ermittelt. Verwendet werden dazu das Quaternion der aktuellen Orientierung des Rigid-Body $Q_{cur}$, das inverse Quaternion der kalibrierten Orientierung des Rigid-Body $Q^{-1}_{calib}$ und der Normalen-Vektor der \POW{} $\overrightarrow{n}_{pw} \in \mathbb{R}^{3}$, welcher aufgrund der Kalibrierungsvorgabe der entgegengesetzten Blickrichtung des Rigid-Body entspricht.
+\begin{equation} 
+    \overrightarrow{d}_{0} = Q_{cur} \cdot Q^{-1}_{calib} \cdot (-\overrightarrow{n}_{pw}) \in \mathbb{R}^{3}
+\end{equation}
+Mit dem ersten Strahlensatz (First Intercept Theorem) kann die Distanz $\delta$ zwischen der Position des Rigid-Body und dem Schnitt"-punkt der Blickrichtung mit der \POW{} wie in Gleichung \ref{schnitt_delta} berechnet werden. Dabei ist $\overrightarrow{d}^{N}_{0}$ der normierte Vektor $\overrightarrow{d}_{0}$. Außerdem sei $\overrightarrow{o}_{pw} \in \mathbb{R}^{3}$ der physikalische Ursprung  der \POW{} (linke untere Ecke) und $\overrightarrow{p}_{cur} \in \mathbb{R}^{3}$ die aktuelle, vom Tracking-System gelieferte, Position des Rigid-Body.
+\begin{equation} \label{schnitt_delta} 
+\delta = \frac{\overrightarrow{n}_{pw} \bullet (\overrightarrow{p}_{cur} - \overrightarrow{o}_{pw}) } 
+              {\overrightarrow{n}_{pw} \bullet (-\overrightarrow{d}^{N}_{0}) } \in \mathbb{R}
+\end{equation}
+Der aktuelle Schnitt"-punkt der Blickrichtung eines Rigid-Bodys mit der \POW{} in Bezug zu deren Ursprung folgt dann mit:
+\begin{equation} 
+    \overrightarrow{s}_{0} = (\overrightarrow{p}_{cur} + \delta \cdot \overrightarrow{d}^{N}_{0}) - \overrightarrow{o}_{pw} \in \mathbb{R}^{3} 
+\end{equation}
+Für die weitere Verwendung wird der Schnitt"-punkt über in der Ebene der \POW{} liegende, relative \glqq{}Screenspace\grqq{}-Koordi"-naten umgerechnet. 
+Notwendig ist dafür die Kenntnis der physikalischen Höhe $h_{pw}$ und Breite $w_{pw}$ der \POW{}. Außerdem müssen die beiden normierten Vektoren $\overrightarrow{u}_{pw}^{N}$ und $\overrightarrow{r}_{pw}^{N}$, welche die \POW{} aufspannen, bekannt sein. 
+$\overrightarrow{u}_{pw}^{N}$ zeigt dabei in die bei der Kalibrierung festgelegte Richtung des \glqq{}Up\grqq{}-Vektors des Rigid-Body und 
+$\overrightarrow{r}_{pw}^{N}$ zeigt dabei in die bei der Kalibrierung festgelegte Richtung des \glqq{}Right\grqq{}-Vektors des Rigid-Body.
+\begin{equation} \label{schnitt_relative}
+    \overrightarrow{s}^{rel}(x, y) \in \mathbb{R}^{2} : x = \frac{\left( \overrightarrow{r}_{pw}^{N} \bullet \overrightarrow{s}_{0} \right) }{w_{pw}}, 
+                                                        y = \frac{\left( \overrightarrow{u}_{pw}^{N} \bullet \overrightarrow{s}_{0} \right) }{h_{pw}}
+\end{equation}
+Für innerhalb der \POW{} liegende Schnittpunkte gilt somit:
+\begin{equation} \label{schnitt_inner}
+    \overrightarrow{s}^{rel}(x, y)  : x \in \left[0,1 \right] \in \mathbb{R}, y \in \left[0,1 \right] \in \mathbb{R}
+\end{equation}
+
+%-------------------------------------------------------------------------------
+\subsection{\FOV{}-Berechnung}
+%\vspace{\baselineskip}
+%-------------------------------------------------------------------------------
+Die vier Vektoren, die das \FOV{} ausgehend von der Position des Rigid-Body aufspannen, werden im Folgenden als $\overrightarrow{d}_{i}, i \in \lbrace 1,2,3,4\rbrace$ bezeichnet.
+Die Berechnung der Schnitt"-punkte dieser Vektoren mit der \POW{} erfolgt analog zur Berechnung des Schnitt"-punktes der Blickrichtung mit der \POW{} $\overrightarrow{s}_{0}$.
+Die vorher zu berechnende Projektion des \FOV{} kann über verschiedene, paarweise definierte Parameter unterschiedlich beschrieben werden.
+Abhängig von den gegeben Parametern ergeben sich für die Berechnung der $\overrightarrow{d}_{i}$ folgende Fälle:
+\begin{enumerate}
+    \item Es sind die effektive Breite $w_{f}$ und Höhe $h_{f}$, die das \FOV{} auf der \POW{} haben soll, gegeben (\glqq{}orthogonale Projektion\grqq{}):\\
+        \begin{equation}
+           \overrightarrow{s}_{i} = \overrightarrow{s}_{0} \pm \left( \frac{w_{f}}{2} \right) \cdot \overrightarrow{r}_{pw}^{N} \pm \left( \frac{h_{f}}{2} \cdot a_{pw} \right) \cdot \overrightarrow{u}_{pw}^{N}\\   
+        \end{equation}
+        Für eine proportionale Skalierung der Breite und Höhe wird die $y$-Komponente zusätzlich entsprechend dem Seitenverhältnis der \POW{} $a_{pw}$ skaliert.
+        Die relativen Schnittpunkte $\overrightarrow{s}_{i}^{rel}$ werden wie in Gleichung \ref{schnitt_relative} berechnet.
+        
+    \item Es sind die effektive Breite $w_{f}$ und das Seitenverhältnis $a_{f}$, die das \FOV{} auf der \POW{} haben soll, gegeben (\glqq{}orthogonale Projektion\grqq{}):
+        \begin{equation}
+            \overrightarrow{s}_{i} = \overrightarrow{s}_{0} \pm \left( \frac{w_{f}}{2} \right) \cdot \overrightarrow{r}_{pw}^{N}  \pm \left( \frac{w_{f}}{a_{f} \cdot 2} \cdot a_{pw} \right) \cdot \overrightarrow{u}_{pw}^{N}\\    
+        \end{equation}
+        Die relativen Schnittpunkte $\overrightarrow{s}_{i}^{rel}$ werden wieder wie in Gleichung \ref{schnitt_relative} berechnet.
+            
+    \item Es sind der horizontale Öffnungswinkel $\alpha_{f}$ und der vertikale Öffnungswinkel $\beta_{f}$ für das \FOV{} gegeben (\glqq{}perspektivische Projektion\grqq{}):\\
+        Für die Berechnung der Vektoren $\overrightarrow{d}_{i}$ werden zuerst der aktuelle \glqq{}Up\grqq{}- und \glqq{}Right\grqq{}-Vektor des Rigid-Body berechnet.
+        Aufgrund der Vorgabe bei der Kalibrierung, können hier als Grundlage die Vektoren verwendet werden, welche die \POW{} aufspannen.
+        \begin{equation}
+            \begin{split}
+                \overrightarrow{u} &= Q_{cur} \cdot Q^{-1}_{calib} \cdot \overrightarrow{u}_{pw}^{N} \in \mathbb{R}^{3}\\
+                \overrightarrow{r} &= Q_{cur} \cdot Q^{-1}_{calib} \cdot \overrightarrow{r}_{pw}^{N} \in \mathbb{R}^{3}\\
+            \end{split}         
+        \end{equation}
+        Die halbierten Ausdehnungen des \FOV{} in horizontaler und vertikaler Richtung im normierten Abstand entlang der Blickrichtung ergeben sich über:
+        \begin{equation}
+            \begin{split}
+                \delta_{\alpha_{f}} &= tan(\frac{\alpha_{f} \cdot \pi}{180})\\
+                \delta_{\beta_{f}}  &= tan(\frac{\beta_{f} \cdot \pi}{180})\\
+            \end{split}         
+        \end{equation}
+        Die Vektoren $\overrightarrow{d}_{i}$ berechnen sich schließlich mit Hilfe der normierten Vektoren $\overrightarrow{d}^{N}_{0}$, $\overrightarrow{u}^{N}$ und $\overrightarrow{r}^{N}$  wie folgt:
+        \begin{equation}
+            \overrightarrow{d}_{i} = \overrightarrow{d}^{N}_{0} \pm(\delta_{\alpha_{f}} \cdot \overrightarrow{r}^{N}) \pm (\delta_{\beta_{f}} \cdot \overrightarrow{u}^{N})
+        \end{equation}
+        Mit den normierten Vektoren $\overrightarrow{d}_{i}^{N}$ können nun die relativen Schnitt"-punkt-Koordi"-naten auf der \POW{} $\overrightarrow{s}_{i}^{rel} \in \mathbb{R}^2$ wie für $\overrightarrow{d}_{0}^{N}$ mit den Gleichungen \ref{schnitt_delta} bis \ref{schnitt_relative} berechnet werden.
+
+    \item Es sind der horizontaler Öffnungswinkel $\alpha_{f}$ und das Seitenverhältnis $a_{f}$ für das \FOV{} gegeben (\glqq{}perspektivische Projektion\grqq{}):\\
+        Im Unterschied zum vorangehenden Fall ändert sich hier lediglich die Berechnung von $\delta_{\beta_{f}}$:
+        \begin{equation}
+            \delta_{\beta_{f}}  = \frac{\delta_{\alpha_{f}}}{a_{f}}
+        \end{equation}
+        
+\end{enumerate}
+Für innerhalb der \POW{} liegende Schnittpunkte $\overrightarrow{s}_{i}^{rel}$ gilt somit wieder Gleichung \ref{schnitt_inner}.
+Außerhalb des Intervalls $[0,1] \in \mathbb{R}$ liegende Schnitt"-punkt-Koordi"-naten werden auf dieses Intervall begrenzt.
+Wenn alle Schnittpunkte des \FOV{} komplett außerhalb der \POW{} liegen, werden alle Schnitt"-punkt-Koordi"-naten auf $unendlich$ gesetzt. 
+
+
+
+\newpage
+%-------------------------------------------------------------------------------
+%%% English Version (shortened)
+%%% Taken from LDAV paper 2020 "Foveated Encoding"
+% https://github.com/UniStuttgart-VISUS/LDAV-2020-FoveatedEncoding
+
+%-------------------------------------------------------------------------------
+\section{Tracking data}
+%-------------------------------------------------------------------------------
+
+In order to acquire the foveated region 
+%for the encoding %
+we need to track the users.
+We can use multiple devices, equipped with reflective markers, to track the users viewing direction.
+Each device is detected by the tracking-system as a separate rigid-body.
+The current position, a vector in $\mathbb{R}^{3}$, and orientation, a quaternion, of each rigid-body is recoded by the tracking software Motive and can be streamed, via UDP, to any machine inside the same network.
+Both are given in reference to the origin of the coordinate system of the tracking-system.
+It is vital to calibrate the orientation of a rigid-body in reference to the display, in order to get a correct look-at rectangle.
+Therefore we determine the position of the bottom left corner of the display in the tracking coordinate system.
+In addition to the position we also set the height and width of the display, which determine the up- and right-vector of the display.
+To calibrate a rigid-body it needs to be placed inside the tracked area, pointing towards the display.
+The orientation of the rigid-body, as seen by the tracking system, is saved automatically, so each rigid-body only needs to be calibrated once.
+
+One node can be connected to the tracking-system in order to receive the current look-at rectangles of all registered and calibrated rigid-bodies with 120Hz.
+All of the valid rectangles are then added to a single message and forwarded to all clients.
+If there is no valid rectangle a keep alive message is send to inform the clients that the connection is still alive.
+Additionally we implemented tracking via the mouse cursor.
+This variant samples the position of the courser with 120Hz, computes a rectangle around the position and scales it to the interval $[0,1]$.
+It was originally implemented for debugging but it also proved useful for benchmarking as it allowed us to create reproducible results.
+
+In the following we describe how to compute the intersection point on the display based on the position of a rigid-body and then how, based on that, the look-at rectangle is computed.
+Note that all data, in the following two paragraphs, is related to the origin of the tracking coordinate system.
+
+%-------------------------------------------------------------------------------
+\subsection{Intersection}
+%-------------------------------------------------------------------------------
+
+In order to compute the intersection point $\overrightarrow{s}$ between the rigid-body and the display we first determine its viewing direction $\overrightarrow{d}$.
+For this we use the quaternion $Q_{rb}$ that represents the current orientation of the rigid-body, the inverse quaternion $Q^{-1}_{cal}$ of its calibrated orientation and the normal vector $\overrightarrow{n}_{dis} \in \mathbb{R}^{3}$ of the display that points in the opposite direction of the viewing direction of the rigid-body.
+%
+\begin{equation*}
+\overrightarrow{d} = Q_{rb} \cdot Q^{-1}_{cal} \cdot (-\overrightarrow{n}_{dis}) \in \mathbb{R}^{3}
+\end{equation*}
+%
+Using the First Intercept Theorem we then compute the distance $\delta$ between the position of the rigid-body and the intersection point on the display.
+$\overrightarrow{d}^{N}$ is the normalised vector $\overrightarrow{d}$, $\overrightarrow{o}_{dis} \in \mathbb{R}^{3}$ is the physical origin of the display, for which we use the bottom left corner, and $\overrightarrow{p}_{rb} \in \mathbb{R}^{3}$ is the current position of the rigid-body.
+%
+\begin{equation}\label{eq:implementation:tracking:intersection} 
+\delta = \frac{\overrightarrow{n}_{dis} \bullet (\overrightarrow{p}_{rb} - \overrightarrow{o}_{dis}) } 
+{\overrightarrow{n}_{dis} \bullet (-\overrightarrow{d}^{N}) } \in \mathbb{R}
+\end{equation}
+%
+The intersection point of a rigid-body along its viewing direction with the display can be computed as follows.
+%
+\begin{equation}\label{eq:implementation:tracking:inner}  
+\overrightarrow{s} = (\overrightarrow{p}_{rb} + \delta \cdot \overrightarrow{d}^{N}) - \overrightarrow{o}_{dis} \in \mathbb{R}^{3} 
+\end{equation}
+%
+In order to deal with different resolution at the two locations we convert the intersection point into relative screen-space coordinates.
+%
+\begin{equation*}
+\overrightarrow{s}^{rel}(x, y)  : x \in \left[0,1 \right] \in \mathbb{R}, y \in \left[0,1 \right] \in \mathbb{R}
+\end{equation*}
+%
+For this we use the physical height $h_{dis}$ and width $w_{dis}$ of the display as well as the normalised vectors $\overrightarrow{u}_{dis}^{N}$ and $\overrightarrow{r}_{dis}^{N}$, which span the display.
+$\overrightarrow{u}_{dis}^{N}$ points in the up-direction and $\overrightarrow{r}_{dis}^{N}$ in the right-direction of the display.
+Both are determined during the calibration step.
+%
+\begin{equation}\label{eq:implementation:tracking:relative} 
+\overrightarrow{s}^{rel}(x, y) \in \mathbb{R}^{2} : x = \frac{\left( \overrightarrow{r}_{dis}^{N} \bullet \overrightarrow{s} \right) }{w_{dis}}, 
+y = \frac{\left( \overrightarrow{u}_{dis}^{N} \bullet \overrightarrow{s} \right) }{h_{dis}}
+\end{equation}
+%
+
+%-------------------------------------------------------------------------------
+\subsection{Foveated region}
+%-------------------------------------------------------------------------------
+
+Our foveated region is a rectangle that is spanned by four vectors $\overrightarrow{d}_{i}, i \in \lbrace 1,2,3,4\rbrace$, starting from the position of the rigid-body, for which we compute the intersections with the display as described in the previous paragraph.
+We use the horizontal angle $\alpha$ and vertical angle $\beta$ in order to compute the perspective projection.
+First the current up- and right-vector of the rigid-body are computed, based on the up- and right-vectors of the display as specified in the calibration step.
+%
+\begin{equation*}
+\begin{split}
+\overrightarrow{u} &= Q_{rb} \cdot Q^{-1}_{cal} \cdot \overrightarrow{u}_{dis}^{N} \in \mathbb{R}^{3}\\
+\overrightarrow{r} &= Q_{rb} \cdot Q^{-1}_{cal} \cdot \overrightarrow{r}_{dis}^{N} \in \mathbb{R}^{3}\\
+\end{split}         
+\end{equation*}
+%
+Half of the horizontal and vertical extends of the rectangle in normalised viewing directions can be computed as follows.
+%
+\begin{equation*}
+\begin{split}
+\delta_{\alpha} &= tan(\frac{\alpha \cdot \pi}{180})\\
+\delta_{\beta}  &= tan(\frac{\beta \cdot \pi}{180})\\
+\end{split}         
+\end{equation*}
+%
+The vectors $\overrightarrow{d}_{i}$, spanning the rectangle, can be computed with the normalised vectors $\overrightarrow{d}^{N}$, $\overrightarrow{u}^{N}$ and $\overrightarrow{r}^{N}$.
+%
+\begin{equation}
+\overrightarrow{d}_{i} = \overrightarrow{d}^{N} \pm(\delta_{\alpha} \cdot \overrightarrow{r}^{N}) \pm (\delta_{\beta} \cdot \overrightarrow{u}^{N})
+\end{equation}
+%
+Using the equations,~\ref{eq:implementation:tracking:intersection},~\ref{eq:implementation:tracking:inner} and~\ref{eq:implementation:tracking:relative}, the relative intersection coordinates, $\overrightarrow{s}_{i}^{rel} \in \mathbb{R}^2$, of the vectors with the display can be computed.
+If all points are outside of the interval $[0,1]$ their coordinates will be changed to $\inf$, otherwise points will be clamped to the interval.
+The size of the rectangle changes based on the distance between the display and the rigid-body, it grows the further away the rigid-body is.
+
+%-------------------------------------------------------------------------------
+\end{document}
