@@ -2,6 +2,7 @@
 
 The `mm-tracking` library provides the interface that allows to communicate with the tracking system in front of the Powerwall at the Visualization Research Center (VISUS) of the University of Stuttgart. 
 This library can be used for interaction with tracking devices (rigid-bodies) and button devices (stick, glasses).
+Additional detailed information and documentation can be found in the `documentation` folder of the repository.
 
 ---
 
@@ -32,21 +33,15 @@ Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously. E
 * Place rigid body inside of tracking area.
 * Start test program: `bin/test.exe`.
 
-### Troubleshooting
+The given default parameters in the example test program `test/src/test.cpp` fit the current VISUS tracking setup (Dezember 2019).
 
-#### Workaround for using non default compiler of Visual Studio with external project VRPN
+## Troubleshooting
+
+### Workaround for using non default compiler of Visual Studio with external project VRPN
 If you want to use a compiler version other than the default provided with the chosen Visual Studio version, you have to explicitly add this information to the build command of VRPN. E.g. if you want to use Visual Studio 2017 and the Visual Studio 2015 compiler, you have to replace line 65 in `\tracking\CMakeLists.txt` as follows:
 `CONFIGURE_COMMAND ${CMAKE_COMMAND} -G "Visual Studio 15 2017" -T v140 -DCMAKE_GENERATOR_PLATFORM=x64 -DVRPN_BUILD_CLIENTS:BOOL=OFF -DVRPN_BUILD_SERVERS:BOOL=OFF ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn{code}`
 
-#### Missing firewall rule
+### Missing firewall rule
 If Windows doesn't ask to add a firewall exception for the test program, rules to allow incoming traffic for TCP port 3884 and UDP ports 1510 and 1511 have to be added manually.
-
-## Documentation
-
-See `documentation` folder.
-
-## Parameters
-
-The given default parameters in the example test program `test/src/test.cpp` fit the current VISUS tracking setup (Dezember 2019).
 
 ---
