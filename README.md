@@ -37,11 +37,7 @@ The given default parameters in the example test program `test/src/test.cpp` fit
 
 ## Troubleshooting
 
-### Workaround for using non default compiler of Visual Studio with external project VRPN
-If you want to use a compiler version other than the default provided with the chosen Visual Studio version, you have to explicitly add this information to the build command of VRPN. E.g. if you want to use Visual Studio 2017 and the Visual Studio 2015 compiler, you have to replace line 65 in `\tracking\CMakeLists.txt` as follows:
-`CONFIGURE_COMMAND ${CMAKE_COMMAND} -G "Visual Studio 15 2017" -T v140 -DCMAKE_GENERATOR_PLATFORM=x64 -DVRPN_BUILD_CLIENTS:BOOL=OFF -DVRPN_BUILD_SERVERS:BOOL=OFF ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn{code}`
-
-### Missing firewall rule
-If Windows doesn't ask to add a firewall exception for the test program, rules to allow incoming traffic for TCP port 3884 and UDP ports 1510 and 1511 have to be added manually.
+### Failing network connection to natNet and/or VPRN server
+If the network connection to the NatNet and/or the VRPN server fails for the test program, make sure there are (windows defender) firewall rules allowing incoming traffic for the TCP port 3884 and the UDP ports 1510 and 1511.
 
 ---
