@@ -198,6 +198,7 @@ namespace tracking {
         * Detect the calibration orientation of the pointing device. 
         * >>> Put rigid body somewhere pointing vertically towards the powerwall screen and
         * >>> right- and up-Vector3D of rigid body must be parallel to x- and y-axis of powerwall screen.
+        * >>> Previous calibration is stored in 'tracking.conf' file.
         *
         * @return True for success, false otherwise.
         */
@@ -270,39 +271,39 @@ namespace tracking {
         **********************************************************************/
 
         /** Print used parameter values. */
-        void printParams(void);
+        void print_params(void);
 
         /** Read physical values from file. */
-        bool readParamsFromFile(void);
+        bool read_params_from_file(void);
 
         /**
         * Request updated tracking data.
         *
         * @return True for success, false otherwise.
         */
-        bool updateTrackingData(void);
+        bool update_tracking_data(void);
 
         /**
         * Process button changes.
         */
-        bool processButtonChanges(void);
+        bool process_button_changes(void);
 
         /**
         * Apply camera 3D transformations.
         */
-        bool processCameraTransformations3D(void);
+        bool process_camera_transformations_3d(void);
 
         /**
         * Apply camera 2D transformations.
         */
-        bool processCameraTransformations2D(void);
+        bool process_camera_transformations_2d(void);
 
         /**
         * Process screen interaction.
         */
-        bool processScreenInteraction(bool process_fov);
+        bool process_screen_interaction(bool process_fov);
 
-        glm::vec2 clipRect(glm::vec2 intersection, glm::vec2 vertex);
+        glm::vec2 clip_rect(glm::vec2 intersection, glm::vec2 vertex);
 
         /**
         * Limit value "val" to range [min, max]

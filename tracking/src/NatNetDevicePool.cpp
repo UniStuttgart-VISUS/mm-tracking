@@ -94,7 +94,7 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & par
         this->m_con_type = params.con_type;
         this->m_verbose_client = params.verbose_client;
 
-        this->printParams();
+        this->print_params();
         this->m_initialised = true;
     }
 
@@ -102,7 +102,7 @@ bool tracking::NatNetDevicePool::Initialise(const NatNetDevicePool::Params & par
 }
 
 
-void tracking::NatNetDevicePool::printParams(void) {
+void tracking::NatNetDevicePool::print_params(void) {
     std::cout << "[PARAMETER] [NatNetDevicePool] Client IP:               " << this->m_client_ip.c_str() << std::endl;
     std::cout << "[PARAMETER] [NatNetDevicePool] Server IP:               " << this->m_server_ip.c_str() << std::endl;
     std::cout << "[PARAMETER] [NatNetDevicePool] Command Port:            " << this->m_cmd_port << std::endl;
@@ -192,9 +192,9 @@ bool tracking::NatNetDevicePool::Connect(void) {
 
     // Register callback handlers.
     std::cout << "[INFO] [NatNetDevicePool] Registering callbacks ..." << std::endl;
-    this->m_natnet_client->SetFrameReceivedCallback(NatNetDevicePool::onData, const_cast<NatNetDevicePool *>(this));
+    this->m_natnet_client->SetFrameReceivedCallback(NatNetDevicePool::on_data, const_cast<NatNetDevicePool *>(this));
     if (this->m_verbose_client) {
-        NatNet_SetLogCallback(NatNetDevicePool::onMessage);
+        NatNet_SetLogCallback(NatNetDevicePool::on_message);
     }
 
     // Send remote command(s)
@@ -360,7 +360,7 @@ glm::vec3 tracking::NatNetDevicePool::GetPosition(const std::string& rigid_body)
 
 
 
-void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData, void *pUserData) {
+void __cdecl tracking::NatNetDevicePool::on_data(sFrameOfMocapData *pFrameOfData, void *pUserData) {
 
 	auto that = static_cast<NatNetDevicePool *>(pUserData);
     if ((pFrameOfData == nullptr) || (that == nullptr)) {
@@ -433,7 +433,7 @@ void __cdecl tracking::NatNetDevicePool::onData(sFrameOfMocapData *pFrameOfData,
 }
 
 
-void __cdecl tracking::NatNetDevicePool::onMessage(Verbosity level, const char *message) {
+void __cdecl tracking::NatNetDevicePool::on_message(Verbosity level, const char *message) {
 
     switch (level) {
         case (::Verbosity::Verbosity_None):    break;

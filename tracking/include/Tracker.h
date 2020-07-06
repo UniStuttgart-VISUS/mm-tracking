@@ -144,7 +144,7 @@ namespace tracking {
         * functions
         **********************************************************************/
 
-        void printParams(void);
+        void print_params(void);
 
     };
 

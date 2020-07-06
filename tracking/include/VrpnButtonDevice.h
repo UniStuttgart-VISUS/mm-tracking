@@ -84,7 +84,7 @@ namespace tracking {
         * @param userData Pinter to class, which register callback (that).
         * @param vrpnData Data struct holding current button data.
         */
-        static void VRPN_CALLBACK onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData);
+        static void VRPN_CALLBACK on_button_changed(void *userData, const vrpn_BUTTONCB vrpnData);
     };
 
 } /** end namespace tracking */

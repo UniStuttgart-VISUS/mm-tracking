@@ -194,7 +194,7 @@ namespace tracking{
         **********************************************************************/
 
         /** Print used parameter values. */
-        void printParams(void);
+        void print_params(void);
 
         /**
         * NatNet client callback for data.
@@ -202,7 +202,7 @@ namespace tracking{
         * @param pFrameOfData Single frame of data for all tracked objects.
         * @param pUserData    Pointer to class which registered callback (that).
         */
-        static void __cdecl onData(sFrameOfMocapData *pFrameOfData, void *pUserData);
+        static void __cdecl on_data(sFrameOfMocapData *pFrameOfData, void *pUserData);
 
         /**
         * NatNet client callback for messages.
@@ -210,7 +210,7 @@ namespace tracking{
         * @param level   The verbosity level of the message.
         * @param message The message.
         */
-        static void __cdecl onMessage(Verbosity level, const char *message);
+        static void __cdecl on_message(Verbosity level, const char *message);
         
     };
 

@@ -46,7 +46,7 @@ bool tracking::VrpnButtonDevice::Connect(void) {
     }
 
     // Register handle for button changes.
-    this->Register<vrpn_BUTTONCHANGEHANDLER>(&VrpnButtonDevice::onButtonChanged, this);
+    this->Register<vrpn_BUTTONCHANGEHANDLER>(&VrpnButtonDevice::on_button_changed, this);
 
     // Start vrpn main loop thread.
     std::cout << "[INFO] [VrpnButtonDevice] Starting VRPN main loop thread for \"" << this->GetDeviceName().c_str() << "\"" << std::endl;
@@ -96,7 +96,7 @@ tracking::Button tracking::VrpnButtonDevice::GetButton(void) const {
 }
 
 
-void VRPN_CALLBACK tracking::VrpnButtonDevice::onButtonChanged(void *userData, const vrpn_BUTTONCB vrpnData) {
+void VRPN_CALLBACK tracking::VrpnButtonDevice::on_button_changed(void *userData, const vrpn_BUTTONCB vrpnData) {
 
     auto that = static_cast<VrpnButtonDevice*>(userData);
     if (that == nullptr) {

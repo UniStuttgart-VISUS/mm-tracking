@@ -232,10 +232,10 @@ bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Pa
         this->m_current_fov[2] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
         this->m_current_fov[3] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
 
-        this->printParams();
+        this->print_params();
         this->m_initialised = true;
 
-        this->m_initialised = this->readParamsFromFile();
+        this->m_initialised = this->read_params_from_file();
     }
 
     return this->m_initialised;
@@ -243,7 +243,7 @@ bool tracking::TrackingUtilizer::Initialise(const tracking::TrackingUtilizer::Pa
 
 
 
-void tracking::TrackingUtilizer::printParams(void) {
+void tracking::TrackingUtilizer::print_params(void) {
     std::cout << "[PARAMETER] [TrackingUtilizer] Button Device Name:      " << this->m_button_device_name.c_str() << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Rigid Body Name:         " << this->m_rigid_body_name.c_str() << std::endl;
     std::cout << "[PARAMETER] [TrackingUtilizer] Select Button:           " << this->m_select_button << std::endl;
@@ -273,7 +273,7 @@ void tracking::TrackingUtilizer::printParams(void) {
 }
 
 
-bool tracking::TrackingUtilizer::readParamsFromFile(void) {
+bool tracking::TrackingUtilizer::read_params_from_file(void) {
 
     std::string line, tag, name;
     float x, y, z, w;
@@ -396,7 +396,7 @@ bool tracking::TrackingUtilizer::GetRawData(unsigned int& o_button,
     bool state_rawdata = false;
 
     // Request updated tracking data.
-    if (this->updateTrackingData()) {
+    if (this->update_tracking_data()) {
         o_button = this->m_current_button;
         o_position_x = this->m_current_position.x;
         o_position_y = this->m_current_position.y;
@@ -434,10 +434,10 @@ bool tracking::TrackingUtilizer::GetSelectionState(bool& o_selecttion) {
     bool state_button = false;
 
     // Request updated tracking data.
-    if (this->updateTrackingData()) {
+    if (this->update_tracking_data()) {
 
         // Check for current button interaction.
-        state_button = this->processButtonChanges();
+        state_button = this->process_button_changes();
     }
 
     if (state_button) {
@@ -462,10 +462,10 @@ bool tracking::TrackingUtilizer::GetIntersection(float& o_intersection_x, float&
     bool state_intersection = false;
 
     // Request updated tracking data.
-    if (this->updateTrackingData()) {
+    if (this->update_tracking_data()) {
 
         // Calculate new current intersection point and fov rectangle.
-        state_intersection = this->processScreenInteraction(false);
+        state_intersection = this->process_screen_interaction(false);
     }
 
     if (state_intersection) {
@@ -495,10 +495,10 @@ bool tracking::TrackingUtilizer::GetFieldOfView(float& o_left_top_x, float& o_le
     bool state_fov = false;
 
     // Request updated tracking data.
-    if (this->updateTrackingData()) {
+    if (this->update_tracking_data()) {
 
         // Calculate new current intersection point and fov rectangle.
-        state_fov = this->processScreenInteraction(true);
+        state_fov = this->process_screen_interaction(true);
     }
 
     if (state_fov) {
@@ -542,7 +542,7 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim i_dim,
     bool state_cam_transform  = false;
 
     // Request updated tracking data.
-    if (this->updateTrackingData()) {
+    if (this->update_tracking_data()) {
 
         // Set current camera for start values if camera manipulation button is pressed
         this->m_current_cam_position = glm::vec3(io_cam_position_x, io_cam_position_y, io_cam_position_z);
@@ -551,12 +551,12 @@ bool tracking::TrackingUtilizer::GetUpdatedCamera(TrackingUtilizer::Dim i_dim,
         this->m_current_cam_center_dist = i_distance_center;
 
         // Check for current button interaction.
-        state_button = this->processButtonChanges();
+        state_button = this->process_button_changes();
 
         // Apply camera transformations enabled by pressed buttons.
         switch (i_dim) {
-            case(TrackingUtilizer::Dim::DIM_2D): state_cam_transform = this->processCameraTransformations2D(); break;
-            case(TrackingUtilizer::Dim::DIM_3D): state_cam_transform = this->processCameraTransformations3D(); break;
+            case(TrackingUtilizer::Dim::DIM_2D): state_cam_transform = this->process_camera_transformations_2d(); break;
+            case(TrackingUtilizer::Dim::DIM_3D): state_cam_transform = this->process_camera_transformations_3d(); break;
             default: break;
         }
     }
@@ -599,7 +599,7 @@ bool tracking::TrackingUtilizer::Calibrate(void) {
     bool state_calibration = false;
 
     // Request updated tracking data.
-    if (this->updateTrackingData()) {
+    if (this->update_tracking_data()) {
         // Store current rigid body orientation as calibration orientation.
         this->m_calibration_orientation = this->m_current_orientation;
         state_calibration = true;
@@ -616,7 +616,7 @@ bool tracking::TrackingUtilizer::Calibrate(void) {
 }
 
 
-bool tracking::TrackingUtilizer::updateTrackingData(void) {
+bool tracking::TrackingUtilizer::update_tracking_data(void) {
 
     if (this->m_tracker == nullptr) {
         std::cerr << std::endl << "[ERROR] [TrackingUtilizer] There is no m_tracker connected. " <<
@@ -661,7 +661,7 @@ bool tracking::TrackingUtilizer::updateTrackingData(void) {
 }
 
 
-bool tracking::TrackingUtilizer::processButtonChanges(void) {
+bool tracking::TrackingUtilizer::process_button_changes(void) {
 
     if (this->m_const_position) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -752,7 +752,7 @@ bool tracking::TrackingUtilizer::processButtonChanges(void) {
 }
 
 
-bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
+bool tracking::TrackingUtilizer::process_camera_transformations_3d(void) {
 
     if (this->m_const_position) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -863,7 +863,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations3D(void) {
 }
 
 
-bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
+bool tracking::TrackingUtilizer::process_camera_transformations_2d(void) {
 
     if (this->m_const_position) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -929,7 +929,7 @@ bool tracking::TrackingUtilizer::processCameraTransformations2D(void) {
 }
 
 
-bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
+bool tracking::TrackingUtilizer::process_screen_interaction(bool process_fov) {
 
     if (this->m_const_position) {
 #ifdef TRACKING_DEBUG_OUTPUT
@@ -999,7 +999,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
         std::cout << "[DEBUG] [TrackingUtilizer] Screen spans from (" << pOv.x << "," << pOv.y << "," << pOv.z<< " to " << urC.x << "," << urC.y << "," << urC.z << ")" << std::endl;
         std::cout << "[DEBUG] [TrackingUtilizer] Screen normal (" << pNv.x << "," << pNv.y << "," << pNv.z << ")" << std::endl;
 #endif
-        // Intersection is only possible if screen normal and the Pointing direction are in opposite direction.
+        // Intersection is only possible if screen normal and the pointing direction are in opposite direction.
         if (glm::dot(pNv, rbDv) < 0.0f) { // pN.Dot(pDir) must be != 0 anyway ...
 
             // --- Calculate screen intersection ------------------------------
@@ -1029,6 +1029,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
             }
 
             // --- Calculate field of view square projected on screen ---------
+
             if (process_fov) {
                 float fov_w  = this->m_fov_width;
                 float fov_h  = this->m_fov_height;
@@ -1129,10 +1130,10 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
                 }
 
                 // Clip fov vertices on screen bounrdies
-                this->m_current_fov[0] = this->clipRect(intersection, this->m_current_fov[0]);
-                this->m_current_fov[1] = this->clipRect(intersection, this->m_current_fov[1]);
-                this->m_current_fov[2] = this->clipRect(intersection, this->m_current_fov[2]);
-                this->m_current_fov[3] = this->clipRect(intersection, this->m_current_fov[3]);
+                this->m_current_fov[0] = this->clip_rect(intersection, this->m_current_fov[0]);
+                this->m_current_fov[1] = this->clip_rect(intersection, this->m_current_fov[1]);
+                this->m_current_fov[2] = this->clip_rect(intersection, this->m_current_fov[2]);
+                this->m_current_fov[3] = this->clip_rect(intersection, this->m_current_fov[3]);
 
                 // Check if fov lies completely outside of screen
                 float min = 0.0f;
@@ -1165,7 +1166,7 @@ bool tracking::TrackingUtilizer::processScreenInteraction(bool process_fov) {
 }
 
 
-glm::vec2 tracking::TrackingUtilizer::clipRect(glm::vec2 intersection, glm::vec2 vertex) {
+glm::vec2 tracking::TrackingUtilizer::clip_rect(glm::vec2 intersection, glm::vec2 vertex) {
 
     glm::vec2 clipped_point = vertex;
     //auto direction = clipped_point - intersection;

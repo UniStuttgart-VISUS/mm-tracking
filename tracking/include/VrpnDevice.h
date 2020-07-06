@@ -77,7 +77,7 @@ namespace tracking {
         // GET
 
         inline std::string GetDeviceName(void) const {
-            return this->deviceName;
+            return this->m_device_name;
         }
 
     protected:
@@ -115,31 +115,31 @@ namespace tracking {
         * Button device name. 
         * The name of the device (defined in vrpn cfg file).
         */
-        std::string deviceName;
+        std::string m_device_name;
 
         /** 
         * VRPN server name.
         * The sever IP address or server host name running vrpn and hosting the device.
         */
-        std::string serverName;
+        std::string m_server_name;
 
         /** 
         * The port used for connecting to the vrpn server.
         * Defined in following file on server: \\mini\c$\vrpn\start64.bat
         */
-        unsigned int port;
+        unsigned int m_port;
 
         /**
         * The protocol used for connecting to the vrpn server.
         */
-        typename VrpnDevice<R>::Protocols protocol;
+        typename VrpnDevice<R>::Protocols m_protocol;
 
         /***********************************************************************
         * functions
         **********************************************************************/
 
         /** Print used PARAMETER values. */
-        void printParams(void);
+        void print_params(void);
 
     };
 
@@ -154,10 +154,10 @@ tracking::VrpnDevice<R>::VrpnDevice(void)
     : m_initialised(false)
     , m_connected(false)
     , m_remote_device(nullptr)
-    , deviceName("ControlBox")
-    , serverName("mini")
-    , port(3884)
-    , protocol(VrpnDevice<R>::Protocols::VRPN_TCP) {
+    , m_device_name("ControlBox")
+    , m_server_name("mini")
+    , m_port(3884)
+    , m_protocol(VrpnDevice<R>::Protocols::VRPN_TCP) {
     
     // intentionally empty...
 }
@@ -215,12 +215,12 @@ bool tracking::VrpnDevice<R>::Initialise(const typename VrpnDevice<R>::Params& p
     }
 
     if (check) {
-        this->deviceName = device_name;
-        this->serverName = server_name;
-        this->port = params.port;
-        this->protocol = params.protocol;
+        this->m_device_name = device_name;
+        this->m_server_name = server_name;
+        this->m_port = params.port;
+        this->m_protocol = params.protocol;
 
-        this->printParams();
+        this->print_params();
         this->m_initialised = true;
     }
 
@@ -229,11 +229,11 @@ bool tracking::VrpnDevice<R>::Initialise(const typename VrpnDevice<R>::Params& p
 
 
 template <class R>
-void tracking::VrpnDevice<R>::printParams(void) {
-    std::cout << "[PARAMETER] [VrpnDevice] Device Name:                   " << this->deviceName.c_str() << std::endl;
-    std::cout << "[PARAMETER] [VrpnDevice] Server Name:                   " << this->serverName.c_str() << std::endl;
-    std::cout << "[PARAMETER] [VrpnDevice] Port:                          " << this->port << std::endl;
-    std::cout << "[PARAMETER] [VrpnDevice] Protocol:                      " << (int)this->protocol << std::endl;
+void tracking::VrpnDevice<R>::print_params(void) {
+    std::cout << "[PARAMETER] [VrpnDevice] Device Name:                   " << this->m_device_name.c_str() << std::endl;
+    std::cout << "[PARAMETER] [VrpnDevice] Server Name:                   " << this->m_server_name.c_str() << std::endl;
+    std::cout << "[PARAMETER] [VrpnDevice] Port:                          " << this->m_port << std::endl;
+    std::cout << "[PARAMETER] [VrpnDevice] Protocol:                      " << (int)this->m_protocol << std::endl;
 }
 
 
@@ -260,7 +260,7 @@ bool tracking::VrpnDevice<R>::Connect(void) {
 
     // Translate protocol to string
     std::string prot = "";
-    switch (this->protocol) {
+    switch (this->m_protocol) {
         case(VrpnDevice<R>::Protocols::VRPN_TCP): prot = "tcp";  break;
         case(VrpnDevice<R>::Protocols::VRPN_UDP): prot = "udp";  break;
         default: break;
@@ -268,7 +268,7 @@ bool tracking::VrpnDevice<R>::Connect(void) {
 
     /// URL: [device_name]@[protocol]://[server_name]:[port]
     std::ostringstream str;
-    str << this->deviceName.c_str() << "@" << prot.c_str() << "://" << this->serverName.c_str() << ":" << this->port;
+    str << this->m_device_name.c_str() << "@" << prot.c_str() << "://" << this->m_server_name.c_str() << ":" << this->m_port;
     url = str.str();
 
     std::cout << "[INFO] [VrpnDevice] Connecting to VRPN server: " << url.c_str() << std::endl;
@@ -291,7 +291,7 @@ bool tracking::VrpnDevice<R>::Connect(void) {
     /// Create remote_device object calling CTOR with make_unique() for type R (e.g. vrpn_Button_remote_device, vrpn_Tracker_remote_device)
     this->m_remote_device = std::make_unique<R>(url.c_str(), connection); 
     this->m_remote_device->shutup = true;
-    std::cout << "[INFO] [VrpnDevice] >>> AVAILABEL BUTTON DEVICE: \"" << this->deviceName.c_str() << "\"" << std::endl;
+    std::cout << "[INFO] [VrpnDevice] >>> AVAILABEL BUTTON DEVICE: \"" << this->m_device_name.c_str() << "\"" << std::endl;
 
     std::cout << "[INFO] [VrpnDevice] Successfully connected to VRPN server." << std::endl;
 

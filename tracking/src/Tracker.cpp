@@ -75,7 +75,7 @@ bool tracking::Tracker::Initialise(const tracking::Tracker::Params& params)
             }
         }
 
-        this->printParams();
+        this->print_params();
         this->m_initialised = true;
     }
 
@@ -83,7 +83,7 @@ bool tracking::Tracker::Initialise(const tracking::Tracker::Params& params)
 }
 
 
-void tracking::Tracker::printParams(void) {
+void tracking::Tracker::print_params(void) {
     std::cout << "[PARAMETER] [Tracker] Active Node:                      " << ((this->m_active_node.empty()) ? ("<all>") : (this->m_active_node.c_str())) << std::endl;
 }
 
