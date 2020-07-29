@@ -612,6 +612,8 @@ bool tracking::TrackingUtilizer::Calibrate(void) {
         this->m_calibration_orientation.x << ";" << this->m_calibration_orientation.y << ";" <<
         this->m_calibration_orientation.z << ";" << this->m_calibration_orientation.w << std::endl;
 
+    /// TODO write and/or replace existing calibration in tracking config file
+
     return state_calibration;
 }
 
@@ -939,11 +941,6 @@ bool tracking::TrackingUtilizer::process_screen_interaction(bool process_fov) {
     }
 
     bool retval = false;
-    this->m_current_intersection = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
-    this->m_current_fov[0] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
-    this->m_current_fov[1] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
-    this->m_current_fov[2] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
-    this->m_current_fov[3] = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
 
     // Variable PREFIX naming convention:
     // p  = powerwall
@@ -1019,15 +1016,22 @@ bool tracking::TrackingUtilizer::process_screen_interaction(bool process_fov) {
 #ifdef TRACKING_DEBUG_OUTPUT
             std::cout << "[DEBUG] [TrackingUtilizer] Relative intersection at (" << x << "," << y << ")" << std::endl;
 #endif
+
+            /// TODO Ask for threshold parameter for removing jitter
+            float threshold = 0.01f; /// = 1cm
+            if (glm::length((this->m_current_intersection - intersection)) < threshold) {
+                return false; // Early ending ... do not change current value
+            }
+
             // Ensure that intersection lies on physical screen (inside of area spanned by pWv and pHv)
-            // Recognise only intersections insides of powerwall screen 
-            // (not recommanded because field of view disappears suddenly when intersection center lies outside of screen)
+            // Recognise only intersections insides of powerwall screen
+            this->m_current_intersection = { TRACKING_FLOAT_MAX, TRACKING_FLOAT_MAX };
             if ((x >= 0.0f) && (y >= 0.0f) && (x <= 1.0f) && (y <= 1.0f)) {
                 //VLTRACE(vislib::Trace::LEVEL_INFO, "Intersection inside of screen. \n");
                 this->m_current_intersection = intersection;
                 retval = true;
             }
-
+        
             // --- Calculate field of view square projected on screen ---------
 
             if (process_fov) {
@@ -1130,10 +1134,10 @@ bool tracking::TrackingUtilizer::process_screen_interaction(bool process_fov) {
                 }
 
                 // Clip fov vertices on screen bounrdies
-                this->m_current_fov[0] = this->clip_rect(intersection, this->m_current_fov[0]);
-                this->m_current_fov[1] = this->clip_rect(intersection, this->m_current_fov[1]);
-                this->m_current_fov[2] = this->clip_rect(intersection, this->m_current_fov[2]);
-                this->m_current_fov[3] = this->clip_rect(intersection, this->m_current_fov[3]);
+                //this->m_current_fov[0] = this->clip_rect(intersection, this->m_current_fov[0]);
+                //this->m_current_fov[1] = this->clip_rect(intersection, this->m_current_fov[1]);
+                //this->m_current_fov[2] = this->clip_rect(intersection, this->m_current_fov[2]);
+                //this->m_current_fov[3] = this->clip_rect(intersection, this->m_current_fov[3]);
 
                 // Check if fov lies completely outside of screen
                 float min = 0.0f;
@@ -1171,7 +1175,7 @@ glm::vec2 tracking::TrackingUtilizer::clip_rect(glm::vec2 intersection, glm::vec
     glm::vec2 clipped_point = vertex;
     //auto direction = clipped_point - intersection;
 
-/// TODO
+    /// TODO
 
     return clipped_point;
 }
