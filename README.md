@@ -37,7 +37,7 @@ The given default parameters in the example test program `test/src/test.cpp` fit
 
 ## Troubleshooting
 
-### Failing network connection to natNet and/or VPRN server
+### Network connection to NatNet and/or VPRN server fails
 If the network connection to the NatNet and/or the VRPN server fails for the test program, make sure there are (windows defender) firewall rules allowing incoming traffic for the TCP port 3884 and the UDP ports 1510 and 1511.
 
 ---
