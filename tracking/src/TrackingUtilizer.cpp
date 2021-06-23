@@ -621,7 +621,7 @@ bool tracking::TrackingUtilizer::Calibrate(void) {
 bool tracking::TrackingUtilizer::update_tracking_data(void) {
 
     if (this->m_tracker == nullptr) {
-        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] There is no m_tracker connected. " <<
+        std::cerr << std::endl << "[ERROR] [TrackingUtilizer] There is no tracker connected. " <<
             "[" << __FILE__ << ", " << __FUNCTION__ << ", line " << __LINE__ << "]" << std::endl << std::endl;
         return false;
     }
@@ -635,7 +635,7 @@ bool tracking::TrackingUtilizer::update_tracking_data(void) {
         this->m_current_orientation  = data.rigid_body.orientation;
 
 #ifdef TRACKING_DEBUG_OUTPUT
-        std::cout << "[DEBUG] [TrackingUtilizer] Buffer Index = " << m_buffer_idx << " - Position Buffer Size = " << this->m_buffer_positions.size() << std::endl;
+        std::cout << "[DEBUG] [TrackingUtilizer] Buffer Index = " << this->m_buffer_idx << " - Position Buffer Size = " << this->m_buffer_positions.size() << std::endl;
 #endif
 
         // Add current position to position buffer

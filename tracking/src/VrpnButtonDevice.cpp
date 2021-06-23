@@ -107,7 +107,7 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::on_button_changed(void *userData,
 
     // Remember the button state.
     tracking::Button m_button = that->m_button.load();
-    tracking::Button mask   = (1 << vrpnData.button);
+    tracking::Button mask     = (1 << vrpnData.button);
     if (vrpnData.state != 0) {
         that->m_button.store(m_button |= mask);
     }
@@ -115,6 +115,6 @@ void VRPN_CALLBACK tracking::VrpnButtonDevice::on_button_changed(void *userData,
         that->m_button.store(m_button &= ~mask);
     }
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[DEBUG] [VrpnButtonDevice] Button = " << vrpnData.button << " | State = " << ((that->mask.load() & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;
+    std::cout << "[DEBUG] [VrpnButtonDevice] Button = " << vrpnData.button << " | State = " << ((mask & (1 << vrpnData.button)) ? (1) : (0)) << std::endl;
 #endif
 }

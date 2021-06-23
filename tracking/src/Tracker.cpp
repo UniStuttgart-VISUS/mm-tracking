@@ -168,7 +168,7 @@ bool tracking::Tracker::GetData(const std::string& i_rigid_body, const std::stri
     }
 
 #ifdef TRACKING_DEBUG_OUTPUT
-    std::cout << "[DEBUG] [Tracker] Requested: Button Device \"" << buttonDeviceName.c_str() << "\" and Rigid Body \"" << rigidBodyName.c_str() << "\"." << std::endl;
+    std::cout << "[DEBUG] [Tracker] Requested: Button Device \"" << i_button_device.c_str() << "\" and Rigid Body \"" << i_rigid_body.c_str() << "\"." << std::endl;
 #endif
 
     // Set data of requested rigid body
