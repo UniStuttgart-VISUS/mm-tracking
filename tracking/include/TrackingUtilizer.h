@@ -32,12 +32,14 @@ namespace tracking {
     ***************************************************************************
     * TROUBLESHOOTING:
     * 
-    * - If your program doesn't receive tracking data (though it should):
-    *     Please check your firewall settings. For your program there must be 
-    *     rules which allow incoming TCP and UDP traffic. This is used by 
-    *     the NatNet client in NatNetDevicePool.
-    *     (Windows might not pop up a firewall notification at the first start) 
-    *     Allow incoming traffic for TCP port 3884 and UDP ports 1510 and 1511.
+    * - If your program does not receive any tracking data:
+    *     For your program there must be firewall rules which allow incoming 
+    *     traffic for TCP port 3884 and UDP ports 1510 and 1511. 
+    *     This is required by the NatNet client implemented in NatNetDevicePool.
+    * 
+    * - If your program only receives zero valued tracking data:
+    *     Switch from `Multicast` to `Unicast` in settings of 'Motive' software
+    *     on NatNet server `mini`. 
     *
     ***************************************************************************/
     class TRACKING_API TrackingUtilizer {

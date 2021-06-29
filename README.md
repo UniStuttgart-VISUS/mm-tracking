@@ -1,6 +1,6 @@
 # Tracking Library `mm-tracking`
 
-The `mm-tracking` library provides the interface that allows to communicate with the tracking system in front of the Powerwall at the Visualization Research Center (VISUS) of the University of Stuttgart. 
+The `mm-tracking` library provides the interface that allows to communicate with the tracking system in front of the Powerwall at the Visualization Research Center (VISUS) of the University of Stuttgart.
 This library can be used for interaction with tracking devices (rigid-bodies) and button devices (stick, glasses).
 Additional detailed information and documentation can be found in the `documentation` folder of the repository.
 
@@ -11,6 +11,14 @@ Additional detailed information and documentation can be found in the `documenta
 Since the required library NatNet is not available for Linux and the library is only usable in combination with the Powerwall it only works with Windows.
 [NatNet](http://optitrack.com/products/natnet-sdk/) is included in this package and it is required for this library to build. If it is not included download the SDK and copy the lib and include folder into the `../tracking/tracking/natnet/` folder. If NatNet is not automatically found set the appropriate `NATNET_GENERIC_LIBRARY`. 
 [VRPN](https://github.com/vrpn/vrpn.git) is also required and it is automatically installed via `cmake`.
+
+
+**NOTES:** 
+- Building was tested with and VS-14(2015), VS-15(2017) and VS-16(2019) for Win32 and x64.
+- If you have VS-16(2019) installed you *have to* configure the project for Visual Studio 2019.
+- Depending on the installed Visual Studio versions, the required CMAKE path to *vcvarsall.bat* might looks like this:  
+  **"C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat"**
+
 
 ## Interface Classes
 
@@ -27,7 +35,7 @@ Multiple `TrackingUtilizers` can be connected to the `Tracker` simultaneously. E
 
 * Configure and generate projects with `cmake`.
 * Adjust client IP parameter in `test/src/test.cpp` in line 35.
-* Build all projects using `INSTALL` target in Viusal Studio. Tested for VS-15(2017) and VS-14(2015).
+* Build all projects using `INSTALL` target in Viusal Studio. 
 * Start 'Motive' software on NatNet server `mini`.
 * Start VRPN server (`C:/vrpn/start64.bat`) on VRPN server `mini`.
 * Place rigid body inside of tracking area.
@@ -39,5 +47,8 @@ The given default parameters in the example test program `test/src/test.cpp` fit
 
 ### Network connection to NatNet and/or VPRN server fails
 If the network connection to the NatNet and/or the VRPN server fails for the test program, make sure there are (windows defender) firewall rules allowing incoming traffic for the TCP port 3884 and the UDP ports 1510 and 1511.
+
+### Receiving only zero valued tracking data
+Switch from `Multicast` to `Unicast` in settings of 'Motive' software on NatNet server `mini`.
 
 ---

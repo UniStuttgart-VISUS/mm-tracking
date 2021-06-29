@@ -16,6 +16,15 @@ if(WIN32)
     file(GLOB_RECURSE TRACKING_HEADERS RELATIVE ${PROJECT_SOURCE_DIR} "include/*.h")
     file(GLOB_RECURSE TRACKING_SOURCES RELATIVE ${PROJECT_SOURCE_DIR} "src/*.cpp")
     
+    set(VCVARSALL_BAT_PATH "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/vcvarsall.bat" CACHE FILEPATH "Select any existing vcvarsall.bat (required for building with VS2019).")
+    if(NOT (EXISTS ${VCVARSALL_BAT_PATH}))
+        message(FATAL_ERROR "[VCVARSALL_BAT_PATH] File does not exist." )        
+    endif()
+    if(NOT (${VCVARSALL_BAT_PATH} MATCHES "vcvarsall.bat$"))
+        message(FATAL_ERROR "[VCVARSALL_BAT_PATH] Wrong file. Expecting 'vcvarsall.bat'." )
+    endif()    
+    set(VS_ENV_SETUP ${VCVARSALL_BAT_PATH}} amd64)
+    
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR})
 
     set(TRACKING_INSTALL_HEADER "include/TrackingUtilizer.h" "include/Tracker.h")
@@ -62,7 +71,7 @@ if(WIN32)
       GIT_REPOSITORY https://github.com/vrpn/vrpn.git
       GIT_TAG ${VRPN_VER} # the only version the software was tested with
   	  GIT_SUBMODULES
-  	  CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_GENERATOR_PLATFORM=x64 -DVRPN_BUILD_CLIENTS:BOOL=OFF -DVRPN_BUILD_SERVERS:BOOL=OFF ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn
+  	  CONFIGURE_COMMAND ${CMAKE_COMMAND} -G "Visual Studio 15 2017" -T v140 -DCMAKE_GENERATOR_PLATFORM=x64 -DVRPN_BUILD_CLIENTS:BOOL=OFF -DVRPN_BUILD_SERVERS:BOOL=OFF ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn
   	  BUILD_COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build --config Debug COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build --config Release COMMAND ${CMAKE_COMMAND} --build ${PROJECT_BINARY_DIR}/vrpn-prefix/src/vrpn-build --config RelWithDebInfo
   	  INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${VRPN_INCLUDE_COPY} ${VRPN_INCLUDE_DIR}
     )
